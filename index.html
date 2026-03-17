@@ -168,44 +168,15 @@ let allOps={},allTotals={},selectedDate=null,calYear,calMonth,pxOverride={};
 
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
-function fmt(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtInt(n){return Math.round(Number(n)).toLocaleString('es-AR');}
-
-function parsearNumero(str){
-  // Limpia el string y convierte al número correcto
-  // Maneja tanto formato AR (1.234,56) como US (1,234.56)
-  let s = String(str).replace(/"/g,'').trim();
-  if(!s) return 0;
-  // Si tiene punto y coma: es formato AR → quitar puntos, coma = decimal
-  if(s.includes('.') && s.includes(',')) {
-    s = s.replace(/\./g,'').replace(',','.');
-  } else if(s.includes(',') && !s.includes('.')) {
-    // Solo coma: puede ser separador de miles o decimal
-    const partes = s.split(',');
-    if(partes[partes.length-1].length === 2 || partes[partes.length-1].length === 1) {
-      // Coma = decimal
-      s = s.replace(',','.');
-    } else {
-      // Coma = separador de miles
-      s = s.replace(/,/g,'');
-    }
-  } else if(s.includes('.') && !s.includes(',')) {
-    const partes = s.split('.');
-    if(partes[partes.length-1].length === 3) {
-      // Punto = separador de miles
-      s = s.replace(/\./g,'');
-    }
-    // si no, punto = decimal, dejar como está
-  }
-  return parseFloat(s) || 0;
-}
-
+function fmt(n){return Math.round(Number(n)).toLocaleString('es-AR');}
 function fmtPnl(n,tag){
-  const v=Number(n);if(isNaN(v)||v===0)return'—';
-  const s=(v>=0?'+':'')+'$'+fmt(Math.abs(v));
+  const v=Math.round(parseFloat(String(n).replace(/\./g,'').replace(',','.')));
+  if(isNaN(v)||v===0)return'—';
+  const s=(v>=0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
   const cls=v>=0?'pnl-pos':'pnl-neg';
   return tag?`<span class="${cls}">${s}</span>`:s;
 }
+function fmtDecimal(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 async function loadFromSheets(){
   setSyncState('loading','Actualizando desde Google Sheets...');
@@ -226,7 +197,8 @@ function parseCSV(text){
     if(cols.length<2)continue;
     const fecha=cols[0].replace(/"/g,'').trim();
     const jsonStr=cols[1].replace(/^"|"$/g,'').replace(/""/g,'"').trim();
-    const total=parsearNumero(cols[2]||'');
+    const totalStr=(cols[2]||'').replace(/"/g,'').trim();
+    const total=parseFloat(totalStr);
     if(!fecha)continue;
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
     try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fecha]=rows;}catch(e){}
@@ -259,7 +231,7 @@ function groupByEspecie(ops){
     map[k].rows.push(o);
     if(o.op==='C'){map[k].vnC+=Number(o.vn);map[k].montoC+=Number(o.monto);}
     else{map[k].vnV+=Number(o.vn);map[k].montoV+=Number(o.monto);}
-    map[k].pylTotal+=parsearNumero(o.pyl)||0;
+    map[k].pylTotal+=parseFloat(o.pyl)||0;
   });
   return Object.values(map);
 }
@@ -284,8 +256,8 @@ function renderTable(ops,tbodyId){
         <td class="mono">${o.especie}</td>
         <td style="font-size:11px;color:#888">T+${o.plazo}</td>
         <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'Compra':'Venta'}</span></td>
-        <td class="tr mono">${fmtInt(o.vn)}</td>
-        <td class="tr mono">${fmt(o.precio)}</td>
+        <td class="tr mono">${fmt(o.vn)}</td>
+        <td class="tr mono">${fmtDecimal(o.precio)}</td>
         <td class="tr mono">$${fmt(o.monto)}</td>
         <td style="font-size:12px;color:#888">${o.cliente||'—'}</td>
         <td class="tr">${pylEspecie}</td>
@@ -320,7 +292,8 @@ function renderCalendar(){
     if(ds===todayS)cls+=' today-cell';
     if(ds===selectedDate)cls+=' selected';
     if(hasOpen)cls+=' has-open';
-    const pnlHtml=hasData&&pnl!==0?`<span class="day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}$${Math.abs(Math.round(pnl/1000))}k</span>`:'';
+    const pnlAbs=Math.abs(Math.round(pnl));
+    const pnlHtml=hasData&&pnl!==0?`<span class="day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}$${pnlAbs>=1000?Math.round(pnlAbs/1000)+'k':pnlAbs.toLocaleString('es-AR')}</span>`:'';
     const opsHtml=hasData?`<span class="day-ops">${ops.length}op</span>`:'';
     grid.innerHTML+=`<div class="${cls}" onclick="selectDay('${ds}')"><span class="day-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
   }
@@ -365,7 +338,7 @@ function renderDiaView(d){
   const openPos=getOpenPos(ops);
   document.getElementById('dm-pos').textContent=openPos.length;
   document.getElementById('dm-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.length+' especie/s';
-  document.getElementById('dm-vol').textContent='$'+Number(Math.round(ops.reduce((a,o)=>a+Number(o.monto),0)/1000)).toLocaleString('es-AR')+'k';
+  document.getElementById('dm-vol').textContent='$'+fmt(ops.reduce((a,o)=>a+Number(o.monto),0)/1000)+'k';
   document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';
   renderTable(ops,'dia-tbody');
 }
@@ -386,8 +359,8 @@ function renderPosView(){
       <td style="font-size:12px;color:#888">${p.date}</td>
       <td class="mono">${p.especie}</td>
       <td style="font-size:11px">T+${p.plazo}</td>
-      <td class="tr mono">${fmtInt(p.vnNeto)}</td>
-      <td class="tr mono">${fmt(p.pxProm)}%</td>
+      <td class="tr mono">${fmt(p.vnNeto)}</td>
+      <td class="tr mono">${fmtDecimal(p.pxProm)}%</td>
       <td class="tr mono">$${fmt(p.montoExp)}</td>
       <td class="tr"><input type="number" step="0.001" placeholder="—" value="${px}" style="width:90px" oninput="setPx('${key}',this.value,${p.vnNeto},${p.pxProm})"></td>
       <td class="tr" id="flt-${key}">${float}</td>
