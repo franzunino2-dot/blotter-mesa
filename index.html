@@ -64,8 +64,6 @@ tbody td{padding:7px 10px;white-space:nowrap}
 .tr{text-align:right}
 .badge-c{background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
 .badge-v{background:#faeeda;color:#854f0b;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
-.badge-closed{background:#eaf3de;color:#3b6d11;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
-.badge-abierta{background:#fcebeb;color:#a32d2d;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
 .sec-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#f1efe8;color:#888;border:0.5px solid #e8e8e4}
 .pnl-pos{color:#3b6d11;font-family:monospace}
 .pnl-neg{color:#a32d2d;font-family:monospace}
@@ -167,16 +165,48 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
 const SHEETS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=1757919510&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},selectedDate=null,calYear,calMonth,pxOverride={};
+
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function fmt(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtInt(n){return Math.round(Number(n)).toLocaleString('es-AR');}
+
+function parsearNumero(str){
+  // Limpia el string y convierte al número correcto
+  // Maneja tanto formato AR (1.234,56) como US (1,234.56)
+  let s = String(str).replace(/"/g,'').trim();
+  if(!s) return 0;
+  // Si tiene punto y coma: es formato AR → quitar puntos, coma = decimal
+  if(s.includes('.') && s.includes(',')) {
+    s = s.replace(/\./g,'').replace(',','.');
+  } else if(s.includes(',') && !s.includes('.')) {
+    // Solo coma: puede ser separador de miles o decimal
+    const partes = s.split(',');
+    if(partes[partes.length-1].length === 2 || partes[partes.length-1].length === 1) {
+      // Coma = decimal
+      s = s.replace(',','.');
+    } else {
+      // Coma = separador de miles
+      s = s.replace(/,/g,'');
+    }
+  } else if(s.includes('.') && !s.includes(',')) {
+    const partes = s.split('.');
+    if(partes[partes.length-1].length === 3) {
+      // Punto = separador de miles
+      s = s.replace(/\./g,'');
+    }
+    // si no, punto = decimal, dejar como está
+  }
+  return parseFloat(s) || 0;
+}
+
 function fmtPnl(n,tag){
   const v=Number(n);if(isNaN(v)||v===0)return'—';
   const s=(v>=0?'+':'')+'$'+fmt(Math.abs(v));
   const cls=v>=0?'pnl-pos':'pnl-neg';
   return tag?`<span class="${cls}">${s}</span>`:s;
 }
+
 async function loadFromSheets(){
   setSyncState('loading','Actualizando desde Google Sheets...');
   try{
@@ -187,6 +217,7 @@ async function loadFromSheets(){
     renderAll();
   }catch(e){setSyncState('error','Error: '+e.message);}
 }
+
 function parseCSV(text){
   allOps={};allTotals={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -195,8 +226,7 @@ function parseCSV(text){
     if(cols.length<2)continue;
     const fecha=cols[0].replace(/"/g,'').trim();
     const jsonStr=cols[1].replace(/^"|"$/g,'').replace(/""/g,'"').trim();
-    const totalRaw=(cols[2]||'').replace(/"/g,'').replace(',','.').trim();
-    const total=parseFloat(totalRaw);
+    const total=parsearNumero(cols[2]||'');
     if(!fecha)continue;
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
     try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fecha]=rows;}catch(e){}
@@ -204,6 +234,7 @@ function parseCSV(text){
   const dates=Object.keys(allOps).sort();
   if(dates.length&&!selectedDate)selectedDate=dates[dates.length-1];
 }
+
 function splitLine(line){
   const r=[];let cur='';let q=false;
   for(let i=0;i<line.length;i++){
@@ -214,10 +245,12 @@ function splitLine(line){
   }
   r.push(cur);return r;
 }
+
 function setSyncState(s,msg){
   document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
   document.getElementById('sync-label').textContent=msg;
 }
+
 function groupByEspecie(ops){
   const map={};
   ops.forEach(o=>{
@@ -226,10 +259,11 @@ function groupByEspecie(ops){
     map[k].rows.push(o);
     if(o.op==='C'){map[k].vnC+=Number(o.vn);map[k].montoC+=Number(o.monto);}
     else{map[k].vnV+=Number(o.vn);map[k].montoV+=Number(o.monto);}
-    map[k].pylTotal+=Number(o.pyl)||0;
+    map[k].pylTotal+=parsearNumero(o.pyl)||0;
   });
   return Object.values(map);
 }
+
 function getOpenPos(ops){
   return groupByEspecie(ops).filter(x=>Math.round(x.vnC-x.vnV)>0).map(x=>({
     especie:x.especie,plazo:x.plazo,
@@ -238,6 +272,7 @@ function getOpenPos(ops){
     montoExp:x.montoC-x.montoV
   }));
 }
+
 function renderTable(ops,tbodyId){
   let html='';
   groupByEspecie(ops).forEach(g=>{
@@ -260,6 +295,7 @@ function renderTable(ops,tbodyId){
   });
   document.getElementById(tbodyId).innerHTML=html;
 }
+
 function renderCalendar(){
   const now=new Date();
   if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
@@ -297,7 +333,9 @@ function renderCalendar(){
     ['ms-pnl','ms-best','ms-worst'].forEach(id=>document.getElementById(id).textContent='—');
   }
 }
+
 function selectDay(d){selectedDate=d;renderCalendar();renderDiaView(d);renderPosView();showTab('dia');}
+
 function renderDiaView(d){
   if(!d){document.getElementById('dia-empty').style.display='';document.getElementById('dia-content').style.display='none';return;}
   const ops=allOps[d]||[];
@@ -331,6 +369,7 @@ function renderDiaView(d){
   document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';
   renderTable(ops,'dia-tbody');
 }
+
 function renderPosView(){
   const allOpen=[];
   Object.entries(allOps).forEach(([date,ops])=>{getOpenPos(ops).forEach(p=>allOpen.push({...p,date}));});
@@ -356,6 +395,7 @@ function renderPosView(){
   });
   document.getElementById('pos-tbody').innerHTML=html;
 }
+
 function setPx(key,val,vnNeto,pxProm){pxOverride[key]=val;const el=document.getElementById('flt-'+key);if(el&&val)el.innerHTML=fmtPnl((parseFloat(val)-pxProm)*vnNeto/100,true);}
 function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
