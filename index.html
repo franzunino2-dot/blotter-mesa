@@ -168,15 +168,19 @@ let allOps={},allTotals={},selectedDate=null,calYear,calMonth,pxOverride={};
 
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
-function fmt(n){return Math.round(Number(n)).toLocaleString('es-AR');}
+
+// Formatea enteros con separador de miles argentino
+function fmtEntero(n){return Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
+// Formatea con 2 decimales
+function fmtDec(n){return (parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+// Formatea P&L — recibe número JS nativo (punto como decimal), redondea a entero
 function fmtPnl(n,tag){
-  const v=Math.round(parseFloat(String(n).replace(/\./g,'').replace(',','.')));
-  if(isNaN(v)||v===0)return'—';
-  const s=(v>=0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
-  const cls=v>=0?'pnl-pos':'pnl-neg';
+  const v=Math.round(parseFloat(n)||0);
+  if(!v)return'—';
+  const s=(v>0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
+  const cls=v>0?'pnl-pos':'pnl-neg';
   return tag?`<span class="${cls}">${s}</span>`:s;
 }
-function fmtDecimal(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 async function loadFromSheets(){
   setSyncState('loading','Actualizando desde Google Sheets...');
@@ -197,8 +201,8 @@ function parseCSV(text){
     if(cols.length<2)continue;
     const fecha=cols[0].replace(/"/g,'').trim();
     const jsonStr=cols[1].replace(/^"|"$/g,'').replace(/""/g,'"').trim();
-    const totalStr=(cols[2]||'').replace(/"/g,'').trim();
-    const total=parseFloat(totalStr);
+    // totalDia viene como número JS estándar con punto decimal (ej: 2915424.34814826)
+    const total=parseFloat((cols[2]||'').replace(/"/g,'').trim());
     if(!fecha)continue;
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
     try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fecha]=rows;}catch(e){}
@@ -229,8 +233,8 @@ function groupByEspecie(ops){
     const k=o.especie+'|'+o.plazo;
     if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,seccion:o.seccion,rows:[],vnC:0,vnV:0,montoC:0,montoV:0,pylTotal:0};
     map[k].rows.push(o);
-    if(o.op==='C'){map[k].vnC+=Number(o.vn);map[k].montoC+=Number(o.monto);}
-    else{map[k].vnV+=Number(o.vn);map[k].montoV+=Number(o.monto);}
+    if(o.op==='C'){map[k].vnC+=parseFloat(o.vn)||0;map[k].montoC+=parseFloat(o.monto)||0;}
+    else{map[k].vnV+=parseFloat(o.vn)||0;map[k].montoV+=parseFloat(o.monto)||0;}
     map[k].pylTotal+=parseFloat(o.pyl)||0;
   });
   return Object.values(map);
@@ -250,17 +254,16 @@ function renderTable(ops,tbodyId){
   groupByEspecie(ops).forEach(g=>{
     g.rows.forEach((o,i)=>{
       const last=i===g.rows.length-1;
-      const pylEspecie=last&&g.pylTotal!==0?fmtPnl(g.pylTotal,true):'—';
       html+=`<tr>
         <td>${i===0?`<span class="sec-badge">${o.seccion||''}</span>`:''}</td>
         <td class="mono">${o.especie}</td>
         <td style="font-size:11px;color:#888">T+${o.plazo}</td>
         <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'Compra':'Venta'}</span></td>
-        <td class="tr mono">${fmt(o.vn)}</td>
-        <td class="tr mono">${fmtDecimal(o.precio)}</td>
-        <td class="tr mono">$${fmt(o.monto)}</td>
+        <td class="tr mono">${fmtEntero(o.vn)}</td>
+        <td class="tr mono">${fmtDec(o.precio)}</td>
+        <td class="tr mono">$${fmtEntero(o.monto)}</td>
         <td style="font-size:12px;color:#888">${o.cliente||'—'}</td>
-        <td class="tr">${pylEspecie}</td>
+        <td class="tr">${last?fmtPnl(g.pylTotal,true):'—'}</td>
       </tr>`;
     });
     html+=`<tr><td colspan="9" style="padding:3px"></td></tr>`;
@@ -292,8 +295,9 @@ function renderCalendar(){
     if(ds===todayS)cls+=' today-cell';
     if(ds===selectedDate)cls+=' selected';
     if(hasOpen)cls+=' has-open';
-    const pnlAbs=Math.abs(Math.round(pnl));
-    const pnlHtml=hasData&&pnl!==0?`<span class="day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}$${pnlAbs>=1000?Math.round(pnlAbs/1000)+'k':pnlAbs.toLocaleString('es-AR')}</span>`:'';
+    const pnlR=Math.round(pnl);
+    const pnlAbs=Math.abs(pnlR);
+    const pnlHtml=hasData&&pnlR!==0?`<span class="day-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}$${pnlAbs>=1000?Math.round(pnlAbs/1000)+'k':pnlAbs.toLocaleString('es-AR')}</span>`:'';
     const opsHtml=hasData?`<span class="day-ops">${ops.length}op</span>`:'';
     grid.innerHTML+=`<div class="${cls}" onclick="selectDay('${ds}')"><span class="day-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
   }
@@ -333,12 +337,12 @@ function renderDiaView(d){
   document.getElementById('dia-content').style.display='';
   document.getElementById('dm-ops').textContent=ops.length;
   document.getElementById('dm-ops-sub').textContent=ops.filter(o=>o.op==='C').length+'C · '+ops.filter(o=>o.op==='V').length+'V';
-  const totalDia=allTotals[d]||0;
-  document.getElementById('dm-pnl').innerHTML=fmtPnl(totalDia,true);
+  document.getElementById('dm-pnl').innerHTML=fmtPnl(allTotals[d]||0,true);
   const openPos=getOpenPos(ops);
   document.getElementById('dm-pos').textContent=openPos.length;
   document.getElementById('dm-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.length+' especie/s';
-  document.getElementById('dm-vol').textContent='$'+fmt(ops.reduce((a,o)=>a+Number(o.monto),0)/1000)+'k';
+  const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
+  document.getElementById('dm-vol').textContent='$'+Math.round(vol/1000).toLocaleString('es-AR')+'k';
   document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';
   renderTable(ops,'dia-tbody');
 }
@@ -359,9 +363,9 @@ function renderPosView(){
       <td style="font-size:12px;color:#888">${p.date}</td>
       <td class="mono">${p.especie}</td>
       <td style="font-size:11px">T+${p.plazo}</td>
-      <td class="tr mono">${fmt(p.vnNeto)}</td>
-      <td class="tr mono">${fmtDecimal(p.pxProm)}%</td>
-      <td class="tr mono">$${fmt(p.montoExp)}</td>
+      <td class="tr mono">${fmtEntero(p.vnNeto)}</td>
+      <td class="tr mono">${fmtDec(p.pxProm)}%</td>
+      <td class="tr mono">$${fmtEntero(p.montoExp)}</td>
       <td class="tr"><input type="number" step="0.001" placeholder="—" value="${px}" style="width:90px" oninput="setPx('${key}',this.value,${p.vnNeto},${p.pxProm})"></td>
       <td class="tr" id="flt-${key}">${float}</td>
     </tr>`;
