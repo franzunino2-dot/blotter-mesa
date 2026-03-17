@@ -164,7 +164,7 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
   </div>
 </div>
 <script>
-const SHEETS_URL='https://api.allorigins.win/raw?url=https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=12982522%26single=true%26output=csv';
+const SHEETS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=1757919510&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},selectedDate=null,calYear,calMonth,pxOverride={};
 function pad2(n){return String(n).padStart(2,'0');}
@@ -175,7 +175,7 @@ function fmtPnl(n,tag){const v=Number(n);if(isNaN(v))return'—';const s=(v>=0?'
 async function loadFromSheets(){
   setSyncState('loading','Actualizando desde Google Sheets...');
   try{
-    const r=await fetch(SHEETS_URL+'&cb='+Date.now());
+    const r=await fetch(SHEETS_URL,{mode:'cors'});
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
     setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
