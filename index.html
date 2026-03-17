@@ -90,17 +90,12 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
     </div>
     <span class="clock" id="clock-el"></span>
   </div>
-
   <div class="sync-bar">
     <div class="sync-dot loading" id="sync-dot"></div>
     <span id="sync-label">Conectando con Google Sheets...</span>
     <button onclick="loadFromSheets()">&#8635; Actualizar</button>
   </div>
-
-  <div class="alert-banner" id="alert-banner">
-    <span id="alert-text"></span>
-  </div>
-
+  <div class="alert-banner" id="alert-banner"><span id="alert-text"></span></div>
   <div class="tabs">
     <div class="tab active" id="tab-mes" onclick="showTab('mes')">Mes</div>
     <div class="tab" id="tab-dia" onclick="showTab('dia')">Día</div>
@@ -173,7 +168,7 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
 </div>
 
 <script>
-const SHEETS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=12982522&single=true&output=csv';
+const SHEETS_URL='https://corsproxy.io/?url=https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=12982522%26single=true%26output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},selectedDate=null,calYear,calMonth,pxOverride={};
 
