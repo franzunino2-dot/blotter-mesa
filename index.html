@@ -101,7 +101,6 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
     <div class="tab" id="tab-dia" onclick="showTab('dia')">Día</div>
     <div class="tab" id="tab-pos" onclick="showTab('pos')">Posiciones</div>
   </div>
-
   <div id="view-mes">
     <div class="month-nav">
       <button onclick="prevMonth()">&#8592;</button>
@@ -120,7 +119,6 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
     </div>
     <div class="day-grid" id="cal-grid"></div>
   </div>
-
   <div id="view-dia" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <span style="font-size:14px;font-weight:500" id="dia-title">Seleccioná un día</span>
@@ -147,7 +145,6 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
       </div>
     </div>
   </div>
-
   <div id="view-pos" style="display:none">
     <div style="font-size:13px;font-weight:500;margin-bottom:10px" id="pos-title">Posiciones abiertas</div>
     <div id="pos-empty" class="empty-state">Sin posiciones abiertas.</div>
@@ -166,23 +163,15 @@ input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;fon
     </div>
   </div>
 </div>
-
 <script>
-const SHEETS_URL='https://corsproxy.io/?url=https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=12982522%26single=true%26output=csv';
+const SHEETS_URL='https://api.allorigins.win/raw?url=https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=12982522%26single=true%26output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},selectedDate=null,calYear,calMonth,pxOverride={};
-
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function fmt(n){return Number(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtInt(n){return Math.round(Number(n)).toLocaleString('es-AR');}
-function fmtPnl(n,tag){
-  const v=Number(n);if(isNaN(v))return'—';
-  const s=(v>=0?'+':'')+'$'+fmt(Math.abs(v));
-  const cls=v>=0?'pnl-pos':'pnl-neg';
-  return tag?`<span class="${cls}">${s}</span>`:s;
-}
-
+function fmtPnl(n,tag){const v=Number(n);if(isNaN(v))return'—';const s=(v>=0?'+':'')+'$'+fmt(Math.abs(v));const cls=v>=0?'pnl-pos':'pnl-neg';return tag?`<span class="${cls}">${s}</span>`:s;}
 async function loadFromSheets(){
   setSyncState('loading','Actualizando desde Google Sheets...');
   try{
@@ -193,7 +182,6 @@ async function loadFromSheets(){
     renderAll();
   }catch(e){setSyncState('error','Error: '+e.message);}
 }
-
 function parseCSV(text){
   allOps={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -208,219 +196,22 @@ function parseCSV(text){
   const dates=Object.keys(allOps).sort();
   if(dates.length&&!selectedDate)selectedDate=dates[dates.length-1];
 }
-
-function splitLine(line){
-  const r=[];let cur='';let q=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
-    else if(c===','&&!q){r.push(cur);cur='';}
-    else cur+=c;
-  }
-  r.push(cur);return r;
-}
-
-function setSyncState(s,msg){
-  document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
-  document.getElementById('sync-label').textContent=msg;
-}
-
-function groupByEspecie(ops){
-  const map={};
-  ops.forEach(o=>{
-    const k=o.especie+'|'+o.plazo;
-    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,seccion:o.seccion,rows:[],vnC:0,vnV:0,montoC:0,montoV:0};
-    map[k].rows.push(o);
-    if(o.op==='C'){map[k].vnC+=Number(o.vn);map[k].montoC+=Number(o.monto);}
-    else{map[k].vnV+=Number(o.vn);map[k].montoV+=Number(o.monto);}
-  });
-  return Object.values(map);
-}
-
-function calcPnl(ops){
-  let t=0;
-  groupByEspecie(ops).forEach(g=>{
-    const c=Math.min(g.vnC,g.vnV);
-    if(c>0){const pC=g.vnC>0?g.montoC/g.vnC:0,pV=g.vnV>0?g.montoV/g.vnV:0;t+=(pV-pC)*c/100;}
-  });
-  return t;
-}
-
-function getOpenPos(ops){
-  return groupByEspecie(ops).filter(x=>Math.round(x.vnC-x.vnV)>0).map(x=>({
-    especie:x.especie,plazo:x.plazo,
-    vnNeto:Math.round(x.vnC-x.vnV),
-    pxProm:x.vnC>0?x.montoC/x.vnC*100:0,
-    montoExp:x.montoC-x.montoV
-  }));
-}
-
-function renderTable(ops,tbodyId){
-  let html='';
-  groupByEspecie(ops).forEach(g=>{
-    const closed=Math.abs(Math.round(g.vnC-g.vnV))<1;
-    let pnl=null;
-    if(closed){const pC=g.vnC>0?g.montoC/g.vnC:0,pV=g.vnV>0?g.montoV/g.vnV:0;pnl=(pV-pC)*g.vnC/100;}
-    g.rows.forEach((o,i)=>{
-      const last=i===g.rows.length-1;
-      html+=`<tr>
-        <td>${i===0?`<span class="sec-badge">${o.seccion||''}</span>`:''}</td>
-        <td class="mono">${o.especie}</td>
-        <td style="font-size:11px;color:#888">T+${o.plazo}</td>
-        <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'Compra':'Venta'}</span></td>
-        <td class="tr mono">${fmtInt(o.vn)}</td>
-        <td class="tr mono">${fmt(o.precio)}</td>
-        <td class="tr mono">$${fmt(o.monto)}</td>
-        <td style="font-size:12px;color:#888">${o.cliente||'—'}</td>
-        <td>${last?(closed?'<span class="badge-closed">Cerrada</span>':'<span class="badge-abierta">Pos. abierta</span>'):'<span style="color:#ddd;font-size:11px">—</span>'}</td>
-        <td class="tr">${last&&pnl!==null?fmtPnl(pnl,true):'—'}</td>
-      </tr>`;
-    });
-    html+=`<tr><td colspan="10" style="padding:3px"></td></tr>`;
-  });
-  document.getElementById(tbodyId).innerHTML=html;
-}
-
-function renderCalendar(){
-  const now=new Date();
-  if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
-  document.getElementById('month-label').textContent=MESES[calMonth]+' '+calYear;
-  const grid=document.getElementById('cal-grid');
-  grid.innerHTML='';
-  const first=new Date(calYear,calMonth,1);
-  let dow=first.getDay()-1;if(dow<0)dow=6;
-  const dim=new Date(calYear,calMonth+1,0).getDate();
-  const todayS=todayStr();
-  let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity;
-  for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="day-cell empty"></div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=pad2(d)+'/'+pad2(calMonth+1)+'/'+calYear;
-    const ops=allOps[ds]||[];
-    const hasData=ops.length>0;
-    const pnl=hasData?calcPnl(ops):null;
-    const hasOpen=hasData&&getOpenPos(ops).length>0;
-    if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl)bestPnl=pnl;if(pnl<worstPnl)worstPnl=pnl;}
-    let cls='day-cell';
-    if(hasData)cls+=' has-data';
-    if(ds===todayS)cls+=' today-cell';
-    if(ds===selectedDate)cls+=' selected';
-    if(hasOpen)cls+=' has-open';
-    const pnlHtml=hasData?`<span class="day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}$${Math.abs(Math.round(pnl/1000))}k</span>`:'';
-    const opsHtml=hasData?`<span class="day-ops">${ops.length}op</span>`:'';
-    grid.innerHTML+=`<div class="${cls}" onclick="selectDay('${ds}')"><span class="day-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
-  }
-  document.getElementById('ms-dias').textContent=diasOp;
-  if(diasOp>0){
-    document.getElementById('ms-pnl').innerHTML=fmtPnl(pnlMes,true);
-    document.getElementById('ms-best').innerHTML=fmtPnl(bestPnl,true);
-    document.getElementById('ms-worst').innerHTML=fmtPnl(worstPnl,true);
-  }else{
-    ['ms-pnl','ms-best','ms-worst'].forEach(id=>document.getElementById(id).textContent='—');
-  }
-}
-
-function selectDay(d){
-  selectedDate=d;renderCalendar();renderDiaView(d);renderPosView();showTab('dia');
-}
-
-function renderDiaView(d){
-  if(!d){document.getElementById('dia-empty').style.display='';document.getElementById('dia-content').style.display='none';return;}
-  const ops=allOps[d]||[];
-  document.getElementById('dia-title').textContent='Operaciones del '+d;
-  const dates=Object.keys(allOps).sort();
-  const chips=document.getElementById('dia-chips');
-  chips.innerHTML='';
-  dates.slice(-8).forEach(dt=>{
-    const chip=document.createElement('span');
-    chip.className='dia-chip'+(dt===d?' active':'');
-    chip.textContent=dt.slice(0,5);
-    chip.onclick=()=>selectDay(dt);
-    chips.appendChild(chip);
-  });
-  if(!ops.length){
-    document.getElementById('dia-empty').style.display='';
-    document.getElementById('dia-content').style.display='none';
-    ['dm-ops','dm-pnl','dm-pos','dm-vol'].forEach(id=>document.getElementById(id).textContent='—');
-    return;
-  }
-  document.getElementById('dia-empty').style.display='none';
-  document.getElementById('dia-content').style.display='';
-  document.getElementById('dm-ops').textContent=ops.length;
-  document.getElementById('dm-ops-sub').textContent=ops.filter(o=>o.op==='C').length+'C · '+ops.filter(o=>o.op==='V').length+'V';
-  document.getElementById('dm-pnl').innerHTML=fmtPnl(calcPnl(ops),true);
-  const openPos=getOpenPos(ops);
-  document.getElementById('dm-pos').textContent=openPos.length;
-  document.getElementById('dm-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.length+' especie/s';
-  document.getElementById('dm-vol').textContent='$'+Number(Math.round(ops.reduce((a,o)=>a+Number(o.monto),0)/1000)).toLocaleString('es-AR')+'k';
-  document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';
-  renderTable(ops,'dia-tbody');
-}
-
-function renderPosView(){
-  const allOpen=[];
-  Object.entries(allOps).forEach(([date,ops])=>{getOpenPos(ops).forEach(p=>allOpen.push({...p,date}));});
-  document.getElementById('pos-title').textContent='Posiciones abiertas ('+allOpen.length+')';
-  if(!allOpen.length){document.getElementById('pos-empty').style.display='';document.getElementById('pos-content').style.display='none';return;}
-  document.getElementById('pos-empty').style.display='none';
-  document.getElementById('pos-content').style.display='';
-  let html='';
-  allOpen.forEach(p=>{
-    const key=p.date+'_'+p.especie+'_'+p.plazo;
-    const px=pxOverride[key]||'';
-    const float=px?fmtPnl((parseFloat(px)-p.pxProm)*p.vnNeto/100,true):'—';
-    html+=`<tr>
-      <td style="font-size:12px;color:#888">${p.date}</td>
-      <td class="mono">${p.especie}</td>
-      <td style="font-size:11px">T+${p.plazo}</td>
-      <td class="tr mono">${fmtInt(p.vnNeto)}</td>
-      <td class="tr mono">${fmt(p.pxProm)}%</td>
-      <td class="tr mono">$${fmt(p.montoExp)}</td>
-      <td class="tr"><input type="number" step="0.001" placeholder="—" value="${px}" style="width:90px" oninput="setPx('${key}',this.value,${p.vnNeto},${p.pxProm})"></td>
-      <td class="tr" id="flt-${key}">${float}</td>
-    </tr>`;
-  });
-  document.getElementById('pos-tbody').innerHTML=html;
-}
-
-function setPx(key,val,vnNeto,pxProm){
-  pxOverride[key]=val;
-  const el=document.getElementById('flt-'+key);
-  if(el&&val)el.innerHTML=fmtPnl((parseFloat(val)-pxProm)*vnNeto/100,true);
-}
-
+function splitLine(line){const r=[];let cur='';let q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}else if(c===','&&!q){r.push(cur);cur='';}else cur+=c;}r.push(cur);return r;}
+function setSyncState(s,msg){document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');document.getElementById('sync-label').textContent=msg;}
+function groupByEspecie(ops){const map={};ops.forEach(o=>{const k=o.especie+'|'+o.plazo;if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,seccion:o.seccion,rows:[],vnC:0,vnV:0,montoC:0,montoV:0};map[k].rows.push(o);if(o.op==='C'){map[k].vnC+=Number(o.vn);map[k].montoC+=Number(o.monto);}else{map[k].vnV+=Number(o.vn);map[k].montoV+=Number(o.monto);}});return Object.values(map);}
+function calcPnl(ops){let t=0;groupByEspecie(ops).forEach(g=>{const c=Math.min(g.vnC,g.vnV);if(c>0){const pC=g.vnC>0?g.montoC/g.vnC:0,pV=g.vnV>0?g.montoV/g.vnV:0;t+=(pV-pC)*c/100;}});return t;}
+function getOpenPos(ops){return groupByEspecie(ops).filter(x=>Math.round(x.vnC-x.vnV)>0).map(x=>({especie:x.especie,plazo:x.plazo,vnNeto:Math.round(x.vnC-x.vnV),pxProm:x.vnC>0?x.montoC/x.vnC*100:0,montoExp:x.montoC-x.montoV}));}
+function renderTable(ops,tbodyId){let html='';groupByEspecie(ops).forEach(g=>{const closed=Math.abs(Math.round(g.vnC-g.vnV))<1;let pnl=null;if(closed){const pC=g.vnC>0?g.montoC/g.vnC:0,pV=g.vnV>0?g.montoV/g.vnV:0;pnl=(pV-pC)*g.vnC/100;}g.rows.forEach((o,i)=>{const last=i===g.rows.length-1;html+=`<tr><td>${i===0?`<span class="sec-badge">${o.seccion||''}</span>`:''}</td><td class="mono">${o.especie}</td><td style="font-size:11px;color:#888">T+${o.plazo}</td><td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'Compra':'Venta'}</span></td><td class="tr mono">${fmtInt(o.vn)}</td><td class="tr mono">${fmt(o.precio)}</td><td class="tr mono">$${fmt(o.monto)}</td><td style="font-size:12px;color:#888">${o.cliente||'—'}</td><td>${last?(closed?'<span class="badge-closed">Cerrada</span>':'<span class="badge-abierta">Pos. abierta</span>'):'<span style="color:#ddd;font-size:11px">—</span>'}</td><td class="tr">${last&&pnl!==null?fmtPnl(pnl,true):'—'}</td></tr>`;});html+=`<tr><td colspan="10" style="padding:3px"></td></tr>`;});document.getElementById(tbodyId).innerHTML=html;}
+function renderCalendar(){const now=new Date();if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}document.getElementById('month-label').textContent=MESES[calMonth]+' '+calYear;const grid=document.getElementById('cal-grid');grid.innerHTML='';const first=new Date(calYear,calMonth,1);let dow=first.getDay()-1;if(dow<0)dow=6;const dim=new Date(calYear,calMonth+1,0).getDate();const todayS=todayStr();let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity;for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="day-cell empty"></div>`;for(let d=1;d<=dim;d++){const ds=pad2(d)+'/'+pad2(calMonth+1)+'/'+calYear;const ops=allOps[ds]||[];const hasData=ops.length>0;const pnl=hasData?calcPnl(ops):null;const hasOpen=hasData&&getOpenPos(ops).length>0;if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl)bestPnl=pnl;if(pnl<worstPnl)worstPnl=pnl;}let cls='day-cell';if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today-cell';if(ds===selectedDate)cls+=' selected';if(hasOpen)cls+=' has-open';const pnlHtml=hasData?`<span class="day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}$${Math.abs(Math.round(pnl/1000))}k</span>`:'';const opsHtml=hasData?`<span class="day-ops">${ops.length}op</span>`:'';grid.innerHTML+=`<div class="${cls}" onclick="selectDay('${ds}')"><span class="day-num">${d}</span>${pnlHtml}${opsHtml}</div>`;}document.getElementById('ms-dias').textContent=diasOp;if(diasOp>0){document.getElementById('ms-pnl').innerHTML=fmtPnl(pnlMes,true);document.getElementById('ms-best').innerHTML=fmtPnl(bestPnl,true);document.getElementById('ms-worst').innerHTML=fmtPnl(worstPnl,true);}else{['ms-pnl','ms-best','ms-worst'].forEach(id=>document.getElementById(id).textContent='—');}}
+function selectDay(d){selectedDate=d;renderCalendar();renderDiaView(d);renderPosView();showTab('dia');}
+function renderDiaView(d){if(!d){document.getElementById('dia-empty').style.display='';document.getElementById('dia-content').style.display='none';return;}const ops=allOps[d]||[];document.getElementById('dia-title').textContent='Operaciones del '+d;const dates=Object.keys(allOps).sort();const chips=document.getElementById('dia-chips');chips.innerHTML='';dates.slice(-8).forEach(dt=>{const chip=document.createElement('span');chip.className='dia-chip'+(dt===d?' active':'');chip.textContent=dt.slice(0,5);chip.onclick=()=>selectDay(dt);chips.appendChild(chip);});if(!ops.length){document.getElementById('dia-empty').style.display='';document.getElementById('dia-content').style.display='none';['dm-ops','dm-pnl','dm-pos','dm-vol'].forEach(id=>document.getElementById(id).textContent='—');return;}document.getElementById('dia-empty').style.display='none';document.getElementById('dia-content').style.display='';document.getElementById('dm-ops').textContent=ops.length;document.getElementById('dm-ops-sub').textContent=ops.filter(o=>o.op==='C').length+'C · '+ops.filter(o=>o.op==='V').length+'V';document.getElementById('dm-pnl').innerHTML=fmtPnl(calcPnl(ops),true);const openPos=getOpenPos(ops);document.getElementById('dm-pos').textContent=openPos.length;document.getElementById('dm-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.length+' especie/s';document.getElementById('dm-vol').textContent='$'+Number(Math.round(ops.reduce((a,o)=>a+Number(o.monto),0)/1000)).toLocaleString('es-AR')+'k';document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';renderTable(ops,'dia-tbody');}
+function renderPosView(){const allOpen=[];Object.entries(allOps).forEach(([date,ops])=>{getOpenPos(ops).forEach(p=>allOpen.push({...p,date}));});document.getElementById('pos-title').textContent='Posiciones abiertas ('+allOpen.length+')';if(!allOpen.length){document.getElementById('pos-empty').style.display='';document.getElementById('pos-content').style.display='none';return;}document.getElementById('pos-empty').style.display='none';document.getElementById('pos-content').style.display='';let html='';allOpen.forEach(p=>{const key=p.date+'_'+p.especie+'_'+p.plazo;const px=pxOverride[key]||'';const float=px?fmtPnl((parseFloat(px)-p.pxProm)*p.vnNeto/100,true):'—';html+=`<tr><td style="font-size:12px;color:#888">${p.date}</td><td class="mono">${p.especie}</td><td style="font-size:11px">T+${p.plazo}</td><td class="tr mono">${fmtInt(p.vnNeto)}</td><td class="tr mono">${fmt(p.pxProm)}%</td><td class="tr mono">$${fmt(p.montoExp)}</td><td class="tr"><input type="number" step="0.001" placeholder="—" value="${px}" style="width:90px" oninput="setPx('${key}',this.value,${p.vnNeto},${p.pxProm})"></td><td class="tr" id="flt-${key}">${float}</td></tr>`;});document.getElementById('pos-tbody').innerHTML=html;}
+function setPx(key,val,vnNeto,pxProm){pxOverride[key]=val;const el=document.getElementById('flt-'+key);if(el&&val)el.innerHTML=fmtPnl((parseFloat(val)-pxProm)*vnNeto/100,true);}
 function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
 function renderAll(){renderCalendar();renderDiaView(selectedDate);renderPosView();updateClock();}
-function showTab(t){
-  ['mes','dia','pos'].forEach(x=>{
-    document.getElementById('view-'+x).style.display=x===t?'':'none';
-    document.getElementById('tab-'+x).classList.toggle('active',x===t);
-  });
-  if(t==='mes')renderCalendar();
-}
-
-function updateClock(){
-  const now=new Date();
-  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
-  document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
-  const minLeft=17*60-(h*60+m);
-  const badge=document.getElementById('rueda-badge');
-  const banner=document.getElementById('alert-banner');
-  const openToday=getOpenPos(allOps[todayStr()]||[]);
-  if(h>=17){
-    badge.className='rueda-badge badge-warn';badge.textContent='Rueda cerrada';
-    if(openToday.length){banner.className='alert-banner danger';banner.style.display='flex';document.getElementById('alert-text').textContent='Rueda cerrada con '+openToday.length+' posición/es abiertas hoy.';}
-    else banner.style.display='none';
-  }else if(minLeft<=30&&openToday.length){
-    badge.className='rueda-badge badge-warn';badge.textContent='Cierre en '+minLeft+' min';
-    banner.className='alert-banner warn';banner.style.display='flex';
-    document.getElementById('alert-text').textContent='Quedan '+minLeft+' min para el cierre con posiciones abiertas.';
-  }else{
-    badge.className='rueda-badge badge-open';badge.innerHTML='&#9679; Rueda abierta';
-    banner.style.display='none';
-  }
-}
-
+function showTab(t){['mes','dia','pos'].forEach(x=>{document.getElementById('view-'+x).style.display=x===t?'':'none';document.getElementById('tab-'+x).classList.toggle('active',x===t);});if(t==='mes')renderCalendar();}
+function updateClock(){const now=new Date();const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);const minLeft=17*60-(h*60+m);const badge=document.getElementById('rueda-badge');const banner=document.getElementById('alert-banner');const openToday=getOpenPos(allOps[todayStr()]||[]);if(h>=17){badge.className='rueda-badge badge-warn';badge.textContent='Rueda cerrada';if(openToday.length){banner.className='alert-banner danger';banner.style.display='flex';document.getElementById('alert-text').textContent='Rueda cerrada con '+openToday.length+' posición/es abiertas hoy.';}else banner.style.display='none';}else if(minLeft<=30&&openToday.length){badge.className='rueda-badge badge-warn';badge.textContent='Cierre en '+minLeft+' min';banner.className='alert-banner warn';banner.style.display='flex';document.getElementById('alert-text').textContent='Quedan '+minLeft+' min para el cierre con posiciones abiertas.';}else{badge.className='rueda-badge badge-open';badge.innerHTML='&#9679; Rueda abierta';banner.style.display='none';}}
 setInterval(updateClock,1000);
 loadFromSheets();
 </script>
