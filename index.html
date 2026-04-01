@@ -356,7 +356,7 @@ function fmtK(n){
 
 function toggleCal(){
   const p=document.getElementById('cal-popup');
-  if(p.classList.contains('open')){p.classList.remove('open');pickStep=0;return;}
+  if(p.classList.contains('open')&&pickStep===0){p.classList.remove('open');return;}
   const now=new Date();
   calY=calY||now.getFullYear();calM=calM===undefined?now.getMonth():calM;
   pickStep=0;renderCal();p.classList.add('open');
