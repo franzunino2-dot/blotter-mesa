@@ -47,7 +47,7 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .cal-nav span{font-size:13px;font-weight:500;color:#e2e8f0}
 .cal-grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-hdr-cell{font-size:10px;color:#4a5568;text-align:center;padding:3px 0;font-weight:500}
-.cal-cell{border-radius:4px;padding:7px 4px;text-align:center;cursor:pointer;font-size:12px;font-family:monospace;color:#4a5568;user-select:none;transition:background .1s}
+.cal-cell{border-radius:4px;padding:7px 4px;text-align:center;cursor:pointer;font-size:12px;font-family:monospace;color:#4a5568;user-select:none}
 .cal-cell:hover{background:#1e2330;color:#e2e8f0}
 .cal-cell.has{color:#a0aec0}
 .cal-cell.empty{cursor:default;pointer-events:none;color:transparent}
@@ -137,13 +137,11 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <button class="logout-btn" onclick="doLogout()">Salir</button>
     </div>
   </div>
-
   <div class="sync-bar">
     <div class="sync-dot loading" id="sync-dot"></div>
     <span id="sync-label">Conectando...</span>
     <button onclick="loadData()" style="background:#111420;border:0.5px solid #1e2330;color:#a0aec0;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px">&#8635; Actualizar</button>
   </div>
-
   <div class="drp-bar">
     <span class="drp-label">Período:</span>
     <div class="drp-wrap" id="drp-wrap">
@@ -170,12 +168,10 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <span class="drp-preset" id="pre-todo" onclick="setPreset('todo')">Todo</span>
     </div>
   </div>
-
   <div class="alert" id="alert-banner" style="display:none">
     <div class="alert-dot"></div>
     <span id="alert-text"></span>
   </div>
-
   <div class="tabs">
     <div class="tab active" id="tab-rueda" onclick="showTab('rueda')">Rueda</div>
     <div class="tab" id="tab-mes" onclick="showTab('mes')">Mes</div>
@@ -197,7 +193,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Op</th><th>Cliente</th><th>Tipo</th>
+          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Cliente</th><th>Tipo</th>
           <th class="tr">VN</th><th class="tr">Precio C</th><th class="tr">Precio V</th>
           <th class="tr">Monto</th><th>Estado</th>
           <th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
@@ -238,8 +234,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Productor</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
+          <th>Fecha</th><th>Productor</th><th>Comit.</th><th>Especie</th><th>Sección</th>
+          <th class="tr">VN</th><th class="tr">Com. productor (col P)</th><th class="tr">P&L mesa (col O)</th>
         </tr></thead>
         <tbody id="prod-tbody"></tbody>
       </table>
@@ -255,8 +251,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Monto</th><th class="tr">P&L Equanima</th>
+          <th>Fecha</th><th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th>
+          <th class="tr">VN</th><th class="tr">Monto</th><th class="tr">P&L Equanima (col O)</th>
         </tr></thead>
         <tbody id="cli-tbody"></tbody>
       </table>
@@ -265,15 +261,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <div id="view-cuenta1000" style="display:none">
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">Ops cuenta propia</div><div class="metric-value blue" id="c1000-ops">—</div><div class="metric-sub">comitente 1000</div></div>
-      <div class="metric"><div class="metric-label">P&L cuenta propia</div><div class="metric-value green" id="c1000-pnl">—</div><div class="metric-sub">incluido en total</div></div>
-      <div class="metric"><div class="metric-label">Volumen</div><div class="metric-value white" id="c1000-vol">—</div><div class="metric-sub">—</div></div>
+      <div class="metric"><div class="metric-label">P&L total cuenta 1000</div><div class="metric-value green" id="c1000-pnl">—</div><div class="metric-sub">= O1 del sheet</div></div>
+      <div class="metric"><div class="metric-label">Com. pagadas productores</div><div class="metric-value amber" id="c1000-prod">—</div><div class="metric-sub">suma col P</div></div>
+      <div class="metric"><div class="metric-label">Operaciones del período</div><div class="metric-value white" id="c1000-ops">—</div><div class="metric-sub">todas las filas</div></div>
     </div>
+    <div class="section-label">Desglose col O por operación — todo suma O1</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th><th class="tr">P&L</th>
+          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Mercado</th><th>Cliente</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th>
+          <th class="tr">Com. productor (col P)</th><th class="tr">P&L cuenta 1000 (col O)</th>
         </tr></thead>
         <tbody id="c1000-tbody"></tbody>
       </table>
@@ -284,13 +282,13 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="metrics3">
       <div class="metric"><div class="metric-label">Cauciones</div><div class="metric-value blue" id="cau-count">—</div><div class="metric-sub">del período</div></div>
       <div class="metric"><div class="metric-label">Monto total</div><div class="metric-value white" id="cau-monto">—</div><div class="metric-sub">—</div></div>
-      <div class="metric"><div class="metric-label">P&L cauciones</div><div class="metric-value green" id="cau-pnl">—</div><div class="metric-sub">—</div></div>
+      <div class="metric"><div class="metric-label">P&L cauciones</div><div class="metric-value green" id="cau-pnl">—</div><div class="metric-sub">col O</div></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Fecha</th><th>Cliente / Tomador</th><th>Comit.</th><th>Mercado</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Tasa</th><th class="tr">Monto</th><th class="tr">P&L</th>
+          <th class="tr">VN</th><th class="tr">Tasa</th><th class="tr">Monto</th><th class="tr">P&L (col O)</th>
         </tr></thead>
         <tbody id="cau-tbody"></tbody>
       </table>
@@ -299,16 +297,16 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <div id="view-comisiones" style="display:none">
     <div class="metrics">
-      <div class="metric"><div class="metric-label">P&L total Equanima</div><div class="metric-value green" id="com-total">—</div><div class="metric-sub">período</div></div>
+      <div class="metric"><div class="metric-label">P&L total Equanima (O1)</div><div class="metric-value green" id="com-total">—</div><div class="metric-sub">período</div></div>
       <div class="metric"><div class="metric-label">Com. pagadas productores</div><div class="metric-value amber" id="com-prod">—</div><div class="metric-sub">suma col P</div></div>
-      <div class="metric"><div class="metric-label">De clientes directos</div><div class="metric-value green" id="com-directo">—</div><div class="metric-sub">sin productor</div></div>
-      <div class="metric"><div class="metric-label">De cuenta propia</div><div class="metric-value blue" id="com-propio">—</div><div class="metric-sub">comitente 1000</div></div>
+      <div class="metric"><div class="metric-label">De clientes directos</div><div class="metric-value green" id="com-directo">—</div><div class="metric-sub">col O sin productor</div></div>
+      <div class="metric"><div class="metric-label">Cauciones</div><div class="metric-value blue" id="com-cau">—</div><div class="metric-sub">col O CAUCION</div></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Fecha</th><th>Especie</th><th>Cliente</th><th>Tipo</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L Equanima</th>
+          <th class="tr">VN</th><th class="tr">Com. productor (col P)</th><th class="tr">P&L mesa (col O)</th>
         </tr></thead>
         <tbody id="com-tbody"></tbody>
       </table>
@@ -321,8 +319,7 @@ const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=305976454&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={};
-let rangeStart=null,rangeEnd=null;
-let pickStep=0; // 0=nada, 1=esperando fin
+let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
 
 function doLogin(){
@@ -335,18 +332,8 @@ function doLogin(){
     loadData();
   }else{document.getElementById('login-error').style.display='block';document.getElementById('login-pass').value='';}
 }
-function doLogout(){
-  sessionStorage.removeItem('mesa-auth');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app-screen').style.display='none';
-}
-function checkAuth(){
-  if(sessionStorage.getItem('mesa-auth')){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    loadData();
-  }
-}
+function doLogout(){sessionStorage.removeItem('mesa-auth');document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
+function checkAuth(){if(sessionStorage.getItem('mesa-auth')){document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadData();}}
 
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
@@ -367,27 +354,20 @@ function fmtK(n){
   return'$'+Math.abs(v).toLocaleString('es-AR');
 }
 
-// ── CALENDAR POPUP ──
 function toggleCal(){
   const p=document.getElementById('cal-popup');
   if(p.classList.contains('open')){p.classList.remove('open');pickStep=0;return;}
   const now=new Date();
-  calY=calY||now.getFullYear();
-  calM=calM===undefined?now.getMonth():calM;
-  pickStep=0;
-  renderCal();
-  p.classList.add('open');
+  calY=calY||now.getFullYear();calM=calM===undefined?now.getMonth():calM;
+  pickStep=0;renderCal();p.classList.add('open');
 }
-
 function calPrev(e){e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();}
 function calNext(e){e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();}
 
 function renderCal(){
   document.getElementById('cal-label').textContent=MESES[calM]+' '+calY;
-  const hdrs=document.getElementById('cal-hdrs');
-  hdrs.innerHTML=['L','M','X','J','V','S','D'].map(h=>`<div class="cal-hdr-cell">${h}</div>`).join('');
-  const grid=document.getElementById('cal-days');
-  grid.innerHTML='';
+  document.getElementById('cal-hdrs').innerHTML=['L','M','X','J','V','S','D'].map(h=>`<div class="cal-hdr-cell">${h}</div>`).join('');
+  const grid=document.getElementById('cal-days');grid.innerHTML='';
   const first=new Date(calY,calM,1);
   let dow=first.getDay()-1;if(dow<0)dow=6;
   const dim=new Date(calY,calM+1,0).getDate();
@@ -402,9 +382,8 @@ function renderCal(){
     let cls='cal-cell';
     if(hasData)cls+=' has';
     if(ds===todayS)cls+=' today';
-    const lo=s&&e?Math.min(s,e):s;
-    const hi=s&&e?Math.max(s,e):s;
-    if(lo&&hi){
+    if(s&&e){
+      const lo=Math.min(s,e),hi=Math.max(s,e);
       if(ts===lo&&ts===hi)cls+=' start end';
       else if(ts===lo)cls+=' start';
       else if(ts===hi)cls+=' end';
@@ -412,24 +391,16 @@ function renderCal(){
     }else if(s&&ts===s)cls+=' start end';
     grid.innerHTML+=`<div class="${cls}" onclick="pickDay('${ds}')">${d}</div>`;
   }
-  const hint=document.getElementById('cal-hint');
-  if(pickStep===0)hint.textContent='Click para elegir fecha inicio';
-  else hint.textContent='Ahora elegí la fecha fin del período';
+  document.getElementById('cal-hint').textContent=pickStep===0?'1° click: fecha inicio · 2° click: fecha fin':'Ahora elegí la fecha fin';
 }
 
 function pickDay(ds){
-  if(pickStep===0){
-    rangeStart=ds;rangeEnd=null;pickStep=1;
-  }else{
+  if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}
+  else{
     rangeEnd=ds;pickStep=0;
-    // Asegurar orden
-    if(strToTs(rangeStart)>strToTs(rangeEnd)){
-      const tmp=rangeStart;rangeStart=rangeEnd;rangeEnd=tmp;
-    }
+    if(strToTs(rangeStart)>strToTs(rangeEnd)){const t=rangeStart;rangeStart=rangeEnd;rangeEnd=t;}
     document.getElementById('cal-popup').classList.remove('open');
-    updateDisplay();
-    clearPresets();
-    renderAll();
+    clearPresets();updateDisplay();renderAll();
   }
   renderCal();
 }
@@ -437,72 +408,42 @@ function pickDay(ds){
 function updateDisplay(){
   const el=document.getElementById('drp-display');
   if(!rangeStart){el.textContent='—';return;}
-  if(!rangeEnd||rangeEnd===rangeStart)el.textContent=rangeStart;
-  else el.textContent=rangeStart+' → '+rangeEnd;
+  el.textContent=rangeEnd&&rangeEnd!==rangeStart?rangeStart+' → '+rangeEnd:rangeStart;
 }
-
-function clearPresets(){
-  document.querySelectorAll('.drp-preset').forEach(p=>p.classList.remove('sel'));
-}
+function clearPresets(){document.querySelectorAll('.drp-preset').forEach(p=>p.classList.remove('sel'));}
 
 function setPreset(p){
-  const now=new Date();
-  const todayS=todayStr();
-  clearPresets();
-  document.getElementById('pre-'+p).classList.add('sel');
+  const now=new Date();const todayS=todayStr();
+  clearPresets();document.getElementById('pre-'+p).classList.add('sel');
   if(p==='hoy'){rangeStart=todayS;rangeEnd=todayS;}
-  else if(p==='ayer'){
-    const y=new Date(now);y.setDate(y.getDate()-1);
-    rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;
-  }else if(p==='semana'){
-    const dow=now.getDay()||7;
-    const mon=new Date(now);mon.setDate(now.getDate()-dow+1);
-    rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;
-  }else if(p==='mes'){
-    rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();
-    rangeEnd=todayS;
-  }else if(p==='todo'){
-    const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));
-    if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}
-  }
-  pickStep=0;
-  updateDisplay();
-  renderAll();
+  else if(p==='ayer'){const y=new Date(now);y.setDate(y.getDate()-1);rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;}
+  else if(p==='semana'){const dow=now.getDay()||7;const mon=new Date(now);mon.setDate(now.getDate()-dow+1);rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;}
+  else if(p==='mes'){rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();rangeEnd=todayS;}
+  else if(p==='todo'){const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}}
+  pickStep=0;updateDisplay();renderAll();
 }
 
-// Cerrar popup al clickear fuera
 document.addEventListener('click',e=>{
   const popup=document.getElementById('cal-popup');
   const wrap=document.getElementById('drp-wrap');
-  if(popup.classList.contains('open')&&!wrap.contains(e.target)){
-    popup.classList.remove('open');pickStep=0;
-  }
+  if(popup.classList.contains('open')&&!wrap.contains(e.target)){popup.classList.remove('open');pickStep=0;}
 });
 
 function getDatesInRange(){
   if(!rangeStart)return[];
   const end=rangeEnd||rangeStart;
-  const s=strToTs(rangeStart),e=strToTs(end);
-  const lo=Math.min(s,e),hi=Math.max(s,e);
-  const dates=[];
-  let cur=lo;
-  while(cur<=hi){
-    const ds=tsToStr(cur);
-    if(allOps[ds])dates.push(ds);
-    cur+=86400000;
-  }
+  const lo=Math.min(strToTs(rangeStart),strToTs(end));
+  const hi=Math.max(strToTs(rangeStart),strToTs(end));
+  const dates=[];let cur=lo;
+  while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds])dates.push(ds);cur+=86400000;}
   return dates;
 }
-
 function getOpsInRange(){
   const ops=[];
   getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push({...o,_fecha:d})));
   return ops;
 }
-
-function getTotalInRange(){
-  return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);
-}
+function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
 
 async function loadData(){
   setSyncState('loading','Actualizando...');
@@ -515,8 +456,7 @@ async function loadData(){
     const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));
     if(allOps[todayS]){rangeStart=todayS;rangeEnd=todayS;document.getElementById('pre-hoy').classList.add('sel');}
     else if(dates.length){rangeStart=dates[dates.length-1];rangeEnd=rangeStart;}
-    updateDisplay();
-    renderAll();
+    updateDisplay();renderAll();
   }catch(e){setSyncState('error','Error: '+e.message);}
 }
 
@@ -545,7 +485,6 @@ function splitLine(line){
   }
   r.push(cur);return r;
 }
-
 function setSyncState(s,msg){
   document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
   document.getElementById('sync-label').textContent=msg;
@@ -553,7 +492,7 @@ function setSyncState(s,msg){
 
 function tipoOp(o){
   if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';
-  if(String(o.comitente)==='1000')return'propio';
+  if(String(o.comitente)==='1000'&&!o.cliente)return'propio';
   if(parseFloat(o.pylProductor)||0)return'productor';
   return'directo';
 }
@@ -569,54 +508,39 @@ function getOpenPos(ops){
   return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
 }
 
-// Par: misma especie + mismo VN + una C y una V
 function getPares(ops){
-  const pares=[];
-  const usados=new Set();
+  const pares=[];const usados=new Set();
   ops.forEach((a,ai)=>{
     if(usados.has(ai))return;
-    const match=ops.findIndex((b,bi)=>
-      bi!==ai&&!usados.has(bi)&&
-      b.especie===a.especie&&
-      Math.abs(parseFloat(b.vn)-parseFloat(a.vn))<1&&
-      b.op!==a.op&&
-      (a._fecha===b._fecha)
-    );
-    if(match>=0){
-      usados.add(ai);usados.add(match);
-      const b=ops[match];
+    const mi=ops.findIndex((b,bi)=>bi!==ai&&!usados.has(bi)&&b.especie===a.especie&&Math.abs(parseFloat(b.vn)-parseFloat(a.vn))<1&&b.op!==a.op&&a._fecha===b._fecha);
+    if(mi>=0){
+      usados.add(ai);usados.add(mi);
+      const b=ops[mi];
       const compra=a.op==='C'?a:b;
       const venta=a.op==='V'?a:b;
-      // P&L productor: el que tenga pylProductor != 0
       const pylProd=(parseFloat(a.pylProductor)||0)+(parseFloat(b.pylProductor)||0);
-      // P&L mesa: el que tenga pylMesa != 0
       const pylMesa=(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0);
-      // Cliente: el que no sea PHAROS/1000 si hay dos distintos
-      const clienteA=a.cliente||'—';
-      const clienteB=b.cliente||'—';
-      const clientePrincipal=clienteA!=='PHAROS'&&clienteA!=='—'?clienteA:(clienteB!=='PHAROS'?clienteB:clienteA);
-      const comitentePrincipal=clienteA!=='PHAROS'&&clienteA!=='—'?a.comitente:b.comitente;
+      const clienteA=a.cliente||'—',clienteB=b.cliente||'—';
+      const clientePpal=clienteA!=='PHAROS'&&clienteA!=='—'?clienteA:(clienteB!=='PHAROS'?clienteB:clienteA);
+      const comPpal=clienteA!=='PHAROS'&&clienteA!=='—'?a.comitente:b.comitente;
       pares.push({
         fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo,
         vn:parseFloat(a.vn)||0,
-        precioC:parseFloat(compra.precio)||0,
-        precioV:parseFloat(venta.precio)||0,
+        precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,
         monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),
-        cliente:clientePrincipal,comitente:comitentePrincipal,
+        cliente:clientePpal,comitente:comPpal,
         pylProductor:pylProd,pylMesa:pylMesa,
-        cerrado:true,tipo:tipoOp(a.pylProductor?a:b),
+        cerrado:true,tipo:tipoOp(pylProd?{pylProductor:pylProd}:{especie:a.especie,comitente:a.comitente,cliente:a.cliente}),
       });
     }else{
       usados.add(ai);
       pares.push({
         fecha:a._fecha,especie:a.especie,seccion:a.seccion,plazo:a.plazo,op:a.op,
         vn:parseFloat(a.vn)||0,
-        precioC:a.op==='C'?parseFloat(a.precio)||0:0,
-        precioV:a.op==='V'?parseFloat(a.precio)||0:0,
+        precioC:a.op==='C'?parseFloat(a.precio)||0:0,precioV:a.op==='V'?parseFloat(a.precio)||0:0,
         monto:parseFloat(a.monto)||0,
         cliente:a.cliente||'—',comitente:a.comitente||'—',
-        pylProductor:parseFloat(a.pylProductor)||0,
-        pylMesa:parseFloat(a.pylMesa)||0,
+        pylProductor:parseFloat(a.pylProductor)||0,pylMesa:parseFloat(a.pylMesa)||0,
         cerrado:false,tipo:tipoOp(a),
       });
     }
@@ -631,7 +555,6 @@ function renderRueda(){
   const pares=getPares(ops);
   const prodActivos=new Set(pares.filter(p=>p.pylProductor).map(p=>p.cliente));
   const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
-
   document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
@@ -642,24 +565,16 @@ function renderRueda(){
   document.getElementById('r-pos').textContent=openPos.length;
   document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
   document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
-
   const banner=document.getElementById('alert-banner');
-  if(openPos.length>0){
-    banner.style.display='flex';
-    document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');
-  }else banner.style.display='none';
-
+  if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');}
+  else banner.style.display='none';
   let html='';
   pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
-      p.tipo==='directo'?`<span class="badge-directo">directo</span>`:
-      p.tipo==='propio'?`<span class="badge-propio">propio</span>`:
-      `<span class="badge-sec">caución</span>`;
+    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:p.tipo==='directo'?`<span class="badge-directo">directo</span>`:p.tipo==='propio'?`<span class="badge-propio">propio</span>`:`<span class="badge-sec">caución</span>`;
     html+=`<tr>
       <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
       <td><span class="especie">${p.especie}</span></td>
       <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-      <td><span class="${p.cerrado?'':'badge-abierta'}" style="${p.cerrado?'color:#4a5568':''}">C↔V</span></td>
       <td style="color:#e2e8f0">${p.cliente}</td>
       <td>${tipoBadge}</td>
       <td class="tr">${fmtInt(p.vn)}</td>
@@ -671,7 +586,7 @@ function renderRueda(){
       <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
     </tr>`;
   });
-  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="13" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones en el período</td></tr>';
+  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="12" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones en el período</td></tr>';
 }
 
 function renderMes(){
@@ -687,12 +602,10 @@ function renderMes(){
   for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;
   for(let d=1;d<=dim;d++){
     const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
-    const hasData=!!allOps[ds];
-    const pnl=allTotals[ds]||0;
+    const hasData=!!allOps[ds];const pnl=allTotals[ds]||0;
     if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}
     const pnlR=Math.round(pnl);
-    let cls='mes-cal-day';
-    if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
+    let cls='mes-cal-day';if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
     const pnlHtml=hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:'';
     const opsHtml=hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op</span>`:'';
     grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')"><span class="mes-cal-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
@@ -702,28 +615,22 @@ function renderMes(){
     document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);
     document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');
     document.getElementById('mes-pnl-sub').textContent=diasOp+' días operados';
-    document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);
-    document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
-    document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);
-    document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
+    document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
+    document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
   }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
 }
-
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
 
 function renderProductores(){
   const ops=getOpsInRange();
-  const pares=getPares(ops).filter(p=>p.tipo==='productor');
+  const pares=getPares(ops).filter(p=>p.pylProductor);
   const acum={};
   pares.forEach(p=>{
     if(!acum[p.cliente])acum[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[],pylProd:0,pylMesa:0,dias:new Set(),especies:new Set()};
-    acum[p.cliente].pares.push(p);
-    acum[p.cliente].pylProd+=p.pylProductor;
-    acum[p.cliente].pylMesa+=p.pylMesa;
-    acum[p.cliente].dias.add(p.fecha);
-    acum[p.cliente].especies.add(p.especie);
+    acum[p.cliente].pares.push(p);acum[p.cliente].pylProd+=p.pylProductor;acum[p.cliente].pylMesa+=p.pylMesa;
+    acum[p.cliente].dias.add(p.fecha);acum[p.cliente].especies.add(p.especie);
   });
   const lista=Object.values(acum).sort((a,b)=>b.pylProd-a.pylProd);
   const totalProd=lista.reduce((s,p)=>s+p.pylProd,0);
@@ -736,8 +643,7 @@ function renderProductores(){
   lista.forEach(p=>{
     const barW=Math.round(p.pylProd/maxP*100);
     acumHtml+=`<div class="client-row">
-      <div class="client-comit">${p.comitente}</div>
-      <div class="client-name">${p.nombre}</div>
+      <div class="client-comit">${p.comitente}</div><div class="client-name">${p.nombre}</div>
       <div class="client-ops-lbl">${p.dias.size}d · ${[...p.especies].slice(0,2).join('/')}</div>
       <div class="client-bar-wrap"><div class="client-bar" style="width:${barW}%;background:#fbbf24"></div></div>
       <div class="client-pnl" style="color:#fbbf24">${fmtPnl(p.pylProd,true,'pnl-pos')}</div>
@@ -755,15 +661,14 @@ function renderProductores(){
         <td style="color:#4a5568">${i===0?prod.comitente:''}</td>
         <td><span class="especie">${p.especie}</span></td>
         <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-        <td style="color:#4a5568">C↔V</td>
         <td class="tr">${fmtInt(p.vn)}</td>
         <td class="tr" style="color:#fbbf24">${fmtPnl(p.pylProductor,true,'pnl-pos')||'—'}</td>
         <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
       </tr>`;
     });
-    detHtml+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;
+    detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
+  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin productores</td></tr>';
 }
 
 function renderClientes(){
@@ -786,40 +691,46 @@ function renderClientes(){
         <td style="color:#4a5568">${i===0?cli.comitente:''}</td>
         <td><span class="especie">${p.especie}</span></td>
         <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-        <td style="color:#4a5568">C↔V</td>
         <td class="tr">${fmtInt(p.vn)}</td>
         <td class="tr">$${fmtInt(p.monto)}</td>
         <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
       </tr>`;
     });
-    html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;
+    html+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
+  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
 
 function renderCuenta1000(){
-  const ops=getOpsInRange().filter(o=>String(o.comitente)==='1000');
-  const vol=ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
-  const pyl=getTotalInRange(); // O1 del sheet — ganancia real de la cuenta 1000
+  // P&L total = O1 (suma de toda la col O = lo que gana Equanima)
+  const total=getTotalInRange();
+  // Todas las filas con su col O y col P
+  const ops=getOpsInRange();
+  const pylProd=ops.reduce((s,o)=>s+(parseFloat(o.pylProductor)||0),0);
+  document.getElementById('c1000-pnl').innerHTML=fmtPnl(total,true)||'—';
+  document.getElementById('c1000-prod').innerHTML=fmtPnl(pylProd,true,'pnl-pos')||'—';
   document.getElementById('c1000-ops').textContent=ops.length||'—';
-  document.getElementById('c1000-pnl').innerHTML=fmtPnl(pyl,true)||'—';
-  document.getElementById('c1000-vol').textContent=fmtK(vol);
   let html='';
   ops.forEach(o=>{
+    const pylMesa=parseFloat(o.pylMesa)||0;
+    const pylProdFila=parseFloat(o.pylProductor)||0;
     html+=`<tr>
       <td style="color:#4a5568;font-family:monospace">${o._fecha}</td>
       <td><span class="especie">${o.especie}</span></td>
       <td><span class="badge-sec">${o.seccion||'—'}</span></td>
       <td style="color:#4a5568">${o.mercado||'—'}</td>
+      <td style="color:#a0aec0">${o.cliente||'—'}</td>
       <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
       <td class="tr">${fmtInt(o.vn)}</td>
       <td class="tr">${fmtDec(o.precio)}%</td>
       <td class="tr">$${fmtInt(o.monto)}</td>
-      <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
+      <td class="tr" style="color:#fbbf24">${pylProdFila?fmtPnl(pylProdFila,true,'pnl-pos'):'—'}</td>
+      <td class="tr">${pylMesa?fmtPnl(pylMesa,true):'—'}</td>
     </tr>`;
   });
-  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones cuenta propia</td></tr>';
+  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
+
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
   const monto=ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
@@ -848,19 +759,16 @@ function renderComisiones(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
   const pares=getPares(ops);
-  const pylProd=pares.reduce((s,p)=>s+p.pylProductor,0);
+  const pylProd=ops.reduce((s,o)=>s+(parseFloat(o.pylProductor)||0),0);
   const pylDirecto=pares.filter(p=>p.tipo==='directo').reduce((s,p)=>s+p.pylMesa,0);
-  const pylPropio=pares.filter(p=>p.tipo==='propio').reduce((s,p)=>s+p.pylMesa,0);
+  const pylCau=pares.filter(p=>p.tipo==='caucion').reduce((s,p)=>s+p.pylMesa,0);
   document.getElementById('com-total').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('com-prod').innerHTML=fmtPnl(pylProd,true,'pnl-pos')||'—';
   document.getElementById('com-directo').innerHTML=fmtPnl(pylDirecto,true)||'—';
-  document.getElementById('com-propio').innerHTML=fmtPnl(pylPropio,true)||'—';
+  document.getElementById('com-cau').innerHTML=fmtPnl(pylCau,true)||'—';
   let html='';
   pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
-      p.tipo==='directo'?`<span class="badge-directo">directo</span>`:
-      p.tipo==='propio'?`<span class="badge-propio">propio</span>`:
-      `<span class="badge-sec">caución</span>`;
+    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:p.tipo==='directo'?`<span class="badge-directo">directo</span>`:p.tipo==='propio'?`<span class="badge-propio">propio</span>`:`<span class="badge-sec">caución</span>`;
     html+=`<tr>
       <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
       <td><span class="especie">${p.especie}</span></td>
@@ -875,10 +783,7 @@ function renderComisiones(){
   document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
 }
 
-function renderAll(){
-  renderRueda();renderMes();renderProductores();
-  renderClientes();renderCuenta1000();renderCauciones();renderComisiones();
-}
+function renderAll(){renderRueda();renderMes();renderProductores();renderClientes();renderCuenta1000();renderCauciones();renderComisiones();}
 
 function showTab(t){
   ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
@@ -889,11 +794,9 @@ function showTab(t){
 }
 
 function updateClock(){
-  const now=new Date();
-  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  const now=new Date();const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
   document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
-  const minLeft=17*60-(h*60+m);
-  const badge=document.getElementById('rueda-badge');
+  const minLeft=17*60-(h*60+m);const badge=document.getElementById('rueda-badge');
   const openToday=getOpenPos((allOps[todayStr()]||[]).map(o=>({...o,_fecha:todayStr()})));
   if(h>=17){badge.className='badge-closed';badge.textContent='Rueda cerrada';}
   else if(minLeft<=30&&openToday.length>0){badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';}
