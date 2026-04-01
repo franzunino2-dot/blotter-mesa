@@ -30,21 +30,23 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0}
 .sync-dot.loading{background:#fbbf24}
 .sync-dot.error{background:#f87171}
-.tabs{display:flex;border-bottom:0.5px solid #1e2330;margin-bottom:16px}
-.tab{padding:7px 18px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:#4a5568}
+.tabs{display:flex;border-bottom:0.5px solid #1e2330;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:7px 14px;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;color:#4a5568;white-space:nowrap}
 .tab.active{color:#e2e8f0;border-bottom-color:#378ADD}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.metrics3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.metrics2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
 .metric{background:#111420;border-radius:6px;padding:10px 12px;border:0.5px solid #1e2330}
 .metric-label{font-size:10px;color:#4a5568;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
 .metric-value{font-size:20px;font-weight:500;font-family:monospace;line-height:1.1}
 .metric-sub{font-size:10px;color:#2d3748;margin-top:3px}
-.green{color:#4ade80}.red{color:#f87171}.white{color:#e2e8f0}.amber{color:#fbbf24}.blue{color:#60a5fa}
+.green{color:#4ade80}.red{color:#f87171}.white{color:#e2e8f0}.amber{color:#fbbf24}.blue{color:#60a5fa}.purple{color:#a78bfa}
 .alert{background:#1a0a00;border:0.5px solid #92400e;border-radius:4px;padding:7px 12px;margin-bottom:12px;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:8px}
 .alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .section-label{font-size:10px;color:#2d3748;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #1e2330}
 .table-wrap{overflow-x:auto;margin-bottom:16px}
-table{width:100%;border-collapse:collapse;min-width:700px}
+table{width:100%;border-collapse:collapse;min-width:600px}
 thead th{padding:5px 8px;text-align:left;font-size:10px;color:#2d3748;border-bottom:0.5px solid #1e2330;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
 tbody tr{border-bottom:0.5px solid #111420}
 tbody tr:last-child{border-bottom:none}
@@ -57,6 +59,9 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .badge-cerrada{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-abierta{background:#2d0a0a;color:#f87171;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-sec{background:#111420;color:#4a5568;font-size:9px;padding:1px 5px;border-radius:3px;border:0.5px solid #1e2330}
+.badge-prod{background:#1a0a2a;color:#a78bfa;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-directo{background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-propio{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
 .pnl-pos{color:#4ade80}.pnl-neg{color:#f87171}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px}
 .cal-hdr{font-size:9px;color:#2d3748;text-align:center;padding:2px 0;font-family:monospace}
@@ -75,19 +80,19 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .client-row{display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid #1e2330;gap:10px}
 .client-row:last-child{border-bottom:none}
 .client-comit{font-size:10px;color:#4a5568;min-width:40px;font-family:monospace}
-.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:80px;font-family:monospace}
+.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:90px;font-family:monospace}
 .client-ops{font-size:10px;color:#4a5568;min-width:70px}
 .client-bar-wrap{flex:1;height:3px;background:#1e2330;border-radius:2px}
 .client-bar{height:100%;border-radius:2px}
-.client-pnl-prod{font-size:11px;font-family:monospace;min-width:110px;text-align:right;color:#fbbf24}
-.client-pnl-mesa{font-size:12px;font-weight:500;font-family:monospace;min-width:110px;text-align:right}
+.client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:110px;text-align:right}
 .nav-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chip{padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer;border:0.5px solid #1e2330;color:#4a5568;font-family:monospace}
 .chip:hover{background:#111420}
 .chip.active{background:#0c2a4a;color:#60a5fa;border-color:#378ADD}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
-.group-sep{height:4px;background:#0d0f14}
-@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.prod-acum-row{display:flex;align-items:center;padding:7px 0;border-bottom:0.5px solid #1e2330;gap:10px}
+.prod-acum-row:last-child{border-bottom:none}
+@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -126,14 +131,19 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div class="tabs">
     <div class="tab active" id="tab-rueda" onclick="showTab('rueda')">Rueda</div>
     <div class="tab" id="tab-mes" onclick="showTab('mes')">Mes</div>
-    <div class="tab" id="tab-clientes" onclick="showTab('clientes')">Productores</div>
+    <div class="tab" id="tab-productores" onclick="showTab('productores')">Productores</div>
+    <div class="tab" id="tab-clientes" onclick="showTab('clientes')">Clientes directos</div>
+    <div class="tab" id="tab-cuenta1000" onclick="showTab('cuenta1000')">Cuenta 1000</div>
+    <div class="tab" id="tab-cauciones" onclick="showTab('cauciones')">Cauciones</div>
+    <div class="tab" id="tab-comisiones" onclick="showTab('comisiones')">Comisiones</div>
   </div>
 
+  <!-- RUEDA -->
   <div id="view-rueda">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L mesa (Equanima)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub">desde O1 del sheet</div></div>
       <div class="metric"><div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Productores activos</div><div class="metric-value blue" id="r-clientes">—</div><div class="metric-sub" id="r-clientes-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Productores activos</div><div class="metric-value blue" id="r-prod">—</div><div class="metric-sub" id="r-prod-sub">—</div></div>
       <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
     </div>
     <div class="nav-chips" id="rueda-chips"></div>
@@ -141,16 +151,16 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th>
-          <th>Productor</th><th class="tr">VN</th><th class="tr">Precio</th>
-          <th class="tr">Monto</th><th>Estado</th>
-          <th class="tr">P&L productor</th><th class="tr">P&L mesa</th>
+          <th>Especie</th><th>Sección</th><th>Op</th><th>Cliente</th><th>Tipo</th>
+          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th>
+          <th>Estado</th><th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
         </tr></thead>
         <tbody id="rueda-tbody"></tbody>
       </table>
     </div>
   </div>
 
+  <!-- MES -->
   <div id="view-mes" style="display:none">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L del mes</div><div class="metric-value green" id="mes-pnl">—</div><div class="metric-sub" id="mes-pnl-sub">—</div></div>
@@ -170,23 +180,105 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="cal-grid" id="cal-grid"></div>
   </div>
 
-  <div id="view-clientes" style="display:none">
-    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
-      <div class="metric"><div class="metric-label">Productores activos hoy</div><div class="metric-value blue" id="cli-count">—</div><div class="metric-sub" id="cli-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="cli-top">—</div><div class="metric-sub" id="cli-top-sub">se llevó</div></div>
-      <div class="metric"><div class="metric-label">P&L total mesa hoy</div><div class="metric-value green" id="cli-mesa-total">—</div><div class="metric-sub">Equanima</div></div>
+  <!-- PRODUCTORES -->
+  <div id="view-productores" style="display:none">
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Total comisiones productores (mes)</div><div class="metric-value amber" id="prod-total-mes">—</div><div class="metric-sub">suma col P todos los días</div></div>
+      <div class="metric"><div class="metric-label">Mayor productor del mes</div><div class="metric-value amber" id="prod-top-mes">—</div><div class="metric-sub" id="prod-top-mes-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período cargado</div></div>
     </div>
-    <div class="nav-chips" id="clientes-chips"></div>
-    <div class="section-label">Ranking productores — lo que se llevan vs. lo que queda para la mesa</div>
-    <div id="cli-ranking" style="margin-bottom:16px"></div>
-    <div class="section-label">Detalle por productor</div>
+    <div class="nav-chips" id="prod-chips"></div>
+    <div class="section-label">Acumulado por productor — todos los días cargados</div>
+    <div id="prod-acum" style="margin-bottom:16px"></div>
+    <div class="section-label">Detalle del día seleccionado</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Productor</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">P&L productor</th><th class="tr">P&L mesa</th>
+          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
+        </tr></thead>
+        <tbody id="prod-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CLIENTES DIRECTOS -->
+  <div id="view-clientes" style="display:none">
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Clientes directos hoy</div><div class="metric-value blue" id="cli-count">—</div><div class="metric-sub">sin productor asignado</div></div>
+      <div class="metric"><div class="metric-label">P&L generado</div><div class="metric-value green" id="cli-pnl">—</div><div class="metric-sub">100% para Equanima</div></div>
+      <div class="metric"><div class="metric-label">Volumen clientes directos</div><div class="metric-value white" id="cli-vol">—</div><div class="metric-sub">—</div></div>
+    </div>
+    <div class="nav-chips" id="cli-chips"></div>
+    <div class="section-label">Clientes sin productor — P&L va 100% a Equanima</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">Monto</th><th class="tr">P&L Equanima</th>
         </tr></thead>
         <tbody id="cli-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CUENTA 1000 -->
+  <div id="view-cuenta1000" style="display:none">
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Ops cuenta propia hoy</div><div class="metric-value blue" id="c1000-ops">—</div><div class="metric-sub">comitente 1000</div></div>
+      <div class="metric"><div class="metric-label">P&L cuenta propia</div><div class="metric-value green" id="c1000-pnl">—</div><div class="metric-sub">incluido en O1</div></div>
+      <div class="metric"><div class="metric-label">Volumen</div><div class="metric-value white" id="c1000-vol">—</div><div class="metric-sub">—</div></div>
+    </div>
+    <div class="nav-chips" id="c1000-chips"></div>
+    <div class="section-label">Operaciones cuenta 1000 — Equanima cuenta propia</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th><th class="tr">P&L</th>
+        </tr></thead>
+        <tbody id="c1000-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CAUCIONES -->
+  <div id="view-cauciones" style="display:none">
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Cauciones activas hoy</div><div class="metric-value blue" id="cau-count">—</div><div class="metric-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Monto total caucionado</div><div class="metric-value white" id="cau-monto">—</div><div class="metric-sub">—</div></div>
+      <div class="metric"><div class="metric-label">P&L cauciones</div><div class="metric-value green" id="cau-pnl">—</div><div class="metric-sub">—</div></div>
+    </div>
+    <div class="nav-chips" id="cau-chips"></div>
+    <div class="section-label">Detalle de cauciones del día</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Cliente / Tomador</th><th>Comit.</th><th>Mercado</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">Precio / Tasa</th><th class="tr">Monto</th><th class="tr">P&L</th>
+        </tr></thead>
+        <tbody id="cau-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMISIONES -->
+  <div id="view-comisiones" style="display:none">
+    <div class="metrics" id="com-metrics">
+      <div class="metric"><div class="metric-label">P&L total Equanima</div><div class="metric-value green" id="com-total">—</div><div class="metric-sub">O1 del día</div></div>
+      <div class="metric"><div class="metric-label">Com. pagadas a productores</div><div class="metric-value amber" id="com-prod">—</div><div class="metric-sub">suma col P</div></div>
+      <div class="metric"><div class="metric-label">De clientes directos</div><div class="metric-value green" id="com-directo">—</div><div class="metric-sub">sin productor</div></div>
+      <div class="metric"><div class="metric-label">De cuenta propia</div><div class="metric-value blue" id="com-propio">—</div><div class="metric-sub">comitente 1000</div></div>
+    </div>
+    <div class="nav-chips" id="com-chips"></div>
+    <div class="section-label">Desglose por tipo de operación</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Especie</th><th>Cliente</th><th>Tipo</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L Equanima</th>
+        </tr></thead>
+        <tbody id="com-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -211,7 +303,6 @@ function doLogin(){
     document.getElementById('login-pass').value='';
   }
 }
-
 function doLogout(){
   sessionStorage.removeItem('mesa-auth');
   document.getElementById('login-screen').style.display='flex';
@@ -220,7 +311,6 @@ function doLogout(){
   document.getElementById('login-pass').value='';
   document.getElementById('login-error').style.display='none';
 }
-
 function checkAuth(){
   if(sessionStorage.getItem('mesa-auth')){
     document.getElementById('login-screen').style.display='none';
@@ -291,6 +381,28 @@ function setSyncState(s,msg){
   document.getElementById('sync-label').textContent=msg;
 }
 
+// Clasifica cada op
+function tipoOp(o){
+  const esCaucion=o.especie&&o.especie.toUpperCase().includes('CAUCION');
+  if(esCaucion)return'caucion';
+  if(o.comitente==='1000')return'propio';
+  const pylProd=parseFloat(o.pylProductor)||0;
+  if(pylProd!==0)return'productor';
+  return'directo';
+}
+
+function getOpenPos(ops){
+  const map={};
+  ops.forEach(o=>{
+    const k=o.especie+'|'+o.plazo;
+    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,vnC:0,vnV:0};
+    if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
+    else map[k].vnV+=parseFloat(o.vn)||0;
+  });
+  return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
+}
+
+// Agrupa pares SENEBI+BYMA
 function getPares(ops){
   const senebi=ops.filter(o=>o.mercado==='SENEBI');
   const byma=ops.filter(o=>o.mercado==='BYMA');
@@ -307,52 +419,39 @@ function getPares(ops){
         precioSenebi:parseFloat(s.precio)||0,
         precioBYMA:parseFloat(match.precio)||0,
         montoSenebi:parseFloat(s.monto)||0,
-        montoBYMA:parseFloat(match.monto)||0,
-        productor:s.cliente||'—',
-        comitente:s.comitente||'—',
+        cliente:s.cliente||'—',comitente:s.comitente||'—',
         pylProductor:parseFloat(s.pylProductor)||0,
         pylMesa:parseFloat(match.pylMesa)||0,
-        cerrado:true,
+        cerrado:true,tipo:tipoOp(s),
       });
     }else{
       pares.push({
         especie:s.especie,seccion:s.seccion,plazo:s.plazo,op:s.op,
         vn:parseFloat(s.vn)||0,
-        precioSenebi:parseFloat(s.precio)||0,
-        precioBYMA:0,montoSenebi:parseFloat(s.monto)||0,montoBYMA:0,
-        productor:s.cliente||'—',comitente:s.comitente||'—',
-        pylProductor:parseFloat(s.pylProductor)||0,pylMesa:0,cerrado:false,
+        precioSenebi:parseFloat(s.precio)||0,precioBYMA:0,
+        montoSenebi:parseFloat(s.monto)||0,
+        cliente:s.cliente||'—',comitente:s.comitente||'—',
+        pylProductor:parseFloat(s.pylProductor)||0,pylMesa:0,
+        cerrado:false,tipo:tipoOp(s),
       });
     }
+  });
+  // ops solo BYMA (cuenta propia sin SENEBI)
+  byma.filter((_,bi)=>!usados.has(bi)).forEach(b=>{
+    pares.push({
+      especie:b.especie,seccion:b.seccion,plazo:b.plazo,op:b.op,
+      vn:parseFloat(b.vn)||0,
+      precioSenebi:parseFloat(b.precio)||0,precioBYMA:parseFloat(b.precio)||0,
+      montoSenebi:parseFloat(b.monto)||0,
+      cliente:b.cliente||'—',comitente:b.comitente||'—',
+      pylProductor:0,pylMesa:parseFloat(b.pylMesa)||0,
+      cerrado:false,tipo:tipoOp(b),
+    });
   });
   return pares;
 }
 
-function getProductores(pares){
-  const map={};
-  pares.forEach(p=>{
-    const n=p.productor;
-    if(!map[n])map[n]={nombre:n,comitente:p.comitente,pares:[],pylProductor:0,pylMesa:0,especies:new Set()};
-    map[n].pares.push(p);
-    map[n].pylProductor+=p.pylProductor;
-    map[n].pylMesa+=p.pylMesa;
-    map[n].especies.add(p.especie);
-  });
-  return Object.values(map).filter(p=>p.nombre!=='—').sort((a,b)=>b.pylProductor-a.pylProductor);
-}
-function getOpenPos(ops){
-  const map={};
-  ops.forEach(o=>{
-    const k=o.especie+'|'+o.plazo;
-    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,vnC:0,vnV:0};
-    if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
-    else map[k].vnV+=parseFloat(o.vn)||0;
-  });
-  return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
-}
-
-
-function renderNavChips(containerId,onSelect){
+function renderNavChips(containerId,cb){
   const dates=Object.keys(allOps).sort();
   const el=document.getElementById(containerId);
   el.innerHTML='';
@@ -360,7 +459,7 @@ function renderNavChips(containerId,onSelect){
     const chip=document.createElement('span');
     chip.className='chip'+(d===selectedDate?' active':'');
     chip.textContent=d.slice(0,5);
-    chip.onclick=()=>{selectedDate=d;onSelect();};
+    chip.onclick=()=>{selectedDate=d;renderAll();};
     el.appendChild(chip);
   });
 }
@@ -370,16 +469,15 @@ function renderRueda(){
   const total=allTotals[selectedDate]||0;
   const openPos=getOpenPos(ops);
   const pares=getPares(ops);
-  const productores=getProductores(pares);
+  const prodActivos=new Set(pares.filter(p=>p.pylProductor).map(p=>p.cliente));
   const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
 
-  const pnlEl=document.getElementById('r-pnl');
-  pnlEl.innerHTML=fmtPnl(total,true)||'—';
-  pnlEl.className='metric-value '+(total>=0?'green':'red');
+  document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
+  document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-vol').textContent=fmtK(vol);
   document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
-  document.getElementById('r-clientes').textContent=productores.length||'—';
-  document.getElementById('r-clientes-sub').textContent=productores.map(p=>p.nombre).slice(0,3).join(' · ')||'—';
+  document.getElementById('r-prod').textContent=prodActivos.size||'—';
+  document.getElementById('r-prod-sub').textContent=[...prodActivos].slice(0,3).join(' · ')||'—';
   document.getElementById('r-pos').textContent=openPos.length;
   document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
   document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
@@ -390,26 +488,29 @@ function renderRueda(){
     document.getElementById('alert-text').textContent='Posición abierta: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');
   }else banner.style.display='none';
 
-  renderNavChips('rueda-chips',()=>{renderRueda();renderClientes();});
+  renderNavChips('rueda-chips');
 
   let html='';
   pares.forEach(p=>{
+    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
+      p.tipo==='directo'?`<span class="badge-directo">directo</span>`:
+      p.tipo==='propio'?`<span class="badge-propio">propio</span>`:
+      `<span class="badge-sec">caución</span>`;
     html+=`<tr>
       <td><span class="especie">${p.especie}</span></td>
       <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-      <td style="color:#4a5568">SENEBI/BYMA</td>
       <td><span class="${p.op==='C'?'badge-c':'badge-v'}">${p.op}</span></td>
-      <td style="color:#e2e8f0">${p.productor}</td>
+      <td style="color:#e2e8f0">${p.cliente}</td>
+      <td>${tipoBadge}</td>
       <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr" style="color:#4a5568">${fmtDec(p.precioSenebi)}% / ${fmtDec(p.precioBYMA)}%</td>
+      <td class="tr" style="color:#4a5568">${fmtDec(p.precioSenebi)}%</td>
       <td class="tr">$${fmtInt(p.montoSenebi)}</td>
       <td>${p.cerrado?'<span class="badge-cerrada">cerrada</span>':'<span class="badge-abierta">abierta</span>'}</td>
-      <td class="tr">${p.pylProductor?fmtPnl(p.pylProductor,true,'pnl-pos'):'—'}</td>
+      <td class="tr" style="color:#fbbf24">${p.pylProductor?fmtPnl(p.pylProductor,true,'pnl-pos'):'—'}</td>
       <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
-    </tr>
-    <tr class="group-sep"><td colspan="11"></td></tr>`;
+    </tr>`;
   });
-  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones para esta fecha</td></tr>';
+  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
 function renderMes(){
@@ -450,49 +551,58 @@ function renderMes(){
   }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
 }
 
-function selectFromCal(d){selectedDate=d;renderRueda();renderClientes();showTab('rueda');}
+function selectFromCal(d){selectedDate=d;renderAll();showTab('rueda');}
 function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderMes();}
 function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderMes();}
 
-function renderClientes(){
-  const ops=allOps[selectedDate]||[];
-  const total=allTotals[selectedDate]||0;
-  const pares=getPares(ops);
-  const productores=getProductores(pares);
-
-  document.getElementById('cli-count').textContent=productores.length||'—';
-  document.getElementById('cli-sub').textContent=productores.map(p=>p.nombre).join(' · ')||'—';
-  document.getElementById('cli-mesa-total').innerHTML=fmtPnl(total,true)||'—';
-
-  const topProd=productores[0];
-  if(topProd){
-    document.getElementById('cli-top').textContent=topProd.nombre;
-    document.getElementById('cli-top-sub').textContent=fmtPnl(topProd.pylProductor,false);
-  }else{
-    document.getElementById('cli-top').textContent='—';
-    document.getElementById('cli-top-sub').textContent='—';
+function renderProductores(){
+  renderNavChips('prod-chips');
+  // Acumulado de todos los días
+  const acum={};
+  Object.entries(allOps).forEach(([fecha,ops])=>{
+    getPares(ops).forEach(p=>{
+      if(!p.pylProductor)return;
+      if(!acum[p.cliente])acum[p.cliente]={nombre:p.cliente,comitente:p.comitente,pylProd:0,pylMesa:0,dias:new Set(),especies:new Set()};
+      acum[p.cliente].pylProd+=p.pylProductor;
+      acum[p.cliente].pylMesa+=p.pylMesa;
+      acum[p.cliente].dias.add(fecha);
+      acum[p.cliente].especies.add(p.especie);
+    });
+  });
+  const lista=Object.values(acum).sort((a,b)=>b.pylProd-a.pylProd);
+  const totalProd=lista.reduce((s,p)=>s+p.pylProd,0);
+  document.getElementById('prod-total-mes').innerHTML=fmtPnl(totalProd,true,'pnl-pos')||'—';
+  document.getElementById('prod-unicos').textContent=lista.length||'—';
+  if(lista[0]){
+    document.getElementById('prod-top-mes').textContent=lista[0].nombre;
+    document.getElementById('prod-top-mes-sub').textContent=fmtPnl(lista[0].pylProd,false);
   }
-
-  renderNavChips('clientes-chips',()=>{renderRueda();renderClientes();});
-
-  const maxProd=Math.max(...productores.map(p=>Math.abs(p.pylProductor)),1);
-  let rankHtml='';
-  productores.forEach(p=>{
-    const barW=Math.round(Math.abs(p.pylProductor)/maxProd*100);
-    rankHtml+=`<div class="client-row">
+  const maxP=Math.max(...lista.map(p=>p.pylProd),1);
+  let acumHtml='';
+  lista.forEach(p=>{
+    const barW=Math.round(p.pylProd/maxP*100);
+    acumHtml+=`<div class="prod-acum-row">
       <div class="client-comit">${p.comitente}</div>
       <div class="client-name">${p.nombre}</div>
-      <div class="client-ops">${p.pares.length}op · ${[...p.especies].slice(0,2).join('/')}</div>
+      <div class="client-ops">${p.dias.size}d · ${[...p.especies].slice(0,2).join('/')}</div>
       <div class="client-bar-wrap"><div class="client-bar" style="width:${barW}%;background:#fbbf24"></div></div>
-      <div class="client-pnl-prod">${fmtPnl(p.pylProductor,true,'pnl-pos')||'—'}</div>
-      <div style="font-size:10px;color:#4a5568;min-width:30px;text-align:center">→</div>
-      <div class="client-pnl-mesa">${fmtPnl(p.pylMesa,true)||'—'}</div>
+      <div class="client-pnl" style="color:#fbbf24">${fmtPnl(p.pylProd,true,'pnl-pos')}</div>
+      <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
+      <div class="client-pnl">${fmtPnl(p.pylMesa,true)}</div>
     </div>`;
   });
-  document.getElementById('cli-ranking').innerHTML=rankHtml||'<div class="empty-state">Sin productores para esta fecha</div>';
+  document.getElementById('prod-acum').innerHTML=acumHtml||'<div class="empty-state">Sin productores</div>';
 
+  // Detalle del día
+  const ops=allOps[selectedDate]||[];
+  const pares=getPares(ops).filter(p=>p.tipo==='productor');
+  const map={};
+  pares.forEach(p=>{
+    if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};
+    map[p.cliente].pares.push(p);
+  });
   let detHtml='';
-  productores.forEach(prod=>{
+  Object.values(map).forEach(prod=>{
     prod.pares.forEach((p,i)=>{
       detHtml+=`<tr>
         <td style="color:#e2e8f0;font-weight:500">${i===0?prod.nombre:''}</td>
@@ -505,15 +615,138 @@ function renderClientes(){
         <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
       </tr>`;
     });
-    detHtml+=`<tr><td colspan="8" style="padding:3px;background:#0d0f14"></td></tr>`;
+    detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('cli-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor para esta fecha</td></tr>';
 }
 
-function renderAll(){renderRueda();renderMes();renderClientes();}
+function renderClientes(){
+  renderNavChips('cli-chips');
+  const ops=allOps[selectedDate]||[];
+  const pares=getPares(ops).filter(p=>p.tipo==='directo');
+  const clientes=new Set(pares.map(p=>p.cliente));
+  const pylTotal=pares.reduce((s,p)=>s+p.pylMesa,0);
+  const vol=pares.reduce((s,p)=>s+p.montoSenebi,0);
+  document.getElementById('cli-count').textContent=clientes.size||'—';
+  document.getElementById('cli-pnl').innerHTML=fmtPnl(pylTotal,true)||'—';
+  document.getElementById('cli-vol').textContent=fmtK(vol);
+  let html='';
+  const map={};
+  pares.forEach(p=>{
+    if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};
+    map[p.cliente].pares.push(p);
+  });
+  Object.values(map).forEach(cli=>{
+    cli.pares.forEach((p,i)=>{
+      html+=`<tr>
+        <td style="color:#e2e8f0;font-weight:500">${i===0?cli.nombre:''}</td>
+        <td style="color:#4a5568">${i===0?cli.comitente:''}</td>
+        <td><span class="especie">${p.especie}</span></td>
+        <td><span class="badge-sec">${p.seccion||'—'}</span></td>
+        <td><span class="${p.op==='C'?'badge-c':'badge-v'}">${p.op}</span></td>
+        <td class="tr">${fmtInt(p.vn)}</td>
+        <td class="tr">$${fmtInt(p.montoSenebi)}</td>
+        <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
+      </tr>`;
+    });
+    html+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
+  });
+  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos para esta fecha</td></tr>';
+}
+
+function renderCuenta1000(){
+  renderNavChips('c1000-chips');
+  const ops=allOps[selectedDate]||[];
+  const propias=ops.filter(o=>o.comitente==='1000');
+  const vol=propias.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
+  const pyl=propias.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0);
+  document.getElementById('c1000-ops').textContent=propias.length||'—';
+  document.getElementById('c1000-pnl').innerHTML=fmtPnl(pyl,true)||'—';
+  document.getElementById('c1000-vol').textContent=fmtK(vol);
+  let html='';
+  propias.forEach(o=>{
+    html+=`<tr>
+      <td><span class="especie">${o.especie}</span></td>
+      <td><span class="badge-sec">${o.seccion||'—'}</span></td>
+      <td style="color:#4a5568">${o.mercado||'—'}</td>
+      <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
+      <td class="tr">${fmtInt(o.vn)}</td>
+      <td class="tr">${fmtDec(o.precio)}%</td>
+      <td class="tr">$${fmtInt(o.monto)}</td>
+      <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones cuenta propia para esta fecha</td></tr>';
+}
+
+function renderCauciones(){
+  renderNavChips('cau-chips');
+  const ops=allOps[selectedDate]||[];
+  const cauciones=ops.filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
+  const monto=cauciones.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
+  const pyl=cauciones.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0);
+  document.getElementById('cau-count').textContent=cauciones.length||'—';
+  document.getElementById('cau-monto').textContent=fmtK(monto);
+  document.getElementById('cau-pnl').innerHTML=fmtPnl(pyl,true)||'—';
+  let html='';
+  cauciones.forEach(o=>{
+    html+=`<tr>
+      <td style="color:#e2e8f0;font-weight:500">${o.cliente||'—'}</td>
+      <td style="color:#4a5568">${o.comitente||'—'}</td>
+      <td style="color:#4a5568">${o.mercado||'—'}</td>
+      <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
+      <td class="tr">${fmtInt(o.vn)}</td>
+      <td class="tr">${fmtDec(o.precio)}%</td>
+      <td class="tr">$${fmtInt(o.monto)}</td>
+      <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones para esta fecha</td></tr>';
+}
+
+function renderComisiones(){
+  renderNavChips('com-chips');
+  const ops=allOps[selectedDate]||[];
+  const total=allTotals[selectedDate]||0;
+  const pares=getPares(ops);
+  const pylProd=pares.reduce((s,p)=>s+p.pylProductor,0);
+  const pylDirecto=pares.filter(p=>p.tipo==='directo').reduce((s,p)=>s+p.pylMesa,0);
+  const pylPropio=pares.filter(p=>p.tipo==='propio').reduce((s,p)=>s+p.pylMesa,0);
+  document.getElementById('com-total').innerHTML=fmtPnl(total,true)||'—';
+  document.getElementById('com-prod').innerHTML=fmtPnl(pylProd,true,'pnl-pos')||'—';
+  document.getElementById('com-directo').innerHTML=fmtPnl(pylDirecto,true)||'—';
+  document.getElementById('com-propio').innerHTML=fmtPnl(pylPropio,true)||'—';
+  let html='';
+  pares.forEach(p=>{
+    const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
+      p.tipo==='directo'?`<span class="badge-directo">directo</span>`:
+      p.tipo==='propio'?`<span class="badge-propio">propio</span>`:
+      `<span class="badge-sec">caución</span>`;
+    html+=`<tr>
+      <td><span class="especie">${p.especie}</span></td>
+      <td style="color:#a0aec0">${p.cliente}</td>
+      <td>${tipoBadge}</td>
+      <td><span class="${p.op==='C'?'badge-c':'badge-v'}">${p.op}</span></td>
+      <td class="tr">${fmtInt(p.vn)}</td>
+      <td class="tr" style="color:#fbbf24">${p.pylProductor?fmtPnl(p.pylProductor,true,'pnl-pos'):'—'}</td>
+      <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="7" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+}
+
+function renderAll(){
+  renderRueda();
+  renderMes();
+  renderProductores();
+  renderClientes();
+  renderCuenta1000();
+  renderCauciones();
+  renderComisiones();
+}
 
 function showTab(t){
-  ['rueda','mes','clientes'].forEach(x=>{
+  ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
     document.getElementById('view-'+x).style.display=x===t?'':'none';
     document.getElementById('tab-'+x).classList.toggle('active',x===t);
   });
