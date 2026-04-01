@@ -395,14 +395,17 @@ function renderCal(){
 }
 
 function pickDay(ds){
-  if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}
-  else{
-    rangeEnd=ds;pickStep=0;
+  if(pickStep===0){
+    rangeStart=ds;rangeEnd=null;pickStep=1;
+    document.getElementById('cal-hint').textContent='Ahora elegí la fecha fin (o clickeá el mismo día)';
+    renderCal();
+  } else {
+    rangeEnd=ds;
     if(strToTs(rangeStart)>strToTs(rangeEnd)){const t=rangeStart;rangeStart=rangeEnd;rangeEnd=t;}
+    pickStep=0;
     document.getElementById('cal-popup').classList.remove('open');
     clearPresets();updateDisplay();renderAll();
   }
-  renderCal();
 }
 
 function updateDisplay(){
