@@ -340,17 +340,17 @@ function getProductores(pares){
   });
   return Object.values(map).filter(p=>p.nombre!=='—').sort((a,b)=>b.pylProductor-a.pylProductor);
 }
-
 function getOpenPos(ops){
   const map={};
   ops.forEach(o=>{
-    const k=o.especie+'|'+o.plazo+'|'+o.mercado;
+    const k=o.especie+'|'+o.plazo;
     if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,vnC:0,vnV:0};
     if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
     else map[k].vnV+=parseFloat(o.vn)||0;
   });
   return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
 }
+
 
 function renderNavChips(containerId,onSelect){
   const dates=Object.keys(allOps).sort();
