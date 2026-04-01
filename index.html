@@ -800,7 +800,7 @@ function renderClientes(){
 function renderCuenta1000(){
   const ops=getOpsInRange().filter(o=>String(o.comitente)==='1000');
   const vol=ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
-  const pyl=ops.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0);
+  const pyl=getTotalInRange(); // O1 del sheet — ganancia real de la cuenta 1000
   document.getElementById('c1000-ops').textContent=ops.length||'—';
   document.getElementById('c1000-pnl').innerHTML=fmtPnl(pyl,true)||'—';
   document.getElementById('c1000-vol').textContent=fmtK(vol);
@@ -820,7 +820,6 @@ function renderCuenta1000(){
   });
   document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones cuenta propia</td></tr>';
 }
-
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
   const monto=ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
