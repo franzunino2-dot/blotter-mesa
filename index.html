@@ -3,177 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blotter — Mesa de dinero</title>
+<title>Mesa de dinero</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:#f8f8f6;color:#1a1a18}
-.app{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.app-title{font-size:16px;font-weight:500}
-.clock{font-size:12px;color:#888;font-family:monospace}
-.rueda-badge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;border:0.5px solid #ccc}
-.badge-open{background:#eaf3de;color:#3b6d11}
-.badge-warn{background:#faeeda;color:#854f0b}
-.alert-banner{display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:500;border:0.5px solid}
-.alert-banner.danger{background:#fcebeb;color:#a32d2d;border-color:#f09595}
-.alert-banner.warn{background:#faeeda;color:#854f0b;border-color:#fac775}
-.sync-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:12px;color:#888}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#639922;flex-shrink:0}
-.sync-dot.loading{background:#EF9F27}
-.sync-dot.error{background:#e24b4a}
-.tabs{display:flex;border-bottom:0.5px solid #ddd;margin-bottom:16px}
-.tab{font-size:12px;padding:7px 18px;cursor:pointer;border-bottom:2px solid transparent;color:#888}
-.tab.active{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
-.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
-.metric{background:#fff;border-radius:8px;padding:10px 12px;border:0.5px solid #e8e8e4}
-.metric-label{font-size:11px;color:#888;margin-bottom:4px}
-.metric-value{font-size:19px;font-weight:500;font-family:monospace}
-.metric-sub{font-size:11px;color:#bbb;margin-top:3px}
-.month-nav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.month-nav button{padding:4px 12px;font-size:12px;border:0.5px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
-.month-nav button:hover{background:#f1efe8}
-.month-nav span{font-size:13px;font-weight:500;min-width:140px;text-align:center}
-.month-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;padding:12px;background:#fff;border-radius:10px;border:0.5px solid #e8e8e4}
-.ms-item{text-align:center}
-.ms-label{font-size:11px;color:#888;margin-bottom:3px}
-.ms-value{font-size:16px;font-weight:500;font-family:monospace}
-.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
-.day-hdr{font-size:11px;color:#bbb;text-align:center;padding:3px 0;font-weight:500}
-.day-cell{border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;border:0.5px solid transparent;min-height:54px;display:flex;flex-direction:column;align-items:center;gap:2px}
-.day-cell:hover{background:#f1efe8}
-.day-cell.empty{cursor:default;pointer-events:none}
-.day-cell.has-data{border-color:#ddd;background:#fff}
-.day-cell.selected{background:#e6f1fb;border-color:#85b7eb}
-.day-cell.today-cell{border-color:#888}
-.day-cell.has-open{border-color:#f09595}
-.day-num{font-size:12px;font-weight:500}
-.day-cell.selected .day-num{color:#185fa5}
-.day-cell.has-open .day-num{color:#a32d2d}
-.day-pnl{font-size:10px;font-family:monospace}
-.day-pnl.pos{color:#3b6d11}
-.day-pnl.neg{color:#a32d2d}
-.day-ops{font-size:10px;color:#bbb}
-.table-wrap{overflow-x:auto;border:0.5px solid #e8e8e4;border-radius:8px;background:#fff}
-table{width:100%;border-collapse:collapse;min-width:680px}
-thead th{padding:7px 10px;text-align:left;font-weight:500;font-size:11px;color:#888;background:#f8f8f6;border-bottom:0.5px solid #e8e8e4;white-space:nowrap}
-tbody tr{border-bottom:0.5px solid #f1efe8}
+body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',monospace,sans-serif;font-size:13px}
+.app{max-width:1200px;margin:0 auto;padding:1rem}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #1e2330;margin-bottom:14px}
+.logo{font-size:14px;font-weight:500;color:#e2e8f0;letter-spacing:.02em}
+.topright{display:flex;align-items:center;gap:14px}
+.clock{font-family:monospace;font-size:12px;color:#4ade80}
+.badge-open{font-size:10px;padding:2px 9px;border-radius:99px;background:#052e16;color:#4ade80;border:0.5px solid #166534}
+.badge-closed{font-size:10px;padding:2px 9px;border-radius:99px;background:#2d1500;color:#fbbf24;border:0.5px solid #92400e}
+.sync-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a5568;margin-bottom:14px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.sync-dot.loading{background:#fbbf24}
+.sync-dot.error{background:#f87171}
+.tabs{display:flex;border-bottom:0.5px solid #1e2330;margin-bottom:16px}
+.tab{padding:7px 18px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:#4a5568}
+.tab.active{color:#e2e8f0;border-bottom-color:#378ADD}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.metric{background:#111420;border-radius:6px;padding:10px 12px;border:0.5px solid #1e2330}
+.metric-label{font-size:10px;color:#4a5568;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.metric-value{font-size:20px;font-weight:500;font-family:monospace;line-height:1.1}
+.metric-sub{font-size:10px;color:#2d3748;margin-top:3px}
+.green{color:#4ade80}.red{color:#f87171}.white{color:#e2e8f0}.amber{color:#fbbf24}.blue{color:#60a5fa}
+.alert{background:#1a0a00;border:0.5px solid #92400e;border-radius:4px;padding:7px 12px;margin-bottom:12px;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:8px}
+.alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.section-label{font-size:10px;color:#2d3748;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #1e2330}
+.table-wrap{overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;min-width:600px}
+thead th{padding:5px 8px;text-align:left;font-size:10px;color:#2d3748;border-bottom:0.5px solid #1e2330;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
+tbody tr{border-bottom:0.5px solid #111420}
 tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#f8f8f6}
-tbody td{padding:7px 10px;white-space:nowrap}
-.mono{font-family:monospace;font-size:12px}
+tbody tr:hover{background:#111420}
+tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .tr{text-align:right}
-.badge-c{background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
-.badge-v{background:#faeeda;color:#854f0b;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block}
-.sec-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#f1efe8;color:#888;border:0.5px solid #e8e8e4}
-.pnl-pos{color:#3b6d11;font-family:monospace}
-.pnl-neg{color:#a32d2d;font-family:monospace}
-.empty-state{text-align:center;padding:40px;color:#bbb;font-size:13px}
-.pos-warn{padding:10px 14px;background:#faeeda;border-radius:8px;margin-bottom:10px;font-size:12px;color:#854f0b;border:0.5px solid #fac775}
-.dia-chips{display:flex;gap:6px;flex-wrap:wrap}
-.dia-chip{padding:4px 10px;border-radius:99px;font-size:11px;cursor:pointer;border:0.5px solid #ddd;color:#888;background:#fff}
-.dia-chip:hover{background:#f1efe8}
-.dia-chip.active{background:#e6f1fb;color:#185fa5;border-color:#85b7eb}
-button{padding:5px 14px;font-size:12px;border:0.5px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
-button:hover{background:#f1efe8}
-input[type=number]{padding:4px 6px;border:0.5px solid #ddd;border-radius:6px;font-size:12px;background:#fff}
-@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}.month-summary{grid-template-columns:repeat(2,1fr)}}
+.especie{color:#e2e8f0;font-weight:500;font-family:monospace}
+.badge-c{background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-v{background:#2d1a00;color:#fbbf24;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-cerrada{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-abierta{background:#2d0a0a;color:#f87171;font-size:9px;padding:1px 5px;border-radius:3px}
+.badge-sec{background:#111420;color:#4a5568;font-size:9px;padding:1px 5px;border-radius:3px;border:0.5px solid #1e2330}
+.pnl-pos{color:#4ade80}
+.pnl-neg{color:#f87171}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px}
+.cal-hdr{font-size:9px;color:#2d3748;text-align:center;padding:2px 0;font-family:monospace}
+.cal-day{border-radius:4px;padding:5px 3px;text-align:center;cursor:pointer;border:0.5px solid transparent;min-height:48px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.cal-day:hover{background:#111420}
+.cal-day.empty{cursor:default;pointer-events:none}
+.cal-day.has-data{border-color:#1e2330;background:#111420}
+.cal-day.today{border-color:#378ADD}
+.cal-day.selected{background:#0c2a4a;border-color:#378ADD}
+.cal-num{font-size:10px;color:#4a5568;font-family:monospace}
+.cal-day.has-data .cal-num{color:#a0aec0}
+.cal-day.selected .cal-num{color:#60a5fa}
+.cal-pnl{font-size:9px;font-family:monospace}
+.cal-pnl.pos{color:#4ade80}
+.cal-pnl.neg{color:#f87171}
+.cal-ops{font-size:9px;color:#2d3748}
+.client-row{display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid #1e2330;gap:12px}
+.client-row:last-child{border-bottom:none}
+.client-comit{font-size:10px;color:#4a5568;min-width:40px;font-family:monospace}
+.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:90px;font-family:monospace}
+.client-ops{font-size:10px;color:#4a5568;min-width:80px}
+.client-bar-wrap{flex:1;height:3px;background:#1e2330;border-radius:2px}
+.client-bar{height:100%;border-radius:2px;background:#4ade80}
+.client-pnl{font-size:13px;font-weight:500;font-family:monospace;min-width:110px;text-align:right}
+.empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
+.nav-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer;border:0.5px solid #1e2330;color:#4a5568;font-family:monospace}
+.chip:hover{background:#111420}
+.chip.active{background:#0c2a4a;color:#60a5fa;border-color:#378ADD}
+@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span class="app-title">Blotter — Mesa de dinero</span>
-      <span class="rueda-badge badge-open" id="rueda-badge">&#9679; Rueda abierta</span>
+    <span class="logo">&#9632; Mesa de dinero</span>
+    <div class="topright">
+      <span class="clock" id="clock-el"></span>
+      <span id="rueda-badge" class="badge-open">&#9679; Rueda abierta</span>
     </div>
-    <span class="clock" id="clock-el"></span>
   </div>
+
   <div class="sync-bar">
     <div class="sync-dot loading" id="sync-dot"></div>
-    <span id="sync-label">Conectando con Google Sheets...</span>
-    <button onclick="loadFromSheets()">&#8635; Actualizar</button>
+    <span id="sync-label">Conectando...</span>
+    <button onclick="loadData()" style="background:#111420;border:0.5px solid #1e2330;color:#a0aec0;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px">&#8635; Actualizar</button>
   </div>
-  <div class="alert-banner" id="alert-banner"><span id="alert-text"></span></div>
+
+  <div class="alert" id="alert-banner" style="display:none">
+    <div class="alert-dot"></div>
+    <span id="alert-text"></span>
+  </div>
+
   <div class="tabs">
-    <div class="tab active" id="tab-mes" onclick="showTab('mes')">Mes</div>
-    <div class="tab" id="tab-dia" onclick="showTab('dia')">Día</div>
-    <div class="tab" id="tab-pos" onclick="showTab('pos')">Posiciones</div>
+    <div class="tab active" id="tab-rueda" onclick="showTab('rueda')">Rueda</div>
+    <div class="tab" id="tab-mes" onclick="showTab('mes')">Mes</div>
+    <div class="tab" id="tab-clientes" onclick="showTab('clientes')">Clientes</div>
   </div>
-  <div id="view-mes">
-    <div class="month-nav">
-      <button onclick="prevMonth()">&#8592;</button>
-      <span id="month-label"></span>
-      <button onclick="nextMonth()">&#8594;</button>
+
+  <div id="view-rueda">
+    <div class="metrics" id="rueda-metrics">
+      <div class="metric"><div class="metric-label">P&L del día</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">desde sheet</div></div>
+      <div class="metric"><div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Clientes activos</div><div class="metric-value blue" id="r-clientes">—</div><div class="metric-sub" id="r-clientes-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
     </div>
-    <div class="month-summary">
-      <div class="ms-item"><div class="ms-label">P&L del mes</div><div class="ms-value" id="ms-pnl">—</div></div>
-      <div class="ms-item"><div class="ms-label">Días operados</div><div class="ms-value" id="ms-dias">0</div></div>
-      <div class="ms-item"><div class="ms-label">Mejor día</div><div class="ms-value pnl-pos" id="ms-best">—</div></div>
-      <div class="ms-item"><div class="ms-label">Peor día</div><div class="ms-value pnl-neg" id="ms-worst">—</div></div>
+    <div class="nav-chips" id="rueda-chips"></div>
+    <div class="section-label">Operaciones del día</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th><th>Cliente</th>
+          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th>
+          <th>Estado</th><th class="tr">P&L</th>
+        </tr></thead>
+        <tbody id="rueda-tbody"></tbody>
+      </table>
     </div>
-    <div class="day-grid">
-      <div class="day-hdr">Lun</div><div class="day-hdr">Mar</div><div class="day-hdr">Mié</div>
-      <div class="day-hdr">Jue</div><div class="day-hdr">Vie</div><div class="day-hdr">Sáb</div><div class="day-hdr">Dom</div>
-    </div>
-    <div class="day-grid" id="cal-grid"></div>
   </div>
-  <div id="view-dia" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-      <span style="font-size:14px;font-weight:500" id="dia-title">Seleccioná un día</span>
-      <div class="dia-chips" id="dia-chips"></div>
-    </div>
+
+  <div id="view-mes" style="display:none">
     <div class="metrics">
-      <div class="metric"><div class="metric-label">Operaciones</div><div class="metric-value" id="dm-ops">—</div><div class="metric-sub" id="dm-ops-sub">—</div></div>
-      <div class="metric"><div class="metric-label">P&L del día</div><div class="metric-value" id="dm-pnl">—</div><div class="metric-sub">total desde sheet</div></div>
-      <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value" id="dm-pos">—</div><div class="metric-sub" id="dm-pos-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Volumen</div><div class="metric-value" id="dm-vol" style="font-size:14px">—</div><div class="metric-sub">monto total</div></div>
+      <div class="metric"><div class="metric-label">P&L del mes</div><div class="metric-value green" id="mes-pnl">—</div><div class="metric-sub" id="mes-pnl-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Días operados</div><div class="metric-value white" id="mes-dias">0</div><div class="metric-sub">del mes</div></div>
+      <div class="metric"><div class="metric-label">Mejor día</div><div class="metric-value green" id="mes-best">—</div><div class="metric-sub" id="mes-best-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Peor día</div><div class="metric-value red" id="mes-worst">—</div><div class="metric-sub" id="mes-worst-sub">—</div></div>
     </div>
-    <div id="dia-empty" class="empty-state">Seleccioná un día del calendario.</div>
-    <div id="dia-content" style="display:none">
-      <div id="dia-pos-warn" class="pos-warn" style="display:none">Posiciones overnight sin cerrar. Revisá la pestaña Posiciones.</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Sección</th><th>Especie</th><th>Plazo</th><th>Op</th>
-            <th class="tr">VN</th><th class="tr">Precio %</th><th class="tr">Monto</th>
-            <th>Cliente</th><th class="tr">P&L especie</th>
-          </tr></thead>
-          <tbody id="dia-tbody"></tbody>
-        </table>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <button onclick="prevMonth()" style="background:#111420;border:0.5px solid #1e2330;color:#a0aec0;padding:3px 12px;border-radius:4px;cursor:pointer;font-size:12px">&#8592;</button>
+      <span style="font-size:13px;color:#e2e8f0;min-width:130px;text-align:center" id="mes-label"></span>
+      <button onclick="nextMonth()" style="background:#111420;border:0.5px solid #1e2330;color:#a0aec0;padding:3px 12px;border-radius:4px;cursor:pointer;font-size:12px">&#8594;</button>
     </div>
+    <div class="cal-grid">
+      <div class="cal-hdr">L</div><div class="cal-hdr">M</div><div class="cal-hdr">X</div>
+      <div class="cal-hdr">J</div><div class="cal-hdr">V</div><div class="cal-hdr">S</div><div class="cal-hdr">D</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
   </div>
-  <div id="view-pos" style="display:none">
-    <div style="font-size:13px;font-weight:500;margin-bottom:10px" id="pos-title">Posiciones abiertas</div>
-    <div id="pos-empty" class="empty-state">Sin posiciones abiertas.</div>
-    <div id="pos-content" style="display:none">
-      <div class="pos-warn">Instrumentos con VN neto comprado sin venta equivalente. Cerrá antes del cierre o pasalos a cartera.</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Fecha</th><th>Especie</th><th>Plazo</th>
-            <th class="tr">VN neto</th><th class="tr">Px prom C</th><th class="tr">Monto exp.</th>
-            <th class="tr">Px actual</th><th class="tr">P&L flotante</th>
-          </tr></thead>
-          <tbody id="pos-tbody"></tbody>
-        </table>
-      </div>
+
+  <div id="view-clientes" style="display:none">
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+      <div class="metric"><div class="metric-label">Clientes activos hoy</div><div class="metric-value blue" id="cli-count">—</div><div class="metric-sub" id="cli-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Mayor generador</div><div class="metric-value green" id="cli-top">—</div><div class="metric-sub" id="cli-top-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Especies operadas</div><div class="metric-value white" id="cli-especies">—</div><div class="metric-sub">hoy</div></div>
+    </div>
+    <div class="nav-chips" id="clientes-chips"></div>
+    <div class="section-label">Ranking por P&L generado</div>
+    <div id="cli-ranking" style="margin-bottom:16px"></div>
+    <div class="section-label">Detalle por cliente</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
+          <th class="tr">VN</th><th class="tr">P&L generado</th>
+        </tr></thead>
+        <tbody id="cli-tbody"></tbody>
+      </table>
     </div>
   </div>
 </div>
+
 <script>
-const SHEETS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt2qVdAfqYXPgT_f-EfIGf0Us7zfEPgF9fzwfFhSq7FvUPuEzQET4tuOXKXbg8X3-8w8JSSFAa3fnf/pub?gid=1757919510&single=true&output=csv';
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=305976454&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-let allOps={},allTotals={},selectedDate=null,calYear,calMonth,pxOverride={};
+let allOps={},allTotals={},selectedDate=null,calYear,calMonth;
 
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
-
-// Formatea enteros con separador de miles argentino
-function fmtEntero(n){return Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
-// Formatea con 2 decimales
+function fmtInt(n){return Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
 function fmtDec(n){return (parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-// Formatea P&L — recibe número JS nativo (punto como decimal), redondea a entero
 function fmtPnl(n,tag){
   const v=Math.round(parseFloat(n)||0);
   if(!v)return'—';
@@ -181,11 +183,17 @@ function fmtPnl(n,tag){
   const cls=v>0?'pnl-pos':'pnl-neg';
   return tag?`<span class="${cls}">${s}</span>`:s;
 }
+function fmtK(n){
+  const v=Math.round(parseFloat(n)||0);
+  if(Math.abs(v)>=1000000) return '$'+Math.round(v/1000000)+'M';
+  if(Math.abs(v)>=1000) return '$'+Math.round(v/1000)+'k';
+  return '$'+Math.abs(v).toLocaleString('es-AR');
+}
 
-async function loadFromSheets(){
-  setSyncState('loading','Actualizando desde Google Sheets...');
+async function loadData(){
+  setSyncState('loading','Actualizando...');
   try{
-    const r=await fetch(SHEETS_URL,{mode:'cors'});
+    const r=await fetch(CSV_URL,{mode:'cors'});
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
     setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
@@ -201,11 +209,10 @@ function parseCSV(text){
     if(cols.length<2)continue;
     const fecha=cols[0].replace(/"/g,'').trim();
     const jsonStr=cols[1].replace(/^"|"$/g,'').replace(/""/g,'"').trim();
-    // totalDia viene como número JS estándar con punto decimal (ej: 2915424.34814826)
     const total=parseFloat((cols[2]||'').replace(/"/g,'').trim());
     if(!fecha)continue;
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
-    try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fecha]=rows;}catch(e){}
+    try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length){allOps[fecha]=rows;}}catch(e){}
   }
   const dates=Object.keys(allOps).sort();
   if(dates.length&&!selectedDate)selectedDate=dates[dates.length-1];
@@ -227,185 +234,231 @@ function setSyncState(s,msg){
   document.getElementById('sync-label').textContent=msg;
 }
 
-function groupByEspecie(ops){
+function getOpenPos(ops){
   const map={};
   ops.forEach(o=>{
-    const k=o.especie+'|'+o.plazo;
-    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,seccion:o.seccion,rows:[],vnC:0,vnV:0,montoC:0,montoV:0,pylTotal:0};
-    map[k].rows.push(o);
-    if(o.op==='C'){map[k].vnC+=parseFloat(o.vn)||0;map[k].montoC+=parseFloat(o.monto)||0;}
-    else{map[k].vnV+=parseFloat(o.vn)||0;map[k].montoV+=parseFloat(o.monto)||0;}
-    map[k].pylTotal+=parseFloat(o.pyl)||0;
+    if(o.registro!=='hecho'&&o.registro!=='operada'&&o.registro!=='parc. opera')return;
+    const k=o.especie+'|'+o.plazo+'|'+o.mercado;
+    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo,vnC:0,vnV:0};
+    if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
+    else map[k].vnV+=parseFloat(o.vn)||0;
   });
-  return Object.values(map);
+  return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
 }
 
-function getOpenPos(ops){
-  return groupByEspecie(ops).filter(x=>Math.round(x.vnC-x.vnV)>0).map(x=>({
-    especie:x.especie,plazo:x.plazo,
-    vnNeto:Math.round(x.vnC-x.vnV),
-    pxProm:x.vnC>0?x.montoC/x.vnC*100:0,
-    montoExp:x.montoC-x.montoV
-  }));
+function getClientes(ops){
+  const map={};
+  ops.forEach(o=>{
+    const nombre=o.cliente||'—';
+    if(!map[nombre])map[nombre]={nombre,comitente:o.comitente,ops:[],pyl:0,especies:new Set()};
+    map[nombre].ops.push(o);
+    map[nombre].pyl+=parseFloat(o.pyl)||0;
+    if(o.especie)map[nombre].especies.add(o.especie);
+  });
+  return Object.values(map).filter(c=>c.nombre&&c.nombre!=='—').sort((a,b)=>b.pyl-a.pyl);
 }
 
-function renderTable(ops,tbodyId){
+function renderNavChips(containerId,onSelect){
+  const dates=Object.keys(allOps).sort();
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  dates.slice(-10).forEach(d=>{
+    const chip=document.createElement('span');
+    chip.className='chip'+(d===selectedDate?' active':'');
+    chip.textContent=d.slice(0,5);
+    chip.onclick=()=>{selectedDate=d;onSelect();};
+    el.appendChild(chip);
+  });
+}
+
+function renderRueda(){
+  const ops=allOps[selectedDate]||[];
+  const total=allTotals[selectedDate]||0;
+  const openPos=getOpenPos(ops);
+  const clientes=getClientes(ops);
+  const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
+
+  document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'<span class="green">$0</span>';
+  document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
+  document.getElementById('r-vol').textContent=fmtK(vol);
+  document.getElementById('r-vol-sub').textContent=ops.length+' operaciones';
+  document.getElementById('r-clientes').textContent=clientes.length;
+  document.getElementById('r-clientes-sub').textContent=clientes.map(c=>c.nombre).slice(0,3).join(' · ');
+  document.getElementById('r-pos').textContent=openPos.length;
+  document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
+  document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
+
+  const banner=document.getElementById('alert-banner');
+  const isToday=selectedDate===todayStr();
+  if(openPos.length>0&&isToday){
+    banner.style.display='flex';
+    document.getElementById('alert-text').textContent='Posición abierta: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ')+' — '+selectedDate;
+  } else banner.style.display='none';
+
+  renderNavChips('rueda-chips',()=>{renderRueda();renderClientes();});
+
+  const grouped={};
+  ops.forEach(o=>{
+    const k=o.especie+'|'+o.seccion;
+    if(!grouped[k])grouped[k]={rows:[],vnC:0,vnV:0,pyl:0,especie:o.especie,seccion:o.seccion};
+    grouped[k].rows.push(o);
+    if(o.op==='C')grouped[k].vnC+=parseFloat(o.vn)||0;
+    else grouped[k].vnV+=parseFloat(o.vn)||0;
+    grouped[k].pyl+=parseFloat(o.pyl)||0;
+  });
+
   let html='';
-  groupByEspecie(ops).forEach(g=>{
+  Object.values(grouped).forEach(g=>{
+    const closed=Math.abs(Math.round(g.vnC-g.vnV))<1;
     g.rows.forEach((o,i)=>{
       const last=i===g.rows.length-1;
       html+=`<tr>
-        <td>${i===0?`<span class="sec-badge">${o.seccion||''}</span>`:''}</td>
-        <td class="mono">${o.especie}</td>
-        <td style="font-size:11px;color:#888">T+${o.plazo}</td>
-        <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'Compra':'Venta'}</span></td>
-        <td class="tr mono">${fmtEntero(o.vn)}</td>
-        <td class="tr mono">${fmtDec(o.precio)}</td>
-        <td class="tr mono">$${fmtEntero(o.monto)}</td>
-        <td style="font-size:12px;color:#888">${o.cliente||'—'}</td>
-        <td class="tr">${last?fmtPnl(g.pylTotal,true):'—'}</td>
+        <td><span class="especie">${o.especie}</span></td>
+        <td><span class="badge-sec">${o.seccion||'—'}</span></td>
+        <td style="color:#4a5568">${o.mercado||'—'}</td>
+        <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op==='C'?'C':'V'}</span></td>
+        <td style="color:#a0aec0">${o.cliente||'—'}</td>
+        <td class="tr">${fmtInt(o.vn)}</td>
+        <td class="tr">${fmtDec(o.precio)}%</td>
+        <td class="tr">$${fmtInt(o.monto)}</td>
+        <td>${last?(closed?'<span class="badge-cerrada">cerrada</span>':'<span class="badge-abierta">abierta</span>'):'<span style="color:#1e2330">—</span>'}</td>
+        <td class="tr">${last&&g.pyl?fmtPnl(g.pyl,true):'—'}</td>
       </tr>`;
     });
-    html+=`<tr><td colspan="9" style="padding:3px"></td></tr>`;
+    html+=`<tr><td colspan="10" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById(tbodyId).innerHTML=html;
+  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="10" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones para esta fecha</td></tr>';
 }
 
-function renderCalendar(){
+function renderMes(){
   const now=new Date();
   if(calYear===undefined){calYear=now.getFullYear();calMonth=now.getMonth();}
-  document.getElementById('month-label').textContent=MESES[calMonth]+' '+calYear;
+  document.getElementById('mes-label').textContent=MESES[calMonth]+' '+calYear;
   const grid=document.getElementById('cal-grid');
   grid.innerHTML='';
   const first=new Date(calYear,calMonth,1);
   let dow=first.getDay()-1;if(dow<0)dow=6;
   const dim=new Date(calYear,calMonth+1,0).getDate();
   const todayS=todayStr();
-  let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity;
-  for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="day-cell empty"></div>`;
+  let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity,bestDay='',worstDay='';
+  for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;
   for(let d=1;d<=dim;d++){
     const ds=pad2(d)+'/'+pad2(calMonth+1)+'/'+calYear;
-    const ops=allOps[ds]||[];
-    const hasData=ops.length>0;
+    const hasData=!!allOps[ds];
     const pnl=allTotals[ds]||0;
-    const hasOpen=hasData&&getOpenPos(ops).length>0;
-    if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl)bestPnl=pnl;if(pnl<worstPnl)worstPnl=pnl;}
-    let cls='day-cell';
-    if(hasData)cls+=' has-data';
-    if(ds===todayS)cls+=' today-cell';
-    if(ds===selectedDate)cls+=' selected';
-    if(hasOpen)cls+=' has-open';
+    if(hasData){
+      diasOp++;pnlMes+=pnl;
+      if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}
+      if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}
+    }
     const pnlR=Math.round(pnl);
-    const pnlAbs=Math.abs(pnlR);
-    const pnlHtml=hasData&&pnlR!==0?`<span class="day-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}$${pnlAbs>=1000?Math.round(pnlAbs/1000)+'k':pnlAbs.toLocaleString('es-AR')}</span>`:'';
-    const opsHtml=hasData?`<span class="day-ops">${ops.length}op</span>`:'';
-    grid.innerHTML+=`<div class="${cls}" onclick="selectDay('${ds}')"><span class="day-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
+    let cls='cal-day';
+    if(hasData)cls+=' has-data';
+    if(ds===todayS)cls+=' today';
+    if(ds===selectedDate)cls+=' selected';
+    const pnlHtml=hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:'';
+    const opsHtml=hasData?`<span class="cal-ops">${(allOps[ds]||[]).length}op</span>`:'';
+    grid.innerHTML+=`<div class="${cls}" onclick="selectFromCal('${ds}')"><span class="cal-num">${d}</span>${pnlHtml}${opsHtml}</div>`;
   }
-  document.getElementById('ms-dias').textContent=diasOp;
+  document.getElementById('mes-dias').textContent=diasOp;
   if(diasOp>0){
-    document.getElementById('ms-pnl').innerHTML=fmtPnl(pnlMes,true);
-    document.getElementById('ms-best').innerHTML=fmtPnl(bestPnl,true);
-    document.getElementById('ms-worst').innerHTML=fmtPnl(worstPnl,true);
-  }else{
-    ['ms-pnl','ms-best','ms-worst'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);
+    document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');
+    document.getElementById('mes-pnl-sub').textContent=diasOp+' días operados';
+    document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);
+    document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
+    document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);
+    document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
+  } else {
+    ['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
   }
 }
 
-function selectDay(d){selectedDate=d;renderCalendar();renderDiaView(d);renderPosView();showTab('dia');}
+function selectFromCal(d){selectedDate=d;renderRueda();renderClientes();showTab('rueda');}
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderMes();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderMes();}
 
-function renderDiaView(d){
-  if(!d){document.getElementById('dia-empty').style.display='';document.getElementById('dia-content').style.display='none';return;}
-  const ops=allOps[d]||[];
-  document.getElementById('dia-title').textContent='Operaciones del '+d;
-  const dates=Object.keys(allOps).sort();
-  const chips=document.getElementById('dia-chips');
-  chips.innerHTML='';
-  dates.slice(-8).forEach(dt=>{
-    const chip=document.createElement('span');
-    chip.className='dia-chip'+(dt===d?' active':'');
-    chip.textContent=dt.slice(0,5);
-    chip.onclick=()=>selectDay(dt);
-    chips.appendChild(chip);
-  });
-  if(!ops.length){
-    document.getElementById('dia-empty').style.display='';
-    document.getElementById('dia-content').style.display='none';
-    ['dm-ops','dm-pnl','dm-pos','dm-vol'].forEach(id=>document.getElementById(id).textContent='—');
-    return;
+function renderClientes(){
+  const ops=allOps[selectedDate]||[];
+  const clientes=getClientes(ops);
+  const especies=new Set(ops.map(o=>o.especie).filter(Boolean));
+
+  document.getElementById('cli-count').textContent=clientes.length||'—';
+  document.getElementById('cli-sub').textContent=clientes.map(c=>c.nombre).join(' · ')||'—';
+
+  const topCli=clientes.find(c=>c.pyl>0);
+  if(topCli){
+    document.getElementById('cli-top').textContent=topCli.nombre;
+    document.getElementById('cli-top-sub').textContent=fmtPnl(topCli.pyl,false);
+  } else {
+    document.getElementById('cli-top').textContent='—';
+    document.getElementById('cli-top-sub').textContent='—';
   }
-  document.getElementById('dia-empty').style.display='none';
-  document.getElementById('dia-content').style.display='';
-  document.getElementById('dm-ops').textContent=ops.length;
-  document.getElementById('dm-ops-sub').textContent=ops.filter(o=>o.op==='C').length+'C · '+ops.filter(o=>o.op==='V').length+'V';
-  document.getElementById('dm-pnl').innerHTML=fmtPnl(allTotals[d]||0,true);
-  const openPos=getOpenPos(ops);
-  document.getElementById('dm-pos').textContent=openPos.length;
-  document.getElementById('dm-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.length+' especie/s';
-  const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
-  document.getElementById('dm-vol').textContent='$'+Math.round(vol/1000).toLocaleString('es-AR')+'k';
-  document.getElementById('dia-pos-warn').style.display=openPos.length>0?'':'none';
-  renderTable(ops,'dia-tbody');
-}
+  document.getElementById('cli-especies').textContent=[...especies].join(' · ')||'—';
 
-function renderPosView(){
-  const allOpen=[];
-  Object.entries(allOps).forEach(([date,ops])=>{getOpenPos(ops).forEach(p=>allOpen.push({...p,date}));});
-  document.getElementById('pos-title').textContent='Posiciones abiertas ('+allOpen.length+')';
-  if(!allOpen.length){document.getElementById('pos-empty').style.display='';document.getElementById('pos-content').style.display='none';return;}
-  document.getElementById('pos-empty').style.display='none';
-  document.getElementById('pos-content').style.display='';
-  let html='';
-  allOpen.forEach(p=>{
-    const key=p.date+'_'+p.especie+'_'+p.plazo;
-    const px=pxOverride[key]||'';
-    const float=px?fmtPnl((parseFloat(px)-p.pxProm)*p.vnNeto/100,true):'—';
-    html+=`<tr>
-      <td style="font-size:12px;color:#888">${p.date}</td>
-      <td class="mono">${p.especie}</td>
-      <td style="font-size:11px">T+${p.plazo}</td>
-      <td class="tr mono">${fmtEntero(p.vnNeto)}</td>
-      <td class="tr mono">${fmtDec(p.pxProm)}%</td>
-      <td class="tr mono">$${fmtEntero(p.montoExp)}</td>
-      <td class="tr"><input type="number" step="0.001" placeholder="—" value="${px}" style="width:90px" oninput="setPx('${key}',this.value,${p.vnNeto},${p.pxProm})"></td>
-      <td class="tr" id="flt-${key}">${float}</td>
-    </tr>`;
+  renderNavChips('clientes-chips',()=>{renderRueda();renderClientes();});
+
+  const maxPnl=Math.max(...clientes.map(c=>Math.abs(c.pyl)),1);
+  let rankHtml='';
+  clientes.forEach(c=>{
+    const barW=Math.round(Math.abs(c.pyl)/maxPnl*100);
+    rankHtml+=`<div class="client-row">
+      <div class="client-comit">${c.comitente||'—'}</div>
+      <div class="client-name">${c.nombre}</div>
+      <div class="client-ops">${c.ops.length} op · ${[...c.especies].slice(0,2).join('/')}</div>
+      <div class="client-bar-wrap"><div class="client-bar" style="width:${barW}%;background:${c.pyl>=0?'#4ade80':'#f87171'}"></div></div>
+      <div class="client-pnl">${fmtPnl(c.pyl,true)||'<span style="color:#2d3748">—</span>'}</div>
+    </div>`;
   });
-  document.getElementById('pos-tbody').innerHTML=html;
+  document.getElementById('cli-ranking').innerHTML=rankHtml||'<div class="empty-state">Sin clientes para esta fecha</div>';
+
+  let detHtml='';
+  clientes.forEach(c=>{
+    c.ops.forEach((o,i)=>{
+      detHtml+=`<tr>
+        <td style="color:#e2e8f0;font-weight:500">${i===0?c.nombre:''}</td>
+        <td style="color:#4a5568">${i===0?c.comitente:''}</td>
+        <td><span class="especie">${o.especie}</span></td>
+        <td><span class="badge-sec">${o.seccion||'—'}</span></td>
+        <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
+        <td class="tr">${fmtInt(o.vn)}</td>
+        <td class="tr">${fmtPnl(o.pyl,true)||'—'}</td>
+      </tr>`;
+    });
+    detHtml+=`<tr><td colspan="7" style="padding:2px;background:#0d0f14"></td></tr>`;
+  });
+  document.getElementById('cli-tbody').innerHTML=detHtml||'<tr><td colspan="7" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
 }
 
-function setPx(key,val,vnNeto,pxProm){pxOverride[key]=val;const el=document.getElementById('flt-'+key);if(el&&val)el.innerHTML=fmtPnl((parseFloat(val)-pxProm)*vnNeto/100,true);}
-function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
-function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
-function renderAll(){renderCalendar();renderDiaView(selectedDate);renderPosView();updateClock();}
+function renderAll(){renderRueda();renderMes();renderClientes();}
+
 function showTab(t){
-  ['mes','dia','pos'].forEach(x=>{
+  ['rueda','mes','clientes'].forEach(x=>{
     document.getElementById('view-'+x).style.display=x===t?'':'none';
     document.getElementById('tab-'+x).classList.toggle('active',x===t);
   });
-  if(t==='mes')renderCalendar();
+  if(t==='mes')renderMes();
 }
+
 function updateClock(){
-  const now=new Date();const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  const now=new Date();
+  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
   document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
   const minLeft=17*60-(h*60+m);
   const badge=document.getElementById('rueda-badge');
-  const banner=document.getElementById('alert-banner');
   const openToday=getOpenPos(allOps[todayStr()]||[]);
   if(h>=17){
-    badge.className='rueda-badge badge-warn';badge.textContent='Rueda cerrada';
-    if(openToday.length){banner.className='alert-banner danger';banner.style.display='flex';document.getElementById('alert-text').textContent='Rueda cerrada con '+openToday.length+' posición/es abiertas hoy.';}
-    else banner.style.display='none';
-  }else if(minLeft<=30&&openToday.length){
-    badge.className='rueda-badge badge-warn';badge.textContent='Cierre en '+minLeft+' min';
-    banner.className='alert-banner warn';banner.style.display='flex';
-    document.getElementById('alert-text').textContent='Quedan '+minLeft+' min para el cierre con posiciones abiertas.';
-  }else{
-    badge.className='rueda-badge badge-open';badge.innerHTML='&#9679; Rueda abierta';
-    banner.style.display='none';
+    badge.className='badge-closed';badge.textContent='Rueda cerrada';
+  } else if(minLeft<=30&&openToday.length>0){
+    badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';
+  } else {
+    badge.className='badge-open';badge.innerHTML='&#9679; Rueda abierta';
   }
 }
+
 setInterval(updateClock,1000);
-loadFromSheets();
+updateClock();
+loadData();
 </script>
 </body>
 </html>
