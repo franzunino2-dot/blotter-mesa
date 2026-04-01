@@ -137,7 +137,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
     </div>
     <div class="nav-chips" id="rueda-chips"></div>
-    <div class="section-label">Operaciones del día — par SENEBI / BYMA</div>
+    <div class="section-label">Operaciones del día</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -177,7 +177,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric"><div class="metric-label">P&L total mesa hoy</div><div class="metric-value green" id="cli-mesa-total">—</div><div class="metric-sub">Equanima</div></div>
     </div>
     <div class="nav-chips" id="clientes-chips"></div>
-    <div class="section-label">Ranking productores — P&L generado vs. llevado</div>
+    <div class="section-label">Ranking productores — lo que se llevan vs. lo que queda para la mesa</div>
     <div id="cli-ranking" style="margin-bottom:16px"></div>
     <div class="section-label">Detalle por productor</div>
     <div class="table-wrap">
@@ -193,7 +193,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 </div>
 
 <script>
-const USERS={'mesa':'mesa2026','admin':'alyc2026'};
+const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=305976454&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},selectedDate=null,calYear,calMonth;
@@ -291,7 +291,6 @@ function setSyncState(s,msg){
   document.getElementById('sync-label').textContent=msg;
 }
 
-// Agrupa operaciones en pares SENEBI+BYMA por especie+plazo+vn
 function getPares(ops){
   const senebi=ops.filter(o=>o.mercado==='SENEBI');
   const byma=ops.filter(o=>o.mercado==='BYMA');
@@ -303,10 +302,7 @@ function getPares(ops){
       const bi=byma.indexOf(match);
       usados.add(bi);
       pares.push({
-        especie:s.especie,
-        seccion:s.seccion,
-        plazo:s.plazo,
-        op:s.op,
+        especie:s.especie,seccion:s.seccion,plazo:s.plazo,op:s.op,
         vn:parseFloat(s.vn)||0,
         precioSenebi:parseFloat(s.precio)||0,
         precioBYMA:parseFloat(match.precio)||0,
@@ -320,20 +316,12 @@ function getPares(ops){
       });
     }else{
       pares.push({
-        especie:s.especie,
-        seccion:s.seccion,
-        plazo:s.plazo,
-        op:s.op,
+        especie:s.especie,seccion:s.seccion,plazo:s.plazo,op:s.op,
         vn:parseFloat(s.vn)||0,
         precioSenebi:parseFloat(s.precio)||0,
-        precioBYMA:0,
-        montoSenebi:parseFloat(s.monto)||0,
-        montoBYMA:0,
-        productor:s.cliente||'—',
-        comitente:s.comitente||'—',
-        pylProductor:parseFloat(s.pylProductor)||0,
-        pylMesa:0,
-        cerrado:false,
+        precioBYMA:0,montoSenebi:parseFloat(s.monto)||0,montoBYMA:0,
+        productor:s.cliente||'—',comitente:s.comitente||'—',
+        pylProductor:parseFloat(s.pylProductor)||0,pylMesa:0,cerrado:false,
       });
     }
   });
@@ -416,7 +404,7 @@ function renderRueda(){
       <td class="tr" style="color:#4a5568">${fmtDec(p.precioSenebi)}% / ${fmtDec(p.precioBYMA)}%</td>
       <td class="tr">$${fmtInt(p.montoSenebi)}</td>
       <td>${p.cerrado?'<span class="badge-cerrada">cerrada</span>':'<span class="badge-abierta">abierta</span>'}</td>
-      <td class="tr"><span style="color:#fbbf24">${p.pylProductor?fmtPnl(p.pylProductor,true,'pnl-pos'):'—'}</span></td>
+      <td class="tr">${p.pylProductor?fmtPnl(p.pylProductor,true,'pnl-pos'):'—'}</td>
       <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
     </tr>
     <tr class="group-sep"><td colspan="11"></td></tr>`;
