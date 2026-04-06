@@ -103,18 +103,16 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .cal-ops-cnt{font-size:9px;color:#2d3748}
 .client-row{display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid #1e2330;gap:10px}
 .client-row:last-child{border-bottom:none}
-.client-comit{font-size:10px;color:#4a5568;min-width:40px;font-family:monospace}
-.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:90px;font-family:monospace}
-.client-ops-lbl{font-size:10px;color:#4a5568;min-width:70px}
+.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:100px;font-family:monospace}
+.client-ops-lbl{font-size:10px;color:#4a5568;min-width:80px}
 .client-bar-wrap{flex:1;height:3px;background:#1e2330;border-radius:2px}
 .client-bar{height:100%;border-radius:2px}
-.client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:110px;text-align:right}
+.client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:120px;text-align:right}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
 @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <div class="login-wrap" id="login-screen">
   <div class="login-box">
     <div class="login-title">&#9632; Mesa de dinero</div>
@@ -184,8 +182,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <div id="view-rueda">
     <div class="metrics">
-      <div class="metric"><div class="metric-label">P&L Equanima</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div></div>
+      <div class="metric"><div class="metric-label">P&L Equanima (O1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Comisiones cobradas (P1)</div><div class="metric-value amber" id="r-com">—</div><div class="metric-sub">suma col P</div></div>
       <div class="metric"><div class="metric-label">Productores activos</div><div class="metric-value purple" id="r-prod">—</div><div class="metric-sub" id="r-prod-sub">—</div></div>
       <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
     </div>
@@ -197,7 +195,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
           <th>Cliente</th><th>Productor</th><th>Tipo</th>
           <th class="tr">VN</th><th class="tr">Precio C</th><th class="tr">Precio V</th>
           <th class="tr">Monto</th><th>Estado</th>
-          <th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
+          <th class="tr">Com. productor</th><th class="tr">P&L mesa (O)</th>
         </tr></thead>
         <tbody id="rueda-tbody"></tbody>
       </table>
@@ -235,8 +233,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Productor</th><th>Cliente</th><th>Especie</th><th>Sección</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L mesa</th>
+          <th>Fecha</th><th>Productor</th><th>Cliente</th><th>Especie</th><th>Sección</th>
+          <th class="tr">VN</th><th class="tr">Com. productor (Q)</th><th class="tr">P&L mesa (O)</th>
         </tr></thead>
         <tbody id="prod-tbody"></tbody>
       </table>
@@ -252,8 +250,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Monto</th><th class="tr">P&L Equanima</th>
+          <th>Fecha</th><th>Cliente</th><th>Comit.</th><th>Especie</th><th>Sección</th>
+          <th class="tr">VN</th><th class="tr">Monto</th><th class="tr">Comisión (P)</th><th class="tr">P&L mesa (O)</th>
         </tr></thead>
         <tbody id="cli-tbody"></tbody>
       </table>
@@ -262,15 +260,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <div id="view-cuenta1000" style="display:none">
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">P&L total Equanima</div><div class="metric-value green" id="c1000-pnl">—</div><div class="metric-sub">suma col O = O1</div></div>
+      <div class="metric"><div class="metric-label">Total comisiones (P1)</div><div class="metric-value amber" id="c1000-com">—</div><div class="metric-sub">suma col P del período</div></div>
       <div class="metric"><div class="metric-label">Operaciones</div><div class="metric-value blue" id="c1000-ops">—</div><div class="metric-sub">todas las filas</div></div>
       <div class="metric"><div class="metric-label">Volumen</div><div class="metric-value white" id="c1000-vol">—</div><div class="metric-sub">—</div></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th><th>Cliente</th><th>Productor</th>
-          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th><th class="tr">P&L mesa (col O)</th>
+          <th>Fecha</th><th>Especie</th><th>Sección</th><th>Mercado</th><th>Op</th>
+          <th>Cliente</th><th>Productor</th>
+          <th class="tr">VN</th><th class="tr">Precio</th><th class="tr">Monto</th>
+          <th class="tr">Comisión (P)</th><th class="tr">P&L mesa (O)</th>
         </tr></thead>
         <tbody id="c1000-tbody"></tbody>
       </table>
@@ -296,16 +296,16 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <div id="view-comisiones" style="display:none">
     <div class="metrics">
-      <div class="metric"><div class="metric-label">P&L total Equanima</div><div class="metric-value green" id="com-total">—</div><div class="metric-sub">O1 período</div></div>
-      <div class="metric"><div class="metric-label">Com. productores</div><div class="metric-value amber" id="com-prod">—</div><div class="metric-sub">col Q</div></div>
-      <div class="metric"><div class="metric-label">Clientes directos</div><div class="metric-value green" id="com-directo">—</div><div class="metric-sub">sin productor</div></div>
-      <div class="metric"><div class="metric-label">Cauciones</div><div class="metric-value blue" id="com-cauciones">—</div><div class="metric-sub">—</div></div>
+      <div class="metric"><div class="metric-label">P&L Equanima (O1)</div><div class="metric-value green" id="com-pnl">—</div><div class="metric-sub">período</div></div>
+      <div class="metric"><div class="metric-label">Comisiones totales (P1)</div><div class="metric-value amber" id="com-total">—</div><div class="metric-sub">suma col P</div></div>
+      <div class="metric"><div class="metric-label">Com. productores (Q)</div><div class="metric-value purple" id="com-prod">—</div><div class="metric-sub">suma col Q</div></div>
+      <div class="metric"><div class="metric-label">Neto Equanima</div><div class="metric-value green" id="com-neto">—</div><div class="metric-sub">P1 − com. productores</div></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Especie</th><th>Cliente</th><th>Productor</th><th>Tipo</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Com. productor</th><th class="tr">P&L Equanima</th>
+          <th>Fecha</th><th>Especie</th><th>Cliente</th><th>Productor</th><th>Tipo</th>
+          <th class="tr">VN</th><th class="tr">Comisión (P)</th><th class="tr">Com. productor (Q)</th><th class="tr">P&L mesa (O)</th>
         </tr></thead>
         <tbody id="com-tbody"></tbody>
       </table>
@@ -317,7 +317,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=305976454&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-let allOps={},allTotals={};
+let allOps={},allTotals={},allComisiones={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
 
@@ -369,8 +369,7 @@ function toggleCal(){
   const now=new Date();
   calY=calY||now.getFullYear();
   calM=calM===undefined?now.getMonth():calM;
-  pickStep=0;renderCal();
-  p.classList.add('open');
+  pickStep=0;renderCal();p.classList.add('open');
 }
 function calPrev(e){e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();}
 function calNext(e){e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();}
@@ -406,9 +405,8 @@ function renderCal(){
 }
 
 function pickDay(ds){
-  if(pickStep===0){
-    rangeStart=ds;rangeEnd=null;pickStep=1;
-  }else{
+  if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}
+  else{
     rangeEnd=ds;pickStep=0;
     if(strToTs(rangeStart)>strToTs(rangeEnd)){const tmp=rangeStart;rangeStart=rangeEnd;rangeEnd=tmp;}
     document.getElementById('cal-popup').classList.remove('open');
@@ -420,8 +418,7 @@ function pickDay(ds){
 function updateDisplay(){
   const el=document.getElementById('drp-display');
   if(!rangeStart){el.textContent='—';return;}
-  if(!rangeEnd||rangeEnd===rangeStart)el.textContent=rangeStart;
-  else el.textContent=rangeStart+' → '+rangeEnd;
+  el.textContent=(!rangeEnd||rangeEnd===rangeStart)?rangeStart:rangeStart+' → '+rangeEnd;
 }
 function clearPresets(){document.querySelectorAll('.drp-preset').forEach(p=>p.classList.remove('sel'));}
 function setPreset(p){
@@ -456,6 +453,7 @@ function getOpsInRange(){
   return ops;
 }
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
+function getComisionesInRange(){return getDatesInRange().reduce((s,d)=>s+(allComisiones[d]||0),0);}
 
 async function loadData(){
   setSyncState('loading','Actualizando...');
@@ -473,7 +471,7 @@ async function loadData(){
 }
 
 function parseCSV(text){
-  allOps={};allTotals={};
+  allOps={};allTotals={};allComisiones={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
     const cols=splitLine(lines[i]);
@@ -481,8 +479,10 @@ function parseCSV(text){
     const fecha=cols[0].replace(/"/g,'').trim();
     const jsonStr=cols[1].replace(/^"|"$/g,'').replace(/""/g,'"').trim();
     const total=parseFloat((cols[2]||'').replace(/"/g,'').trim());
+    const comisiones=parseFloat((cols[3]||'').replace(/"/g,'').trim());
     if(!fecha)continue;
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
+    if(!isNaN(comisiones)&&comisiones!==0)allComisiones[fecha]=comisiones;
     try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fecha]=rows;}catch(e){}
   }
 }
@@ -503,8 +503,8 @@ function setSyncState(s,msg){
 
 function tipoOp(o){
   if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';
-  if(String(o.comitente)==='1000'&&!o.productor)return'propio';
   if(o.productor&&o.productor!=='')return'productor';
+  if(String(o.comitente)==='1000')return'propio';
   return'directo';
 }
 
@@ -519,7 +519,6 @@ function getOpenPos(ops){
   return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
 }
 
-// Par: misma especie + mismo VN + C y V en mismo día
 function getPares(ops){
   const pares=[];const usados=new Set();
   ops.forEach((a,ai)=>{
@@ -528,8 +527,7 @@ function getPares(ops){
       bi!==ai&&!usados.has(bi)&&
       b.especie===a.especie&&
       Math.abs(parseFloat(b.vn)-parseFloat(a.vn))<1&&
-      b.op!==a.op&&
-      a._fecha===b._fecha
+      b.op!==a.op&&a._fecha===b._fecha
     );
     if(matchIdx>=0){
       usados.add(ai);usados.add(matchIdx);
@@ -537,6 +535,7 @@ function getPares(ops){
       const compra=a.op==='C'?a:b;
       const venta=a.op==='V'?a:b;
       const pylMesa=(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0);
+      const comision=(parseFloat(a.comision)||0)+(parseFloat(b.comision)||0);
       const comProductor=(parseFloat(a.comProductor)||0)+(parseFloat(b.comProductor)||0);
       const productor=a.productor||b.productor||'';
       const cliente=a.cliente||b.cliente||'—';
@@ -544,13 +543,10 @@ function getPares(ops){
       pares.push({
         fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo,
         vn:parseFloat(a.vn)||0,
-        precioC:parseFloat(compra.precio)||0,
-        precioV:parseFloat(venta.precio)||0,
+        precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,
         monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),
-        cliente,comitente,productor,
-        pylMesa,comProductor,
-        cerrado:true,
-        tipo:tipoOp(productor?{...a,productor}:a),
+        cliente,comitente,productor,pylMesa,comision,comProductor,
+        cerrado:true,tipo:tipoOp({...a,productor}),
       });
     }else{
       usados.add(ai);
@@ -563,6 +559,7 @@ function getPares(ops){
         cliente:a.cliente||'—',comitente:a.comitente||'—',
         productor:a.productor||'',
         pylMesa:parseFloat(a.pylMesa)||0,
+        comision:parseFloat(a.comision)||0,
         comProductor:parseFloat(a.comProductor)||0,
         cerrado:false,tipo:tipoOp(a),
       });
@@ -574,6 +571,7 @@ function getPares(ops){
 function renderRueda(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
+  const comTotal=getComisionesInRange();
   const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));
   const pares=getPares(ops);
   const prodActivos=new Set(pares.filter(p=>p.productor).map(p=>p.productor));
@@ -582,8 +580,7 @@ function renderRueda(){
   document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
-  document.getElementById('r-vol').textContent=fmtK(vol);
-  document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
+  document.getElementById('r-com').innerHTML=fmtPnl(comTotal,true,'pnl-pos')||'—';
   document.getElementById('r-prod').textContent=prodActivos.size||'—';
   document.getElementById('r-prod-sub').textContent=[...prodActivos].slice(0,3).join(' · ')||'—';
   document.getElementById('r-pos').textContent=openPos.length;
@@ -591,10 +588,8 @@ function renderRueda(){
   document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
 
   const banner=document.getElementById('alert-banner');
-  if(openPos.length>0){
-    banner.style.display='flex';
-    document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');
-  }else banner.style.display='none';
+  if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');}
+  else banner.style.display='none';
 
   let html='';
   pares.forEach(p=>{
@@ -619,7 +614,7 @@ function renderRueda(){
       <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
     </tr>`;
   });
-  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones en el período</td></tr>';
+  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
 function renderMes(){
@@ -704,15 +699,14 @@ function renderProductores(){
         <td style="color:#a0aec0">${p.cliente}</td>
         <td><span class="especie">${p.especie}</span></td>
         <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-        <td style="color:#4a5568">C↔V</td>
         <td class="tr">${fmtInt(p.vn)}</td>
         <td class="tr" style="color:#fbbf24">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td>
         <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
       </tr>`;
     });
-    detHtml+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;
+    detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
+  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
 }
 
 function renderClientes(){
@@ -738,19 +732,20 @@ function renderClientes(){
         <td style="color:#4a5568">C↔V</td>
         <td class="tr">${fmtInt(p.vn)}</td>
         <td class="tr">$${fmtInt(p.monto)}</td>
+        <td class="tr" style="color:#fbbf24">${fmtPnl(p.comision,true,'pnl-pos')||'—'}</td>
         <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
       </tr>`;
     });
-    html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;
+    html+=`<tr><td colspan="10" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
+  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="10" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
 
 function renderCuenta1000(){
   const ops=getOpsInRange();
-  const total=getTotalInRange();
+  const comTotal=getComisionesInRange();
   const vol=ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0);
-  document.getElementById('c1000-pnl').innerHTML=fmtPnl(total,true)||'—';
+  document.getElementById('c1000-com').innerHTML=fmtPnl(comTotal,true,'pnl-pos')||'—';
   document.getElementById('c1000-ops').textContent=ops.length||'—';
   document.getElementById('c1000-vol').textContent=fmtK(vol);
   let html='';
@@ -766,10 +761,11 @@ function renderCuenta1000(){
       <td class="tr">${fmtInt(o.vn)}</td>
       <td class="tr">${fmtDec(o.precio)}%</td>
       <td class="tr">$${fmtInt(o.monto)}</td>
+      <td class="tr" style="color:#fbbf24">${fmtPnl(o.comision,true,'pnl-pos')||'—'}</td>
       <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
     </tr>`;
   });
-  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
+  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="12" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
 function renderCauciones(){
@@ -799,14 +795,14 @@ function renderCauciones(){
 function renderComisiones(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
+  const comTotal=getComisionesInRange();
   const pares=getPares(ops);
   const comProd=pares.reduce((s,p)=>s+p.comProductor,0);
-  const pylDirecto=pares.filter(p=>p.tipo==='directo').reduce((s,p)=>s+p.pylMesa,0);
-  const pylCaucion=pares.filter(p=>p.tipo==='caucion').reduce((s,p)=>s+p.pylMesa,0);
-  document.getElementById('com-total').innerHTML=fmtPnl(total,true)||'—';
+  const neto=comTotal-comProd;
+  document.getElementById('com-pnl').innerHTML=fmtPnl(total,true)||'—';
+  document.getElementById('com-total').innerHTML=fmtPnl(comTotal,true,'pnl-pos')||'—';
   document.getElementById('com-prod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';
-  document.getElementById('com-directo').innerHTML=fmtPnl(pylDirecto,true)||'—';
-  document.getElementById('com-cauciones').innerHTML=fmtPnl(pylCaucion,true)||'—';
+  document.getElementById('com-neto').innerHTML=fmtPnl(neto,true)||'—';
   let html='';
   pares.forEach(p=>{
     const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
@@ -819,10 +815,10 @@ function renderComisiones(){
       <td style="color:#a0aec0">${p.cliente}</td>
       <td style="color:#a78bfa">${p.productor||'—'}</td>
       <td>${tipoBadge}</td>
-      <td style="color:#4a5568">C↔V</td>
       <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr" style="color:#fbbf24">${p.comProductor?fmtPnl(p.comProductor,true,'pnl-pos'):'—'}</td>
-      <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
+      <td class="tr" style="color:#fbbf24">${fmtPnl(p.comision,true,'pnl-pos')||'—'}</td>
+      <td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td>
+      <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
     </tr>`;
   });
   document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
