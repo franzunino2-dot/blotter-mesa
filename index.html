@@ -458,7 +458,8 @@ function getComisionesInRange(){return getDatesInRange().reduce((s,d)=>s+(allCom
 async function loadData(){
   setSyncState('loading','Actualizando...');
   try{
-    const r=await fetch(CSV_URL,{mode:'cors'});
+    const url=CSV_URL+'&t='+Date.now();
+    const r=await fetch(url,{mode:'cors',cache:'no-store'});
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
     setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
@@ -576,7 +577,6 @@ function renderRueda(){
   const pares=getPares(ops);
   const prodActivos=new Set(pares.filter(p=>p.productor).map(p=>p.productor));
   const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
-
   document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
@@ -586,11 +586,9 @@ function renderRueda(){
   document.getElementById('r-pos').textContent=openPos.length;
   document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
   document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
-
   const banner=document.getElementById('alert-banner');
   if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie+' T+'+p.plazo).join(', ');}
   else banner.style.display='none';
-
   let html='';
   pares.forEach(p=>{
     const tipoBadge=p.tipo==='productor'?`<span class="badge-prod">productor</span>`:
