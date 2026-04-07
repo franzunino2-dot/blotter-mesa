@@ -22,7 +22,7 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .logo{font-size:14px;font-weight:500;color:#e2e8f0}
 .topright{display:flex;align-items:center;gap:14px}
 .clock{font-family:monospace;font-size:12px;color:#4ade80}
-.badge-open{font-size:10px;padding:2px 9px;border-radius:99px;background:#052e16;color:#4ade80;border:0.5px solid #166534}
+.badge-open{font-size:10px;padding:2px 9px;border-radius:99px;background:#052e16;color:#4ade80;border:0.5px solid #166634}
 .badge-closed{font-size:10px;padding:2px 9px;border-radius:99px;background:#2d1500;color:#fbbf24;border:0.5px solid #92400e}
 .logout-btn{font-size:11px;color:#4a5568;cursor:pointer;padding:3px 8px;border:0.5px solid #1e2330;border-radius:4px;background:transparent}
 .logout-btn:hover{color:#f87171;border-color:#f87171}
@@ -219,7 +219,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   </div>
   <div id="view-productores" style="display:none">
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">col Q del período</div></div>
+      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período</div></div>
       <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div></div>
       <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
     </div>
@@ -311,6 +311,20 @@ let allOps={},allTotals={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
 
+// Índices del array
+const I={sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
+
+function rowToObj(r,fecha){
+  return{
+    _fecha:fecha,
+    seccion:r[I.sec]||'',mercado:r[I.mer]||'',plazo:r[I.plz]||'0',
+    op:r[I.op]||'',especie:r[I.esp]||'',moneda:r[I.mon]||'',
+    precio:r[I.pre]||0,vn:r[I.vn]||0,monto:r[I.mto]||0,
+    comitente:String(r[I.com]||''),cliente:r[I.cli]||'',
+    productor:r[I.pro]||'',pylMesa:r[I.pyl]||0,comProductor:r[I.cpro]||0,
+  };
+}
+
 function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
@@ -360,12 +374,8 @@ function toggleCal(){
   if(calY===undefined){calY=now.getFullYear();calM=now.getMonth();}
   pickStep=0;renderCal();popup.classList.add('open');
 }
-document.getElementById('cal-prev').addEventListener('click',function(e){
-  e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();
-});
-document.getElementById('cal-next').addEventListener('click',function(e){
-  e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();
-});
+document.getElementById('cal-prev').addEventListener('click',function(e){e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();});
+document.getElementById('cal-next').addEventListener('click',function(e){e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();});
 function renderCal(){
   document.getElementById('cal-label').textContent=MESES[calM]+' '+calY;
   const hdrs=document.getElementById('cal-hdrs');hdrs.innerHTML='';
@@ -435,7 +445,7 @@ function getDatesInRange(){
 }
 function getOpsInRange(){
   const ops=[];
-  getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push({...o,_fecha:d})));
+  getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o)));
   return ops;
 }
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
@@ -459,50 +469,36 @@ function parseCSV(text){
   allOps={};allTotals={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
+    // Separar manualmente: fecha termina en primer ","
     const line=lines[i];
-    // Separar por primera y última coma que delimitan fecha,json,total,timestamp
-    const firstComma=line.indexOf(',');
-    if(firstComma<0)continue;
-    const fecha=line.slice(0,firstComma).replace(/"/g,'').trim();
-    if(!fecha||!fecha.match(/^\d{2}\/\d{2}\/\d{4}$/))continue;
-    const rest=line.slice(firstComma+1);
-    // Encontrar el último par de comas para separar json del total
-    // El json está entre la primera coma y la antepenúltima
-    const lastComma=rest.lastIndexOf(',');
-    const secondLastComma=rest.lastIndexOf(',',lastComma-1);
-    const jsonRaw=rest.slice(0,secondLastComma);
-    const totalStr=rest.slice(secondLastComma+1,lastComma);
-    const total=parseFloat(totalStr.replace(/"/g,'').trim());
-    if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
+    const fc=line.indexOf(',');
+    if(fc<0)continue;
+    const fecha=line.slice(0,fc).replace(/"/g,'').trim();
+    if(!fecha.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/))continue;
+    // Normalizar fecha a dd/mm/yyyy
+    const fp=fecha.split('/');
+    const fechaNorm=pad2(fp[0])+'/'+pad2(fp[1])+'/'+fp[2];
+    // El resto: buscar el total al final (último número antes del último campo)
+    const rest=line.slice(fc+1);
+    // El JSON es todo lo que está entre el primer "[" y el último "]"
+    const jStart=rest.indexOf('[');
+    const jEnd=rest.lastIndexOf(']');
+    if(jStart<0||jEnd<0)continue;
+    const jsonStr=rest.slice(jStart,jEnd+1);
+    // Total está después del "]"
+    const afterJson=rest.slice(jEnd+1);
+    const totalMatch=afterJson.match(/[\d.]+/);
+    const total=totalMatch?parseFloat(totalMatch[0]):0;
+    if(total!==0)allTotals[fechaNorm]=total;
     try{
-      // Limpiar el json: quitar comillas externas y des-escapar backslashes
-      let jsonStr=jsonRaw.trim();
-      if(jsonStr.startsWith('"'))jsonStr=jsonStr.slice(1);
-      if(jsonStr.endsWith('"'))jsonStr=jsonStr.slice(0,-1);
-      jsonStr=jsonStr.replace(/\\"/g,'"').replace(/""/g,'"');
       const rows=JSON.parse(jsonStr);
       if(Array.isArray(rows)&&rows.length){
-        allOps[fecha]=rows.map(r=>({
-          seccion:r.s||'',mercado:r.m||'',plazo:r.z||'0',op:r.o||'',
-          especie:r.e||'',moneda:r.mo||'',precio:r.p||0,vn:r.v||0,
-          monto:r.mt||0,comitente:r.c||'',cliente:r.cl||'',
-          productor:r.pr||'',pylMesa:r.py||0,comProductor:r.cp||0,
-        }));
+        allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }
     }catch(e){}
   }
 }
 
-function splitCSVLine(line){
-  const r=[];let cur='';let q=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
-    else if(c===','&&!q){r.push(cur);cur='';}
-    else cur+=c;
-  }
-  r.push(cur);return r;
-}
 function setSyncState(s,msg){
   document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
   document.getElementById('sync-label').textContent=msg;
@@ -510,7 +506,7 @@ function setSyncState(s,msg){
 function tipoOp(o){
   if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';
   if(o.productor&&o.productor.trim()!=='')return'productor';
-  if(String(o.comitente)==='1000')return'propio';
+  if(o.comitente==='1000')return'propio';
   return'directo';
 }
 function getOpenPos(ops){
@@ -612,8 +608,8 @@ function renderMes(){
     const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
     const hasData=!!allOps[ds];const pnl=allTotals[ds]||0;
     if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}
-    const pnlR=Math.round(pnl);
-    let cls='mes-cal-day';if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
+    const pnlR=Math.round(pnl);let cls='mes-cal-day';
+    if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
     grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')"><span class="mes-cal-num">${d}</span>${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op</span>`:''}</div>`;
   }
   document.getElementById('mes-dias').textContent=diasOp;
@@ -679,23 +675,19 @@ function renderClientes(){
   document.getElementById('cli-count').textContent=clientes.size||'—';
   document.getElementById('cli-pnl').innerHTML=fmtPnl(pares.reduce((s,p)=>s+p.pylMesa,0),true)||'—';
   document.getElementById('cli-vol').textContent=fmtK(pares.reduce((s,p)=>s+p.monto,0));
-  const map={};
-  pares.forEach(p=>{if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};map[p.cliente].pares.push(p);});
+  const map={};pares.forEach(p=>{if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};map[p.cliente].pares.push(p);});
   let html='';
-  Object.values(map).forEach(cli=>{
-    cli.pares.forEach((p,i)=>{html+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-      <td style="color:#e2e8f0;font-weight:500">${i===0?cli.nombre:''}</td>
-      <td style="color:#4a5568">${i===0?cli.comitente:''}</td>
-      <td><span class="especie">${p.especie}</span></td>
-      <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-      <td style="color:#4a5568">C↔V</td>
-      <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr">$${fmtInt(p.monto)}</td>
-      <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
-    </tr>`;});
-    html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;
-  });
+  Object.values(map).forEach(cli=>{cli.pares.forEach((p,i)=>{html+=`<tr>
+    <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
+    <td style="color:#e2e8f0;font-weight:500">${i===0?cli.nombre:''}</td>
+    <td style="color:#4a5568">${i===0?cli.comitente:''}</td>
+    <td><span class="especie">${p.especie}</span></td>
+    <td><span class="badge-sec">${p.seccion||'—'}</span></td>
+    <td style="color:#4a5568">C↔V</td>
+    <td class="tr">${fmtInt(p.vn)}</td>
+    <td class="tr">$${fmtInt(p.monto)}</td>
+    <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
+  </tr>`;});html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;});
   document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
 function renderCuenta1000(){
@@ -780,7 +772,7 @@ function updateClock(){
   document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
   const minLeft=17*60-(h*60+m);
   const badge=document.getElementById('rueda-badge');
-  const openToday=getOpenPos((allOps[todayStr()]||[]).map(o=>({...o,_fecha:todayStr()})));
+  const openToday=getOpenPos((allOps[todayStr()]||[]).map(o=>o));
   if(h>=17){badge.className='badge-closed';badge.textContent='Rueda cerrada';}
   else if(minLeft<=30&&openToday.length>0){badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';}
   else{badge.className='badge-open';badge.innerHTML='&#9679; Rueda abierta';}
