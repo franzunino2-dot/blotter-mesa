@@ -468,7 +468,7 @@ function parseCSV(text){
     try{
       // El JSON usa claves cortas: s=seccion, m=mercado, o=op, e=especie, etc.
       const raw=cols[1];
-      const jsonStr=raw.replace(/^"+|"+$/g,'').replace(/""/g,'"');
+      const jsonStr=raw.replace(/^"+|"+$/g,'').replace(/""/g,'"').replace(/\\"/g,'"');
       const rows=JSON.parse(jsonStr);
       if(Array.isArray(rows)&&rows.length){
         // Mapear claves cortas a nombres completos
