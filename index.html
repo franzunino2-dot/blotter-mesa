@@ -459,19 +459,29 @@ function parseCSV(text){
   allOps={};allTotals={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
-    const cols=splitCSVLine(lines[i]);
-    if(cols.length<2)continue;
-    const fecha=cols[0].replace(/"/g,'').trim();
+    const line=lines[i];
+    // Separar por primera y última coma que delimitan fecha,json,total,timestamp
+    const firstComma=line.indexOf(',');
+    if(firstComma<0)continue;
+    const fecha=line.slice(0,firstComma).replace(/"/g,'').trim();
     if(!fecha||!fecha.match(/^\d{2}\/\d{2}\/\d{4}$/))continue;
-    const total=parseFloat((cols[2]||'').replace(/"/g,'').trim());
+    const rest=line.slice(firstComma+1);
+    // Encontrar el último par de comas para separar json del total
+    // El json está entre la primera coma y la antepenúltima
+    const lastComma=rest.lastIndexOf(',');
+    const secondLastComma=rest.lastIndexOf(',',lastComma-1);
+    const jsonRaw=rest.slice(0,secondLastComma);
+    const totalStr=rest.slice(secondLastComma+1,lastComma);
+    const total=parseFloat(totalStr.replace(/"/g,'').trim());
     if(!isNaN(total)&&total!==0)allTotals[fecha]=total;
     try{
-      // El JSON usa claves cortas: s=seccion, m=mercado, o=op, e=especie, etc.
-      const raw=cols[1];
-      const jsonStr=raw.replace(/^"+|"+$/g,'').replace(/""/g,'"').replace(/\\"/g,'"');
+      // Limpiar el json: quitar comillas externas y des-escapar backslashes
+      let jsonStr=jsonRaw.trim();
+      if(jsonStr.startsWith('"'))jsonStr=jsonStr.slice(1);
+      if(jsonStr.endsWith('"'))jsonStr=jsonStr.slice(0,-1);
+      jsonStr=jsonStr.replace(/\\"/g,'"').replace(/""/g,'"');
       const rows=JSON.parse(jsonStr);
       if(Array.isArray(rows)&&rows.length){
-        // Mapear claves cortas a nombres completos
         allOps[fecha]=rows.map(r=>({
           seccion:r.s||'',mercado:r.m||'',plazo:r.z||'0',op:r.o||'',
           especie:r.e||'',moneda:r.mo||'',precio:r.p||0,vn:r.v||0,
