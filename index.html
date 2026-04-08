@@ -469,24 +469,20 @@ function parseCSV(text){
   allOps={};allTotals={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
-    // Separar manualmente: fecha termina en primer ","
     const line=lines[i];
     const fc=line.indexOf(',');
     if(fc<0)continue;
     const fecha=line.slice(0,fc).replace(/"/g,'').trim();
     if(!fecha.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/))continue;
-    // Normalizar fecha a dd/mm/yyyy
     const fp=fecha.split('/');
-    const fechaNorm=pad2(fp[0])+'/'+pad2(fp[1])+'/'+fp[2];
-    // El resto: buscar el total al final (último número antes del último campo)
+    const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-    // El JSON es todo lo que está entre el primer "[" y el último "]"
-    const jStart=rest.indexOf('[');
-    const jEnd=rest.lastIndexOf(']');
-    if(jStart<0||jEnd<0)continue;
-    const jsonStr=rest.slice(jStart,jEnd+1);
-    // Total está después del "]"
-    const afterJson=rest.slice(jEnd+1);
+    const j1=rest.indexOf('[');
+    const j2=rest.lastIndexOf(']');
+    if(j1<0||j2<0)continue;
+    // Limpiar comillas dobles duplicadas del CSV
+    const jsonStr=rest.slice(j1,j2+1).replace(/""/g,'"');
+    const afterJson=rest.slice(j2+1);
     const totalMatch=afterJson.match(/[\d.]+/);
     const total=totalMatch?parseFloat(totalMatch[0]):0;
     if(total!==0)allTotals[fechaNorm]=total;
