@@ -481,7 +481,7 @@ function parseCSV(text){
     const j2=rest.lastIndexOf(']');
     if(j1<0||j2<0)continue;
     // Limpiar comillas dobles duplicadas del CSV
-    const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'"').replace(/""/g,'"');
+    const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'').replace(/""/g,'"');
     const afterJson=rest.slice(j2+1);
     const totalMatch=afterJson.match(/[\d.]+/);
     const total=totalMatch?parseFloat(totalMatch[0]):0;
