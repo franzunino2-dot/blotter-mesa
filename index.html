@@ -506,24 +506,26 @@ function parseCSV(text){
     const fp=fecha.split('/');
     const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-
-    // ---- Parse col B: operaciones ----
+    // Col B: operaciones
     const j1=rest.indexOf('[');
-    const j2=rest.lastIndexOf(']');
+    const j2=rest.indexOf(']',j1);
     if(j1>=0&&j2>j1){
-      const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'').replace(/""/g,'"');
-      // Col C: total (número después del JSON)
+      const jsonStr=rest.slice(j1,j2+1).replace(/""/g,'"');
       const afterJson=rest.slice(j2+1);
       const totalMatch=afterJson.match(/[\d.]+/);
       const total=totalMatch?parseFloat(totalMatch[0]):0;
       if(total!==0)allTotals[fechaNorm]=total;
-      try{
-        const rows=JSON.parse(jsonStr);
-        if(Array.isArray(rows)&&rows.length){
-          allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
-        }
-      }catch(e){}
+      try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));}catch(e){}
     }
+    // Col E: homebroker — buscar el ÚLTIMO array de la línea
+    const hbJ1=rest.lastIndexOf('[[');
+    const hbJ2=rest.lastIndexOf(']]');
+    if(hbJ1>=0&&hbJ2>hbJ1){
+      const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
+      try{const hbRows=JSON.parse(hbStr);if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;}catch(e){}
+    }
+  }
+}
 
     // ---- Parse col E: homebroker ----
     // CSV format: fecha,json_ops,total,actualizado,json_hb
