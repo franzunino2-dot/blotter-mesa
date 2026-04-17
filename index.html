@@ -71,8 +71,6 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .section-label{font-size:10px;color:#2d3748;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #1e2330}
-.hb-label{font-size:10px;color:#0ea5e9;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #0ea5e940;display:flex;align-items:center;gap:6px}
-.hb-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a3a;color:#0ea5e9;border:0.5px solid #0ea5e940}
 .table-wrap{overflow-x:auto;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;min-width:650px}
 thead th{padding:5px 8px;text-align:left;font-size:10px;color:#2d3748;border-bottom:0.5px solid #1e2330;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
@@ -90,7 +88,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .badge-prod{background:#1a0a2a;color:#a78bfa;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-directo{background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-propio{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
-.badge-hb{background:#0c2a3a;color:#0ea5e9;font-size:9px;padding:1px 5px;border-radius:3px;border:0.5px solid #0ea5e940}
 .pnl-pos{color:#4ade80}.pnl-neg{color:#f87171}
 .mes-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px}
 .mes-cal-hdr{font-size:9px;color:#2d3748;text-align:center;padding:2px 0}
@@ -112,7 +109,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .client-bar{height:100%;border-radius:2px}
 .client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:120px;text-align:right}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
-.hb-info-box{background:#0c1a22;border:0.5px solid #0ea5e940;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#0ea5e9}
 @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:1fr}}
 </style>
 </head>
@@ -185,8 +181,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div id="view-rueda">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Homebroker</div><div class="metric-value blue" id="r-hb">—</div><div class="metric-sub" id="r-hb-sub">comisiones HB</div></div>
       <div class="metric"><div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Productores activos</div><div class="metric-value purple" id="r-prod">—</div><div class="metric-sub" id="r-prod-sub">—</div></div>
       <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
     </div>
     <div class="section-label">Operaciones del período</div>
@@ -222,17 +218,14 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="mes-cal-grid" id="mes-cal-grid"></div>
   </div>
   <div id="view-productores" style="display:none">
-    <div class="metrics">
-      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">blotter + HB</div></div>
-      <div class="metric"><div class="metric-label">Homebroker</div><div class="metric-value blue" id="prod-hb-total">—</div><div class="metric-sub">comisiones HB</div></div>
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período</div></div>
       <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div></div>
       <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
     </div>
-    <div class="section-label">Acumulado por productor (blotter)</div>
+    <div class="section-label">Acumulado por productor</div>
     <div id="prod-acum" style="margin-bottom:16px"></div>
-    <div class="hb-label"><span class="hb-badge">HB</span> Homebroker — comisiones del período</div>
-    <div id="prod-hb-acum" style="margin-bottom:16px"></div>
-    <div class="section-label">Detalle blotter</div>
+    <div class="section-label">Detalle</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -297,7 +290,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric"><div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="com-pnl">—</div><div class="metric-sub">período</div></div>
       <div class="metric"><div class="metric-label">Ganancia bruta</div><div class="metric-value white" id="com-bruto">—</div><div class="metric-sub">antes productores</div></div>
       <div class="metric"><div class="metric-label">Com. productores</div><div class="metric-value purple" id="com-prod">—</div><div class="metric-sub">col Q</div></div>
-      <div class="metric"><div class="metric-label">HB mesa</div><div class="metric-value blue" id="com-hb">—</div><div class="metric-sub">homebroker</div></div>
+      <div class="metric"><div class="metric-label">Ops con productor</div><div class="metric-value amber" id="com-conprod">—</div><div class="metric-sub">del período</div></div>
     </div>
     <div class="table-wrap">
       <table>
@@ -308,28 +301,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <tbody id="com-tbody"></tbody>
       </table>
     </div>
-    <div class="hb-label" style="margin-top:12px"><span class="hb-badge">HB</span> Homebroker — detalle por fecha</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Fecha</th><th>Productor</th><th class="tr">Com. Total</th><th class="tr">PyL Mesa</th><th class="tr">Productor $</th>
-        </tr></thead>
-        <tbody id="com-hb-tbody"></tbody>
-      </table>
-    </div>
   </div>
 </div>
 <script>
 const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-// allOps: fecha -> array de ops
-// allTotals: fecha -> totalDia (col C)
-// allHB: fecha -> array de [productor, comTotal, pylMesa, comProd]
-let allOps={},allTotals={},allHB={};
+let allOps={},allTotals={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
 
+// Índices del array
 const I={sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
 
 function rowToObj(r,fecha){
@@ -411,7 +393,7 @@ function renderCal(){
     const ts=strToTs(ds);
     const el=document.createElement('div');
     let cls='cal-cell';
-    if(allOps[ds]||allHB[ds])cls+=' has';
+    if(allOps[ds])cls+=' has';
     if(ds===todayS)cls+=' today';
     if(s&&e){const lo=Math.min(s,e),hi=Math.max(s,e);if(ts===lo&&ts===hi)cls+=' start end';else if(ts===lo)cls+=' start';else if(ts===hi)cls+=' end';else if(ts>lo&&ts<hi)cls+=' inrange';}
     else if(s&&ts===s)cls+=' start end';
@@ -449,10 +431,7 @@ function setPreset(p){
   else if(p==='ayer'){const y=new Date(now);y.setDate(y.getDate()-1);rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;}
   else if(p==='semana'){const dow=now.getDay()||7;const mon=new Date(now);mon.setDate(now.getDate()-dow+1);rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;}
   else if(p==='mes'){rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();rangeEnd=todayS;}
-  else if(p==='todo'){
-    const dates=Object.keys({...allOps,...allHB}).sort((a,b)=>strToTs(a)-strToTs(b));
-    if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}
-  }
+  else if(p==='todo'){const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}}
   pickStep=0;updateDisplay();renderAll();
 }
 function getDatesInRange(){
@@ -461,21 +440,13 @@ function getDatesInRange(){
   const lo=Math.min(strToTs(rangeStart),strToTs(end));
   const hi=Math.max(strToTs(rangeStart),strToTs(end));
   const dates=[];let cur=lo;
-  while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds]||allHB[ds])dates.push(ds);cur+=86400000;}
+  while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds])dates.push(ds);cur+=86400000;}
   return dates;
 }
 function getOpsInRange(){
   const ops=[];
   getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o)));
   return ops;
-}
-function getHBInRange(){
-  // Returns array of {fecha, productor, comTotal, pylMesa, comProd}
-  const hb=[];
-  getDatesInRange().forEach(d=>{
-    (allHB[d]||[]).forEach(r=>hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]}));
-  });
-  return hb;
 }
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
 
@@ -495,7 +466,7 @@ async function loadData(){
 }
 
 function parseCSV(text){
-  allOps={};allTotals={};allHB={};
+  allOps={};allTotals={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
     const line=lines[i];
@@ -506,59 +477,21 @@ function parseCSV(text){
     const fp=fecha.split('/');
     const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-
-    // ---- Parse col B: operaciones ----
     const j1=rest.indexOf('[');
     const j2=rest.lastIndexOf(']');
-    if(j1>=0&&j2>j1){
-      const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'').replace(/""/g,'"');
-      // Col C: total (número después del JSON)
-      const afterJson=rest.slice(j2+1);
-      const totalMatch=afterJson.match(/[\d.]+/);
-      const total=totalMatch?parseFloat(totalMatch[0]):0;
-      if(total!==0)allTotals[fechaNorm]=total;
-      try{
-        const rows=JSON.parse(jsonStr);
-        if(Array.isArray(rows)&&rows.length){
-          allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
-        }
-      }catch(e){}
-    }
-
-    // ---- Parse col E: homebroker ----
-    // CSV format: fecha,json_ops,total,actualizado,json_hb
-    // Split por comas respetando que puede haber comas dentro de JSON
-    // Col E es la 5ta columna — buscamos el 2do '[' que corresponde a hbRows
-    const parts=rest.split(',');
-    // Reconstruimos buscando el JSON de HB (col E = índice 4 del rest, contando desde 0)
-    // Más robusto: buscar el último array JSON que no sea el de operaciones
-    const hbStart=rest.lastIndexOf('[[');
-    const hbEnd=rest.lastIndexOf(']]');
-    if(hbStart>=0&&hbEnd>hbStart&&hbStart!==j1){
-      const hbStr=rest.slice(hbStart,hbEnd+2).replace(/\\"/g,'').replace(/""/g,'"');
-      try{
-        const hbRows=JSON.parse(hbStr);
-        if(Array.isArray(hbRows)&&hbRows.length){
-          allHB[fechaNorm]=hbRows;
-        }
-      }catch(e){}
-    }else{
-      // Fallback: buscar desde el final de la línea principal
-      // Col E viene después del 4to separador de nivel superior
-      // Buscar '[' después de la posición j2+afterJson.length
-      const fullAfter=rest.slice(j2+1);
-      const hbJ1=fullAfter.lastIndexOf('[');
-      const hbJ2=fullAfter.lastIndexOf(']');
-      if(hbJ1>=0&&hbJ2>hbJ1){
-        const hbStr=fullAfter.slice(hbJ1,hbJ2+1).replace(/\\"/g,'').replace(/""/g,'"');
-        try{
-          const hbRows=JSON.parse(hbStr);
-          if(Array.isArray(hbRows)&&hbRows.length){
-            allHB[fechaNorm]=hbRows;
-          }
-        }catch(e){}
+    if(j1<0||j2<0)continue;
+    // Limpiar comillas dobles duplicadas del CSV
+    const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'').replace(/""/g,'"');
+    const afterJson=rest.slice(j2+1);
+    const totalMatch=afterJson.match(/[\d.]+/);
+    const total=totalMatch?parseFloat(totalMatch[0]):0;
+    if(total!==0)allTotals[fechaNorm]=total;
+    try{
+      const rows=JSON.parse(jsonStr);
+      if(Array.isArray(rows)&&rows.length){
+        allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }
-    }
+    }catch(e){}
   }
 }
 
@@ -614,31 +547,26 @@ function getPares(ops){
   });
   return pares;
 }
-
 function renderRueda(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
-  const hb=getHBInRange();
-  const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);
   const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));
   const pares=getPares(ops);
+  const prodActivos=new Set(pares.filter(p=>p.productor).map(p=>p.productor));
   const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
-
   document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
-  document.getElementById('r-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-  document.getElementById('r-hb-sub').textContent=hb.length?hb.length+' productores':'sin datos HB';
   document.getElementById('r-vol').textContent=fmtK(vol);
   document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
+  document.getElementById('r-prod').textContent=prodActivos.size||'—';
+  document.getElementById('r-prod-sub').textContent=[...prodActivos].slice(0,3).join(' · ')||'—';
   document.getElementById('r-pos').textContent=openPos.length;
   document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
   document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
-
   const banner=document.getElementById('alert-banner');
   if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');}
   else banner.style.display='none';
-
   let html='';
   pares.forEach(p=>{
     const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
@@ -661,7 +589,6 @@ function renderRueda(){
   });
   document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
-
 function renderMes(){
   const now=new Date();
   if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
@@ -675,16 +602,11 @@ function renderMes(){
   for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;
   for(let d=1;d<=dim;d++){
     const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
-    const hasData=!!(allOps[ds]||allHB[ds]);const pnl=allTotals[ds]||0;
+    const hasData=!!allOps[ds];const pnl=allTotals[ds]||0;
     if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}
     const pnlR=Math.round(pnl);let cls='mes-cal-day';
     if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
-    const hasHB=!!allHB[ds];
-    grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')">
-      <span class="mes-cal-num">${d}</span>
-      ${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}
-      ${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op${hasHB?' HB':''}</span>`:''}
-    </div>`;
+    grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')"><span class="mes-cal-num">${d}</span>${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op</span>`:''}</div>`;
   }
   document.getElementById('mes-dias').textContent=diasOp;
   if(diasOp>0){
@@ -697,17 +619,12 @@ function renderMes(){
     document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
   }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
 }
-
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
-
 function renderProductores(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
-  const hb=getHBInRange();
-
-  // Acumulado blotter por productor
   const acum={};
   pares.forEach(p=>{
     const key=p.productor;
@@ -716,33 +633,11 @@ function renderProductores(){
     acum[key].dias.add(p.fecha);acum[key].especies.add(p.especie);acum[key].clientes.add(p.cliente);
   });
   const lista=Object.values(acum).sort((a,b)=>b.comProd-a.comProd);
-
-  // Acumulado HB por productor
-  const hbAcum={};
-  hb.forEach(r=>{
-    if(!hbAcum[r.productor])hbAcum[r.productor]={nombre:r.productor,comTotal:0,pylMesa:0,comProd:0,dias:new Set()};
-    hbAcum[r.productor].comTotal+=r.comTotal;
-    hbAcum[r.productor].pylMesa+=r.pylMesa;
-    hbAcum[r.productor].comProd+=r.comProd;
-    hbAcum[r.productor].dias.add(r.fecha);
-  });
-  const hbLista=Object.values(hbAcum).sort((a,b)=>b.pylMesa-a.pylMesa);
-  const hbPylTotal=hbLista.reduce((s,r)=>s+r.pylMesa,0);
-
   const totalProd=lista.reduce((s,p)=>s+p.comProd,0);
   document.getElementById('prod-total').innerHTML=fmtPnl(totalProd,true,'pnl-pos')||'—';
-  document.getElementById('prod-hb-total').innerHTML=hbPylTotal?fmtPnl(hbPylTotal,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-  document.getElementById('prod-unicos').textContent=new Set([...lista.map(p=>p.nombre),...hbLista.map(p=>p.nombre)]).size||'—';
-
-  // Top productor combinado (blotter + HB)
-  const combined={};
-  lista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.comProd;});
-  hbLista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.pylMesa;});
-  const topEntry=Object.entries(combined).sort((a,b)=>b[1]-a[1])[0];
-  if(topEntry){document.getElementById('prod-top').textContent=topEntry[0];document.getElementById('prod-top-sub').textContent=fmtPnl(topEntry[1],false);}
+  document.getElementById('prod-unicos').textContent=lista.length||'—';
+  if(lista[0]){document.getElementById('prod-top').textContent=lista[0].nombre;document.getElementById('prod-top-sub').textContent=fmtPnl(lista[0].comProd,false);}
   else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}
-
-  // Render blotter acum
   const maxP=Math.max(...lista.map(p=>p.comProd),1);
   document.getElementById('prod-acum').innerHTML=lista.length?lista.map(p=>`<div class="client-row">
     <div class="client-name" style="color:#a78bfa">${p.nombre}</div>
@@ -752,21 +647,7 @@ function renderProductores(){
     <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
     <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
     <div class="client-pnl">${fmtPnl(p.pylMesa,true)}</div>
-  </div>`).join(''):'<div class="empty-state">Sin operaciones con productor en el blotter</div>';
-
-  // Render HB acum
-  const maxHB=Math.max(...hbLista.map(p=>p.pylMesa),1);
-  document.getElementById('prod-hb-acum').innerHTML=hbLista.length?hbLista.map(p=>`<div class="client-row">
-    <div class="client-name" style="color:#0ea5e9">${p.nombre}</div>
-    <div class="client-ops-lbl">${p.dias.size} sem.</div>
-    <div style="font-size:10px;color:#4a5568;min-width:100px">Com. total: ${fmtPnl(p.comTotal,false,'pnl-pos')}</div>
-    <div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.pylMesa/maxHB*100)}%;background:#0ea5e9"></div></div>
-    <div class="client-pnl" style="color:#0ea5e9">${fmtPnl(p.pylMesa,true,'pnl-pos')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
-    <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
-  </div>`).join(''):'<div class="empty-state" style="color:#0ea5e940;font-size:11px">Sin datos de homebroker para el período</div>';
-
-  // Detalle blotter
+  </div>`).join(''):'<div class="empty-state">Sin productores</div>';
   let detHtml='';
   lista.forEach(prod=>{
     prod.pares.forEach((p,i)=>{detHtml+=`<tr>
@@ -783,7 +664,6 @@ function renderProductores(){
   });
   document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
 }
-
 function renderClientes(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.tipo==='directo');
@@ -806,7 +686,6 @@ function renderClientes(){
   </tr>`;});html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;});
   document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
-
 function renderCuenta1000(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -829,7 +708,6 @@ function renderCuenta1000(){
   </tr>`;});
   document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
-
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
   document.getElementById('cau-count').textContent=ops.length||'—';
@@ -849,21 +727,17 @@ function renderCauciones(){
   </tr>`;});
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 }
-
 function renderComisiones(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
   const pares=getPares(ops);
-  const hb=getHBInRange();
   const comProd=pares.reduce((s,p)=>s+p.comProductor,0);
   const bruto=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
-  const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);
-
+  const conProd=pares.filter(p=>p.productor&&p.productor!=='').length;
   document.getElementById('com-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('com-bruto').innerHTML=fmtPnl(bruto,true,'pnl-pos')||'—';
   document.getElementById('com-prod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';
-  document.getElementById('com-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-
+  document.getElementById('com-conprod').textContent=conProd||'—';
   let html='';
   pares.forEach(p=>{
     const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
@@ -879,21 +753,7 @@ function renderComisiones(){
     </tr>`;
   });
   document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
-
-  // Tabla HB
-  let hbHtml='';
-  hb.forEach(r=>{
-    hbHtml+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
-      <td style="color:#0ea5e9">${r.productor}</td>
-      <td class="tr" style="color:#a0aec0">${fmtPnl(r.comTotal,true,'pnl-pos')||'—'}</td>
-      <td class="tr">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
-      <td class="tr" style="color:#a78bfa">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('com-hb-tbody').innerHTML=hbHtml||'<tr><td colspan="5" style="text-align:center;padding:16px;color:#2d3748">Sin datos de homebroker para el período</td></tr>';
 }
-
 function renderAll(){renderRueda();renderMes();renderProductores();renderClientes();renderCuenta1000();renderCauciones();renderComisiones();}
 function showTab(t){
   ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
