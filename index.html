@@ -487,29 +487,29 @@ function parseCSV(text){
     const fp=fecha.split('/');
     const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-    const j1=rest.indexOf('[');
-    const j2=rest.lastIndexOf(']');
-    if(j1<0||j2<0)continue;
-    const jsonStr=rest.slice(j1,j2+1).replace(/\\"/g,'').replace(/""/g,'"');
-    const afterJson=rest.slice(j2+1);
-    const totalMatch=afterJson.match(/[\d.]+/);
-    const total=totalMatch?parseFloat(totalMatch[0]):0;
-    if(total!==0)allTotals[fechaNorm]=total;
-    try{
-      const rows=JSON.parse(jsonStr);
-      if(Array.isArray(rows)&&rows.length){
-        allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
-      }
-    }catch(e){}
-    // HB: buscar ultimo array de la linea (col E)
-    const hbJ1=rest.lastIndexOf('[[');
-    const hbJ2=rest.lastIndexOf(']]');
-    if(hbJ1>=0&&hbJ2>hbJ1&&hbJ1!==rest.indexOf('[[')){
-      const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
+    // Col B: operaciones — primer [[ hasta su ]] correspondiente
+    const j1=rest.indexOf('[[');
+    const j2=rest.indexOf(']]',j1);
+    if(j1>=0&&j2>j1){
+      const jsonStr=rest.slice(j1,j2+2).replace(/""/g,'"');
+      const afterJson=rest.slice(j2+2);
+      const totalMatch=afterJson.match(/[\d.]+/);
+      const total=totalMatch?parseFloat(totalMatch[0]):0;
+      if(total!==0)allTotals[fechaNorm]=total;
       try{
-        const hbRows=JSON.parse(hbStr);
-        if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
+        const rows=JSON.parse(jsonStr);
+        if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }catch(e){}
+      // Col E: HB — ultimo [[ de la linea
+      const hbJ1=rest.lastIndexOf('[[');
+      const hbJ2=rest.lastIndexOf(']]');
+      if(hbJ1>j2&&hbJ2>hbJ1){
+        const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
+        try{
+          const hbRows=JSON.parse(hbStr);
+          if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
+        }catch(e){}
+      }
     }
   }
 }
