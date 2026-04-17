@@ -90,7 +90,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .badge-prod{background:#1a0a2a;color:#a78bfa;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-directo{background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-propio{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
-.badge-hb{background:#0c2a3a;color:#0ea5e9;font-size:9px;padding:1px 5px;border-radius:3px;border:0.5px solid #0ea5e940}
 .pnl-pos{color:#4ade80}.pnl-neg{color:#f87171}
 .mes-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px}
 .mes-cal-hdr{font-size:9px;color:#2d3748;text-align:center;padding:2px 0}
@@ -112,7 +111,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .client-bar{height:100%;border-radius:2px}
 .client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:120px;text-align:right}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
-.hb-info-box{background:#0c1a22;border:0.5px solid #0ea5e940;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#0ea5e9}
 @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:1fr}}
 </style>
 </head>
@@ -224,7 +222,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div id="view-productores" style="display:none">
     <div class="metrics">
       <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">blotter + HB</div></div>
-      <div class="metric"><div class="metric-label">Homebroker</div><div class="metric-value blue" id="prod-hb-total">—</div><div class="metric-sub">comisiones HB</div></div>
+      <div class="metric"><div class="metric-label">Homebroker mesa</div><div class="metric-value blue" id="prod-hb-total">—</div><div class="metric-sub">PyL HB</div></div>
       <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div></div>
       <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
     </div>
@@ -323,177 +321,36 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-// allOps: fecha -> array de ops
-// allTotals: fecha -> totalDia (col C)
-// allHB: fecha -> array de [productor, comTotal, pylMesa, comProd]
 let allOps={},allTotals={},allHB={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
-
 const I={sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
-
-function rowToObj(r,fecha){
-  return{
-    _fecha:fecha,
-    seccion:r[I.sec]||'',mercado:r[I.mer]||'',plazo:r[I.plz]||'0',
-    op:r[I.op]||'',especie:r[I.esp]||'',moneda:r[I.mon]||'',
-    precio:r[I.pre]||0,vn:r[I.vn]||0,monto:r[I.mto]||0,
-    comitente:String(r[I.com]||''),cliente:r[I.cli]||'',
-    productor:r[I.pro]||'',pylMesa:r[I.pyl]||0,comProductor:r[I.cpro]||0,
-  };
-}
-
-function doLogin(){
-  const u=document.getElementById('login-user').value.trim();
-  const p=document.getElementById('login-pass').value;
-  if(USERS[u]&&USERS[u]===p){
-    sessionStorage.setItem('mesa-auth',u);
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    loadData();
-  }else{document.getElementById('login-error').style.display='block';document.getElementById('login-pass').value='';}
-}
-function doLogout(){
-  sessionStorage.removeItem('mesa-auth');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app-screen').style.display='none';
-}
-function checkAuth(){
-  if(sessionStorage.getItem('mesa-auth')){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    loadData();
-  }
-}
-
+function rowToObj(r,fecha){return{_fecha:fecha,seccion:r[I.sec]||'',mercado:r[I.mer]||'',plazo:r[I.plz]||'0',op:r[I.op]||'',especie:r[I.esp]||'',moneda:r[I.mon]||'',precio:r[I.pre]||0,vn:r[I.vn]||0,monto:r[I.mto]||0,comitente:String(r[I.com]||''),cliente:r[I.cli]||'',productor:r[I.pro]||'',pylMesa:r[I.pyl]||0,comProductor:r[I.cpro]||0};}
+function doLogin(){const u=document.getElementById('login-user').value.trim();const p=document.getElementById('login-pass').value;if(USERS[u]&&USERS[u]===p){sessionStorage.setItem('mesa-auth',u);document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadData();}else{document.getElementById('login-error').style.display='block';document.getElementById('login-pass').value='';}}
+function doLogout(){sessionStorage.removeItem('mesa-auth');document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
+function checkAuth(){if(sessionStorage.getItem('mesa-auth')){document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadData();}}
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function strToTs(s){const[d,m,y]=s.split('/');return new Date(+y,+m-1,+d).getTime();}
 function tsToStr(ts){const d=new Date(ts);return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function fmtInt(n){return Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
 function fmtDec(n){return(parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtPnl(n,tag,cls){
-  const v=Math.round(parseFloat(n)||0);if(!v)return'—';
-  const s=(v>0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
-  const c=cls||(v>0?'pnl-pos':'pnl-neg');
-  return tag?`<span class="${c}">${s}</span>`:s;
-}
-function fmtK(n){
-  const v=Math.round(parseFloat(n)||0);
-  if(Math.abs(v)>=1000000)return'$'+Math.round(v/1000000)+'M';
-  if(Math.abs(v)>=1000)return'$'+Math.round(v/1000)+'k';
-  return'$'+Math.abs(v).toLocaleString('es-AR');
-}
-
-function toggleCal(){
-  const popup=document.getElementById('cal-popup');
-  if(popup.classList.contains('open')){popup.classList.remove('open');pickStep=0;return;}
-  const now=new Date();
-  if(calY===undefined){calY=now.getFullYear();calM=now.getMonth();}
-  pickStep=0;renderCal();popup.classList.add('open');
-}
+function fmtPnl(n,tag,cls){const v=Math.round(parseFloat(n)||0);if(!v)return'—';const s=(v>0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');const c=cls||(v>0?'pnl-pos':'pnl-neg');return tag?`<span class="${c}">${s}</span>`:s;}
+function fmtK(n){const v=Math.round(parseFloat(n)||0);if(Math.abs(v)>=1000000)return'$'+Math.round(v/1000000)+'M';if(Math.abs(v)>=1000)return'$'+Math.round(v/1000)+'k';return'$'+Math.abs(v).toLocaleString('es-AR');}
+function toggleCal(){const popup=document.getElementById('cal-popup');if(popup.classList.contains('open')){popup.classList.remove('open');pickStep=0;return;}const now=new Date();if(calY===undefined){calY=now.getFullYear();calM=now.getMonth();}pickStep=0;renderCal();popup.classList.add('open');}
 document.getElementById('cal-prev').addEventListener('click',function(e){e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();});
 document.getElementById('cal-next').addEventListener('click',function(e){e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();});
-function renderCal(){
-  document.getElementById('cal-label').textContent=MESES[calM]+' '+calY;
-  const hdrs=document.getElementById('cal-hdrs');hdrs.innerHTML='';
-  ['L','M','X','J','V','S','D'].forEach(h=>{const d=document.createElement('div');d.className='cal-hdr-cell';d.textContent=h;hdrs.appendChild(d);});
-  const grid=document.getElementById('cal-days');grid.innerHTML='';
-  const first=new Date(calY,calM,1);
-  let dow=first.getDay()-1;if(dow<0)dow=6;
-  const dim=new Date(calY,calM+1,0).getDate();
-  const todayS=todayStr();
-  const s=rangeStart?strToTs(rangeStart):null;
-  const e=rangeEnd?strToTs(rangeEnd):null;
-  for(let i=0;i<dow;i++){const el=document.createElement('div');el.className='cal-cell empty';grid.appendChild(el);}
-  for(let d=1;d<=dim;d++){
-    const ds=pad2(d)+'/'+pad2(calM+1)+'/'+calY;
-    const ts=strToTs(ds);
-    const el=document.createElement('div');
-    let cls='cal-cell';
-    if(allOps[ds]||allHB[ds])cls+=' has';
-    if(ds===todayS)cls+=' today';
-    if(s&&e){const lo=Math.min(s,e),hi=Math.max(s,e);if(ts===lo&&ts===hi)cls+=' start end';else if(ts===lo)cls+=' start';else if(ts===hi)cls+=' end';else if(ts>lo&&ts<hi)cls+=' inrange';}
-    else if(s&&ts===s)cls+=' start end';
-    el.className=cls;el.textContent=d;el.dataset.date=ds;
-    el.addEventListener('click',function(ev){ev.stopPropagation();onPickDay(this.dataset.date);});
-    grid.appendChild(el);
-  }
-  document.getElementById('cal-hint').textContent=pickStep===0?'Elegí la fecha inicio':'Ahora elegí la fecha fin';
-}
-function onPickDay(ds){
-  if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}
-  else{
-    rangeEnd=ds;pickStep=0;
-    if(strToTs(rangeStart)>strToTs(rangeEnd)){const tmp=rangeStart;rangeStart=rangeEnd;rangeEnd=tmp;}
-    document.getElementById('cal-popup').classList.remove('open');
-    updateDisplay();clearPresets();renderAll();
-  }
-  renderCal();
-}
-document.addEventListener('click',function(e){
-  const popup=document.getElementById('cal-popup');
-  const wrap=document.getElementById('drp-wrap');
-  if(popup.classList.contains('open')&&!wrap.contains(e.target)){popup.classList.remove('open');pickStep=0;}
-});
-function updateDisplay(){
-  const el=document.getElementById('drp-display');
-  if(!rangeStart){el.textContent='—';return;}
-  el.textContent=(!rangeEnd||rangeEnd===rangeStart)?rangeStart:rangeStart+' → '+rangeEnd;
-}
+function renderCal(){document.getElementById('cal-label').textContent=MESES[calM]+' '+calY;const hdrs=document.getElementById('cal-hdrs');hdrs.innerHTML='';['L','M','X','J','V','S','D'].forEach(h=>{const d=document.createElement('div');d.className='cal-hdr-cell';d.textContent=h;hdrs.appendChild(d);});const grid=document.getElementById('cal-days');grid.innerHTML='';const first=new Date(calY,calM,1);let dow=first.getDay()-1;if(dow<0)dow=6;const dim=new Date(calY,calM+1,0).getDate();const todayS=todayStr();const s=rangeStart?strToTs(rangeStart):null;const e=rangeEnd?strToTs(rangeEnd):null;for(let i=0;i<dow;i++){const el=document.createElement('div');el.className='cal-cell empty';grid.appendChild(el);}for(let d=1;d<=dim;d++){const ds=pad2(d)+'/'+pad2(calM+1)+'/'+calY;const ts=strToTs(ds);const el=document.createElement('div');let cls='cal-cell';if(allOps[ds]||allHB[ds])cls+=' has';if(ds===todayS)cls+=' today';if(s&&e){const lo=Math.min(s,e),hi=Math.max(s,e);if(ts===lo&&ts===hi)cls+=' start end';else if(ts===lo)cls+=' start';else if(ts===hi)cls+=' end';else if(ts>lo&&ts<hi)cls+=' inrange';}else if(s&&ts===s)cls+=' start end';el.className=cls;el.textContent=d;el.dataset.date=ds;el.addEventListener('click',function(ev){ev.stopPropagation();onPickDay(this.dataset.date);});grid.appendChild(el);}document.getElementById('cal-hint').textContent=pickStep===0?'Elegí la fecha inicio':'Ahora elegí la fecha fin';}
+function onPickDay(ds){if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}else{rangeEnd=ds;pickStep=0;if(strToTs(rangeStart)>strToTs(rangeEnd)){const tmp=rangeStart;rangeStart=rangeEnd;rangeEnd=tmp;}document.getElementById('cal-popup').classList.remove('open');updateDisplay();clearPresets();renderAll();}renderCal();}
+document.addEventListener('click',function(e){const popup=document.getElementById('cal-popup');const wrap=document.getElementById('drp-wrap');if(popup.classList.contains('open')&&!wrap.contains(e.target)){popup.classList.remove('open');pickStep=0;}});
+function updateDisplay(){const el=document.getElementById('drp-display');if(!rangeStart){el.textContent='—';return;}el.textContent=(!rangeEnd||rangeEnd===rangeStart)?rangeStart:rangeStart+' → '+rangeEnd;}
 function clearPresets(){document.querySelectorAll('.drp-preset').forEach(p=>p.classList.remove('sel'));}
-function setPreset(p){
-  const now=new Date();const todayS=todayStr();
-  clearPresets();document.getElementById('pre-'+p).classList.add('sel');
-  if(p==='hoy'){rangeStart=todayS;rangeEnd=todayS;}
-  else if(p==='ayer'){const y=new Date(now);y.setDate(y.getDate()-1);rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;}
-  else if(p==='semana'){const dow=now.getDay()||7;const mon=new Date(now);mon.setDate(now.getDate()-dow+1);rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;}
-  else if(p==='mes'){rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();rangeEnd=todayS;}
-  else if(p==='todo'){
-    const dates=Object.keys({...allOps,...allHB}).sort((a,b)=>strToTs(a)-strToTs(b));
-    if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}
-  }
-  pickStep=0;updateDisplay();renderAll();
-}
-function getDatesInRange(){
-  if(!rangeStart)return[];
-  const end=rangeEnd||rangeStart;
-  const lo=Math.min(strToTs(rangeStart),strToTs(end));
-  const hi=Math.max(strToTs(rangeStart),strToTs(end));
-  const dates=[];let cur=lo;
-  while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds]||allHB[ds])dates.push(ds);cur+=86400000;}
-  return dates;
-}
-function getOpsInRange(){
-  const ops=[];
-  getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o)));
-  return ops;
-}
-function getHBInRange(){
-  // Returns array of {fecha, productor, comTotal, pylMesa, comProd}
-  const hb=[];
-  getDatesInRange().forEach(d=>{
-    (allHB[d]||[]).forEach(r=>hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]}));
-  });
-  return hb;
-}
+function setPreset(p){const now=new Date();const todayS=todayStr();clearPresets();document.getElementById('pre-'+p).classList.add('sel');if(p==='hoy'){rangeStart=todayS;rangeEnd=todayS;}else if(p==='ayer'){const y=new Date(now);y.setDate(y.getDate()-1);rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;}else if(p==='semana'){const dow=now.getDay()||7;const mon=new Date(now);mon.setDate(now.getDate()-dow+1);rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;}else if(p==='mes'){rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();rangeEnd=todayS;}else if(p==='todo'){const dates=Object.keys({...allOps,...allHB}).sort((a,b)=>strToTs(a)-strToTs(b));if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}}pickStep=0;updateDisplay();renderAll();}
+function getDatesInRange(){if(!rangeStart)return[];const end=rangeEnd||rangeStart;const lo=Math.min(strToTs(rangeStart),strToTs(end));const hi=Math.max(strToTs(rangeStart),strToTs(end));const dates=[];let cur=lo;while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds]||allHB[ds])dates.push(ds);cur+=86400000;}return dates;}
+function getOpsInRange(){const ops=[];getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o)));return ops;}
+function getHBInRange(){const hb=[];getDatesInRange().forEach(d=>{(allHB[d]||[]).forEach(r=>hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]}));});return hb;}
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
-
-async function loadData(){
-  setSyncState('loading','Actualizando...');
-  try{
-    const r=await fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    parseCSV(await r.text());
-    setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
-    const todayS=todayStr();
-    const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));
-    if(allOps[todayS]){rangeStart=todayS;rangeEnd=todayS;document.getElementById('pre-hoy').classList.add('sel');}
-    else if(dates.length){rangeStart=dates[dates.length-1];rangeEnd=rangeStart;}
-    updateDisplay();renderAll();
-  }catch(e){setSyncState('error','Error: '+e.message);}
-}
-
+async function loadData(){setSyncState('loading','Actualizando...');try{const r=await fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);parseCSV(await r.text());setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));const todayS=todayStr();const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));if(allOps[todayS]){rangeStart=todayS;rangeEnd=todayS;document.getElementById('pre-hoy').classList.add('sel');}else if(dates.length){rangeStart=dates[dates.length-1];rangeEnd=rangeStart;}updateDisplay();renderAll();}catch(e){setSyncState('error','Error: '+e.message);}}
 function parseCSV(text){
   allOps={};allTotals={};allHB={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -506,7 +363,6 @@ function parseCSV(text){
     const fp=fecha.split('/');
     const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-    // Col B: operaciones
     const j1=rest.indexOf('[');
     const j2=rest.indexOf(']',j1);
     if(j1>=0&&j2>j1){
@@ -517,7 +373,6 @@ function parseCSV(text){
       if(total!==0)allTotals[fechaNorm]=total;
       try{const rows=JSON.parse(jsonStr);if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));}catch(e){}
     }
-    // Col E: homebroker — buscar el ÚLTIMO array de la línea
     const hbJ1=rest.lastIndexOf('[[');
     const hbJ2=rest.lastIndexOf(']]');
     if(hbJ1>=0&&hbJ2>hbJ1){
@@ -526,395 +381,23 @@ function parseCSV(text){
     }
   }
 }
-
-    // ---- Parse col E: homebroker ----
-    // CSV format: fecha,json_ops,total,actualizado,json_hb
-    // Split por comas respetando que puede haber comas dentro de JSON
-    // Col E es la 5ta columna — buscamos el 2do '[' que corresponde a hbRows
-    const parts=rest.split(',');
-    // Reconstruimos buscando el JSON de HB (col E = índice 4 del rest, contando desde 0)
-    // Más robusto: buscar el último array JSON que no sea el de operaciones
-    const hbStart=rest.lastIndexOf('[[');
-    const hbEnd=rest.lastIndexOf(']]');
-    if(hbStart>=0&&hbEnd>hbStart&&hbStart!==j1){
-      const hbStr=rest.slice(hbStart,hbEnd+2).replace(/\\"/g,'').replace(/""/g,'"');
-      try{
-        const hbRows=JSON.parse(hbStr);
-        if(Array.isArray(hbRows)&&hbRows.length){
-          allHB[fechaNorm]=hbRows;
-        }
-      }catch(e){}
-    }else{
-      // Fallback: buscar desde el final de la línea principal
-      // Col E viene después del 4to separador de nivel superior
-      // Buscar '[' después de la posición j2+afterJson.length
-      const fullAfter=rest.slice(j2+1);
-      const hbJ1=fullAfter.lastIndexOf('[');
-      const hbJ2=fullAfter.lastIndexOf(']');
-      if(hbJ1>=0&&hbJ2>hbJ1){
-        const hbStr=fullAfter.slice(hbJ1,hbJ2+1).replace(/\\"/g,'').replace(/""/g,'"');
-        try{
-          const hbRows=JSON.parse(hbStr);
-          if(Array.isArray(hbRows)&&hbRows.length){
-            allHB[fechaNorm]=hbRows;
-          }
-        }catch(e){}
-      }
-    }
-  }
-}
-
-function setSyncState(s,msg){
-  document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
-  document.getElementById('sync-label').textContent=msg;
-}
-function tipoOp(o){
-  if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';
-  if(o.productor&&o.productor.trim()!=='')return'productor';
-  if(o.comitente==='1000')return'propio';
-  return'directo';
-}
-function getOpenPos(ops){
-  const map={};
-  ops.forEach(o=>{
-    const k=o.especie+'|'+(o.plazo||'0');
-    if(!map[k])map[k]={especie:o.especie,plazo:o.plazo||'0',vnC:0,vnV:0};
-    if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
-    else map[k].vnV+=parseFloat(o.vn)||0;
-  });
-  return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
-}
-function getPares(ops){
-  const pares=[];const usados=new Set();
-  ops.forEach((a,ai)=>{
-    if(usados.has(ai))return;
-    const mi=ops.findIndex((b,bi)=>bi!==ai&&!usados.has(bi)&&b.especie===a.especie&&Math.abs((parseFloat(b.vn)||0)-(parseFloat(a.vn)||0))<1&&b.op!==a.op&&a._fecha===b._fecha);
-    if(mi>=0){
-      usados.add(ai);usados.add(mi);
-      const b=ops[mi];
-      const compra=a.op==='C'?a:b;const venta=a.op==='V'?a:b;
-      pares.push({
-        fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo||'0',
-        vn:parseFloat(a.vn)||0,precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,
-        monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),
-        cliente:(a.cliente||b.cliente||'—').trim(),comitente:(a.comitente||b.comitente||'—').trim(),
-        productor:(a.productor||b.productor||'').trim(),
-        pylMesa:(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0),
-        comProductor:(parseFloat(a.comProductor)||0)+(parseFloat(b.comProductor)||0),
-        cerrado:true,tipo:tipoOp({...a,productor:a.productor||b.productor||''}),
-      });
-    }else{
-      usados.add(ai);
-      pares.push({
-        fecha:a._fecha,especie:a.especie,seccion:a.seccion,plazo:a.plazo||'0',
-        vn:parseFloat(a.vn)||0,precioC:a.op==='C'?parseFloat(a.precio)||0:0,precioV:a.op==='V'?parseFloat(a.precio)||0:0,
-        monto:parseFloat(a.monto)||0,cliente:(a.cliente||'—').trim(),comitente:(a.comitente||'—').trim(),
-        productor:(a.productor||'').trim(),pylMesa:parseFloat(a.pylMesa)||0,comProductor:parseFloat(a.comProductor)||0,
-        cerrado:false,tipo:tipoOp(a),
-      });
-    }
-  });
-  return pares;
-}
-
-function renderRueda(){
-  const ops=getOpsInRange();
-  const total=getTotalInRange();
-  const hb=getHBInRange();
-  const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);
-  const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));
-  const pares=getPares(ops);
-  const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
-
-  document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
-  document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
-  document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
-  document.getElementById('r-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-  document.getElementById('r-hb-sub').textContent=hb.length?hb.length+' productores':'sin datos HB';
-  document.getElementById('r-vol').textContent=fmtK(vol);
-  document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
-  document.getElementById('r-pos').textContent=openPos.length;
-  document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');
-  document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');
-
-  const banner=document.getElementById('alert-banner');
-  if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');}
-  else banner.style.display='none';
-
-  let html='';
-  pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
-    html+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-      <td><span class="especie">${p.especie}</span></td>
-      <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-      <td style="color:#4a5568">C↔V</td>
-      <td style="color:#e2e8f0">${p.cliente}</td>
-      <td style="color:#a78bfa">${p.productor||'—'}</td>
-      <td>${tipoBadge}</td>
-      <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr" style="color:#4a5568">${p.precioC?fmtDec(p.precioC)+'%':'—'}</td>
-      <td class="tr" style="color:#4a5568">${p.precioV?fmtDec(p.precioV)+'%':'—'}</td>
-      <td class="tr">$${fmtInt(p.monto)}</td>
-      <td>${p.cerrado?'<span class="badge-cerrada">cerrada</span>':'<span class="badge-abierta">abierta</span>'}</td>
-      <td class="tr" style="color:#a78bfa">${p.comProductor?fmtPnl(p.comProductor,true,'pnl-pos'):'—'}</td>
-      <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
-}
-
-function renderMes(){
-  const now=new Date();
-  if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
-  document.getElementById('mes-label').textContent=MESES[mesCalM]+' '+mesCalY;
-  const grid=document.getElementById('mes-cal-grid');grid.innerHTML='';
-  const first=new Date(mesCalY,mesCalM,1);
-  let dow=first.getDay()-1;if(dow<0)dow=6;
-  const dim=new Date(mesCalY,mesCalM+1,0).getDate();
-  const todayS=todayStr();
-  let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity,bestDay='',worstDay='';
-  for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
-    const hasData=!!(allOps[ds]||allHB[ds]);const pnl=allTotals[ds]||0;
-    if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}
-    const pnlR=Math.round(pnl);let cls='mes-cal-day';
-    if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
-    const hasHB=!!allHB[ds];
-    grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')">
-      <span class="mes-cal-num">${d}</span>
-      ${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}
-      ${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op${hasHB?' HB':''}</span>`:''}
-    </div>`;
-  }
-  document.getElementById('mes-dias').textContent=diasOp;
-  if(diasOp>0){
-    document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);
-    document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');
-    document.getElementById('mes-pnl-sub').textContent=diasOp+' días operados';
-    document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);
-    document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
-    document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);
-    document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
-  }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
-}
-
+function setSyncState(s,msg){document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');document.getElementById('sync-label').textContent=msg;}
+function tipoOp(o){if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';if(o.productor&&o.productor.trim()!=='')return'productor';if(o.comitente==='1000')return'propio';return'directo';}
+function getOpenPos(ops){const map={};ops.forEach(o=>{const k=o.especie+'|'+(o.plazo||'0');if(!map[k])map[k]={especie:o.especie,plazo:o.plazo||'0',vnC:0,vnV:0};if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;else map[k].vnV+=parseFloat(o.vn)||0;});return Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);}
+function getPares(ops){const pares=[];const usados=new Set();ops.forEach((a,ai)=>{if(usados.has(ai))return;const mi=ops.findIndex((b,bi)=>bi!==ai&&!usados.has(bi)&&b.especie===a.especie&&Math.abs((parseFloat(b.vn)||0)-(parseFloat(a.vn)||0))<1&&b.op!==a.op&&a._fecha===b._fecha);if(mi>=0){usados.add(ai);usados.add(mi);const b=ops[mi];const compra=a.op==='C'?a:b;const venta=a.op==='V'?a:b;pares.push({fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo||'0',vn:parseFloat(a.vn)||0,precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),cliente:(a.cliente||b.cliente||'—').trim(),comitente:(a.comitente||b.comitente||'—').trim(),productor:(a.productor||b.productor||'').trim(),pylMesa:(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0),comProductor:(parseFloat(a.comProductor)||0)+(parseFloat(b.comProductor)||0),cerrado:true,tipo:tipoOp({...a,productor:a.productor||b.productor||''})});}else{usados.add(ai);pares.push({fecha:a._fecha,especie:a.especie,seccion:a.seccion,plazo:a.plazo||'0',vn:parseFloat(a.vn)||0,precioC:a.op==='C'?parseFloat(a.precio)||0:0,precioV:a.op==='V'?parseFloat(a.precio)||0:0,monto:parseFloat(a.monto)||0,cliente:(a.cliente||'—').trim(),comitente:(a.comitente||'—').trim(),productor:(a.productor||'').trim(),pylMesa:parseFloat(a.pylMesa)||0,comProductor:parseFloat(a.comProductor)||0,cerrado:false,tipo:tipoOp(a)});}});return pares;}
+function renderRueda(){const ops=getOpsInRange();const total=getTotalInRange();const hb=getHBInRange();const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));const pares=getPares(ops);const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';document.getElementById('r-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';document.getElementById('r-hb-sub').textContent=hb.length?hb.length+' entradas':'sin datos HB';document.getElementById('r-vol').textContent=fmtK(vol);document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';document.getElementById('r-pos').textContent=openPos.length;document.getElementById('r-pos-sub').textContent=openPos.length===0?'todo cerrado':openPos.map(p=>p.especie).join(' · ');document.getElementById('r-pos').className='metric-value '+(openPos.length>0?'amber':'green');const banner=document.getElementById('alert-banner');if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');}else banner.style.display='none';let html='';pares.forEach(p=>{const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';html+=`<tr><td style="color:#4a5568;font-family:monospace">${p.fecha}</td><td><span class="especie">${p.especie}</span></td><td><span class="badge-sec">${p.seccion||'—'}</span></td><td style="color:#4a5568">C↔V</td><td style="color:#e2e8f0">${p.cliente}</td><td style="color:#a78bfa">${p.productor||'—'}</td><td>${tipoBadge}</td><td class="tr">${fmtInt(p.vn)}</td><td class="tr" style="color:#4a5568">${p.precioC?fmtDec(p.precioC)+'%':'—'}</td><td class="tr" style="color:#4a5568">${p.precioV?fmtDec(p.precioV)+'%':'—'}</td><td class="tr">$${fmtInt(p.monto)}</td><td>${p.cerrado?'<span class="badge-cerrada">cerrada</span>':'<span class="badge-abierta">abierta</span>'}</td><td class="tr" style="color:#a78bfa">${p.comProductor?fmtPnl(p.comProductor,true,'pnl-pos'):'—'}</td><td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td></tr>`;});document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';}
+function renderMes(){const now=new Date();if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}document.getElementById('mes-label').textContent=MESES[mesCalM]+' '+mesCalY;const grid=document.getElementById('mes-cal-grid');grid.innerHTML='';const first=new Date(mesCalY,mesCalM,1);let dow=first.getDay()-1;if(dow<0)dow=6;const dim=new Date(mesCalY,mesCalM+1,0).getDate();const todayS=todayStr();let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity,bestDay='',worstDay='';for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;for(let d=1;d<=dim;d++){const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;const hasData=!!(allOps[ds]||allHB[ds]);const pnl=allTotals[ds]||0;if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}const pnlR=Math.round(pnl);let cls='mes-cal-day';if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';const hasHB=!!allHB[ds];grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')"><span class="mes-cal-num">${d}</span>${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op${hasHB?' HB':''}</span>`:''}</div>`;}document.getElementById('mes-dias').textContent=diasOp;if(diasOp>0){document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');document.getElementById('mes-pnl-sub').textContent=diasOp+' días operados';document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);}else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');}
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
-
-function renderProductores(){
-  const ops=getOpsInRange();
-  const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
-  const hb=getHBInRange();
-
-  // Acumulado blotter por productor
-  const acum={};
-  pares.forEach(p=>{
-    const key=p.productor;
-    if(!acum[key])acum[key]={nombre:key,pares:[],comProd:0,pylMesa:0,dias:new Set(),especies:new Set(),clientes:new Set()};
-    acum[key].pares.push(p);acum[key].comProd+=p.comProductor;acum[key].pylMesa+=p.pylMesa;
-    acum[key].dias.add(p.fecha);acum[key].especies.add(p.especie);acum[key].clientes.add(p.cliente);
-  });
-  const lista=Object.values(acum).sort((a,b)=>b.comProd-a.comProd);
-
-  // Acumulado HB por productor
-  const hbAcum={};
-  hb.forEach(r=>{
-    if(!hbAcum[r.productor])hbAcum[r.productor]={nombre:r.productor,comTotal:0,pylMesa:0,comProd:0,dias:new Set()};
-    hbAcum[r.productor].comTotal+=r.comTotal;
-    hbAcum[r.productor].pylMesa+=r.pylMesa;
-    hbAcum[r.productor].comProd+=r.comProd;
-    hbAcum[r.productor].dias.add(r.fecha);
-  });
-  const hbLista=Object.values(hbAcum).sort((a,b)=>b.pylMesa-a.pylMesa);
-  const hbPylTotal=hbLista.reduce((s,r)=>s+r.pylMesa,0);
-
-  const totalProd=lista.reduce((s,p)=>s+p.comProd,0);
-  document.getElementById('prod-total').innerHTML=fmtPnl(totalProd,true,'pnl-pos')||'—';
-  document.getElementById('prod-hb-total').innerHTML=hbPylTotal?fmtPnl(hbPylTotal,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-  document.getElementById('prod-unicos').textContent=new Set([...lista.map(p=>p.nombre),...hbLista.map(p=>p.nombre)]).size||'—';
-
-  // Top productor combinado (blotter + HB)
-  const combined={};
-  lista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.comProd;});
-  hbLista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.pylMesa;});
-  const topEntry=Object.entries(combined).sort((a,b)=>b[1]-a[1])[0];
-  if(topEntry){document.getElementById('prod-top').textContent=topEntry[0];document.getElementById('prod-top-sub').textContent=fmtPnl(topEntry[1],false);}
-  else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}
-
-  // Render blotter acum
-  const maxP=Math.max(...lista.map(p=>p.comProd),1);
-  document.getElementById('prod-acum').innerHTML=lista.length?lista.map(p=>`<div class="client-row">
-    <div class="client-name" style="color:#a78bfa">${p.nombre}</div>
-    <div class="client-ops-lbl">${p.dias.size}d · ${[...p.especies].slice(0,2).join('/')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:100px">${[...p.clientes].slice(0,2).join(', ')}</div>
-    <div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.comProd/maxP*100)}%;background:#a78bfa"></div></div>
-    <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
-    <div class="client-pnl">${fmtPnl(p.pylMesa,true)}</div>
-  </div>`).join(''):'<div class="empty-state">Sin operaciones con productor en el blotter</div>';
-
-  // Render HB acum
-  const maxHB=Math.max(...hbLista.map(p=>p.pylMesa),1);
-  document.getElementById('prod-hb-acum').innerHTML=hbLista.length?hbLista.map(p=>`<div class="client-row">
-    <div class="client-name" style="color:#0ea5e9">${p.nombre}</div>
-    <div class="client-ops-lbl">${p.dias.size} sem.</div>
-    <div style="font-size:10px;color:#4a5568;min-width:100px">Com. total: ${fmtPnl(p.comTotal,false,'pnl-pos')}</div>
-    <div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.pylMesa/maxHB*100)}%;background:#0ea5e9"></div></div>
-    <div class="client-pnl" style="color:#0ea5e9">${fmtPnl(p.pylMesa,true,'pnl-pos')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
-    <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
-  </div>`).join(''):'<div class="empty-state" style="color:#0ea5e940;font-size:11px">Sin datos de homebroker para el período</div>';
-
-  // Detalle blotter
-  let detHtml='';
-  lista.forEach(prod=>{
-    prod.pares.forEach((p,i)=>{detHtml+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-      <td style="color:#a78bfa;font-weight:500">${i===0?prod.nombre:''}</td>
-      <td style="color:#a0aec0">${p.cliente}</td>
-      <td><span class="especie">${p.especie}</span></td>
-      <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-      <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td>
-      <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
-    </tr>`;});
-    detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
-  });
-  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
-}
-
-function renderClientes(){
-  const ops=getOpsInRange();
-  const pares=getPares(ops).filter(p=>p.tipo==='directo');
-  const clientes=new Set(pares.map(p=>p.cliente));
-  document.getElementById('cli-count').textContent=clientes.size||'—';
-  document.getElementById('cli-pnl').innerHTML=fmtPnl(pares.reduce((s,p)=>s+p.pylMesa,0),true)||'—';
-  document.getElementById('cli-vol').textContent=fmtK(pares.reduce((s,p)=>s+p.monto,0));
-  const map={};pares.forEach(p=>{if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};map[p.cliente].pares.push(p);});
-  let html='';
-  Object.values(map).forEach(cli=>{cli.pares.forEach((p,i)=>{html+=`<tr>
-    <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-    <td style="color:#e2e8f0;font-weight:500">${i===0?cli.nombre:''}</td>
-    <td style="color:#4a5568">${i===0?cli.comitente:''}</td>
-    <td><span class="especie">${p.especie}</span></td>
-    <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-    <td style="color:#4a5568">C↔V</td>
-    <td class="tr">${fmtInt(p.vn)}</td>
-    <td class="tr">$${fmtInt(p.monto)}</td>
-    <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
-  </tr>`;});html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;});
-  document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
-}
-
-function renderCuenta1000(){
-  const ops=getOpsInRange();
-  const total=getTotalInRange();
-  document.getElementById('c1000-pnl').innerHTML=fmtPnl(total,true,'pnl-pos')||'—';
-  document.getElementById('c1000-ops').textContent=ops.length||'—';
-  document.getElementById('c1000-vol').textContent=fmtK(ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0));
-  let html='';
-  ops.forEach(o=>{html+=`<tr>
-    <td style="color:#4a5568;font-family:monospace">${o._fecha}</td>
-    <td><span class="especie">${o.especie}</span></td>
-    <td><span class="badge-sec">${o.seccion||'—'}</span></td>
-    <td style="color:#4a5568">${o.mercado||'—'}</td>
-    <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
-    <td style="color:#a0aec0">${o.cliente||'—'}</td>
-    <td style="color:#a78bfa">${o.productor||'—'}</td>
-    <td class="tr">${fmtInt(o.vn)}</td>
-    <td class="tr">${fmtDec(o.precio)}%</td>
-    <td class="tr">$${fmtInt(o.monto)}</td>
-    <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
-  </tr>`;});
-  document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
-}
-
-function renderCauciones(){
-  const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
-  document.getElementById('cau-count').textContent=ops.length||'—';
-  document.getElementById('cau-monto').textContent=fmtK(ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0));
-  document.getElementById('cau-pnl').innerHTML=fmtPnl(ops.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0),true)||'—';
-  let html='';
-  ops.forEach(o=>{html+=`<tr>
-    <td style="color:#4a5568;font-family:monospace">${o._fecha}</td>
-    <td style="color:#e2e8f0;font-weight:500">${o.cliente||'—'}</td>
-    <td style="color:#4a5568">${o.comitente||'—'}</td>
-    <td style="color:#4a5568">${o.mercado||'—'}</td>
-    <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
-    <td class="tr">${fmtInt(o.vn)}</td>
-    <td class="tr">${fmtDec(o.precio)}%</td>
-    <td class="tr">$${fmtInt(o.monto)}</td>
-    <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
-  </tr>`;});
-  document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
-}
-
-function renderComisiones(){
-  const ops=getOpsInRange();
-  const total=getTotalInRange();
-  const pares=getPares(ops);
-  const hb=getHBInRange();
-  const comProd=pares.reduce((s,p)=>s+p.comProductor,0);
-  const bruto=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
-  const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);
-
-  document.getElementById('com-pnl').innerHTML=fmtPnl(total,true)||'—';
-  document.getElementById('com-bruto').innerHTML=fmtPnl(bruto,true,'pnl-pos')||'—';
-  document.getElementById('com-prod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';
-  document.getElementById('com-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';
-
-  let html='';
-  pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
-    html+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-      <td><span class="especie">${p.especie}</span></td>
-      <td style="color:#a0aec0">${p.cliente}</td>
-      <td style="color:#a78bfa">${p.productor||'—'}</td>
-      <td>${tipoBadge}</td>
-      <td class="tr">${fmtInt(p.vn)}</td>
-      <td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td>
-      <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
-
-  // Tabla HB
-  let hbHtml='';
-  hb.forEach(r=>{
-    hbHtml+=`<tr>
-      <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
-      <td style="color:#0ea5e9">${r.productor}</td>
-      <td class="tr" style="color:#a0aec0">${fmtPnl(r.comTotal,true,'pnl-pos')||'—'}</td>
-      <td class="tr">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
-      <td class="tr" style="color:#a78bfa">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('com-hb-tbody').innerHTML=hbHtml||'<tr><td colspan="5" style="text-align:center;padding:16px;color:#2d3748">Sin datos de homebroker para el período</td></tr>';
-}
-
+function renderProductores(){const ops=getOpsInRange();const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');const hb=getHBInRange();const acum={};pares.forEach(p=>{const key=p.productor;if(!acum[key])acum[key]={nombre:key,pares:[],comProd:0,pylMesa:0,dias:new Set(),especies:new Set(),clientes:new Set()};acum[key].pares.push(p);acum[key].comProd+=p.comProductor;acum[key].pylMesa+=p.pylMesa;acum[key].dias.add(p.fecha);acum[key].especies.add(p.especie);acum[key].clientes.add(p.cliente);});const lista=Object.values(acum).sort((a,b)=>b.comProd-a.comProd);const hbAcum={};hb.forEach(r=>{if(!hbAcum[r.productor])hbAcum[r.productor]={nombre:r.productor,comTotal:0,pylMesa:0,comProd:0,dias:new Set()};hbAcum[r.productor].comTotal+=r.comTotal;hbAcum[r.productor].pylMesa+=r.pylMesa;hbAcum[r.productor].comProd+=r.comProd;hbAcum[r.productor].dias.add(r.fecha);});const hbLista=Object.values(hbAcum).sort((a,b)=>b.pylMesa-a.pylMesa);const hbPylTotal=hbLista.reduce((s,r)=>s+r.pylMesa,0);const totalProd=lista.reduce((s,p)=>s+p.comProd,0);document.getElementById('prod-total').innerHTML=fmtPnl(totalProd,true,'pnl-pos')||'—';document.getElementById('prod-hb-total').innerHTML=hbPylTotal?fmtPnl(hbPylTotal,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';document.getElementById('prod-unicos').textContent=new Set([...lista.map(p=>p.nombre),...hbLista.map(p=>p.nombre)]).size||'—';const combined={};lista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.comProd;});hbLista.forEach(p=>{if(!combined[p.nombre])combined[p.nombre]=0;combined[p.nombre]+=p.pylMesa;});const topEntry=Object.entries(combined).sort((a,b)=>b[1]-a[1])[0];if(topEntry){document.getElementById('prod-top').textContent=topEntry[0];document.getElementById('prod-top-sub').textContent=fmtPnl(topEntry[1],false);}else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}const maxP=Math.max(...lista.map(p=>p.comProd),1);document.getElementById('prod-acum').innerHTML=lista.length?lista.map(p=>`<div class="client-row"><div class="client-name" style="color:#a78bfa">${p.nombre}</div><div class="client-ops-lbl">${p.dias.size}d · ${[...p.especies].slice(0,2).join('/')}</div><div style="font-size:10px;color:#4a5568;min-width:100px">${[...p.clientes].slice(0,2).join(', ')}</div><div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.comProd/maxP*100)}%;background:#a78bfa"></div></div><div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div><div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div><div class="client-pnl">${fmtPnl(p.pylMesa,true)}</div></div>`).join(''):'<div class="empty-state">Sin operaciones con productor en el blotter</div>';const maxHB=Math.max(...hbLista.map(p=>p.pylMesa),1);document.getElementById('prod-hb-acum').innerHTML=hbLista.length?hbLista.map(p=>`<div class="client-row"><div class="client-name" style="color:#0ea5e9">${p.nombre}</div><div class="client-ops-lbl">${p.dias.size} sem.</div><div style="font-size:10px;color:#4a5568;min-width:100px">Com. total: ${fmtPnl(p.comTotal,false,'pnl-pos')}</div><div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.pylMesa/maxHB*100)}%;background:#0ea5e9"></div></div><div class="client-pnl" style="color:#0ea5e9">${fmtPnl(p.pylMesa,true,'pnl-pos')}</div><div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div><div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div></div>`).join(''):'<div class="empty-state" style="color:#4a5568;font-size:11px">Sin datos de homebroker para el período</div>';let detHtml='';lista.forEach(prod=>{prod.pares.forEach((p,i)=>{detHtml+=`<tr><td style="color:#4a5568;font-family:monospace">${p.fecha}</td><td style="color:#a78bfa;font-weight:500">${i===0?prod.nombre:''}</td><td style="color:#a0aec0">${p.cliente}</td><td><span class="especie">${p.especie}</span></td><td><span class="badge-sec">${p.seccion||'—'}</span></td><td class="tr">${fmtInt(p.vn)}</td><td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td></tr>`;});detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;});document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';}
+function renderClientes(){const ops=getOpsInRange();const pares=getPares(ops).filter(p=>p.tipo==='directo');const clientes=new Set(pares.map(p=>p.cliente));document.getElementById('cli-count').textContent=clientes.size||'—';document.getElementById('cli-pnl').innerHTML=fmtPnl(pares.reduce((s,p)=>s+p.pylMesa,0),true)||'—';document.getElementById('cli-vol').textContent=fmtK(pares.reduce((s,p)=>s+p.monto,0));const map={};pares.forEach(p=>{if(!map[p.cliente])map[p.cliente]={nombre:p.cliente,comitente:p.comitente,pares:[]};map[p.cliente].pares.push(p);});let html='';Object.values(map).forEach(cli=>{cli.pares.forEach((p,i)=>{html+=`<tr><td style="color:#4a5568;font-family:monospace">${p.fecha}</td><td style="color:#e2e8f0;font-weight:500">${i===0?cli.nombre:''}</td><td style="color:#4a5568">${i===0?cli.comitente:''}</td><td><span class="especie">${p.especie}</span></td><td><span class="badge-sec">${p.seccion||'—'}</span></td><td style="color:#4a5568">C↔V</td><td class="tr">${fmtInt(p.vn)}</td><td class="tr">$${fmtInt(p.monto)}</td><td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td></tr>`;});html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;});document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';}
+function renderCuenta1000(){const ops=getOpsInRange();const total=getTotalInRange();document.getElementById('c1000-pnl').innerHTML=fmtPnl(total,true,'pnl-pos')||'—';document.getElementById('c1000-ops').textContent=ops.length||'—';document.getElementById('c1000-vol').textContent=fmtK(ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0));let html='';ops.forEach(o=>{html+=`<tr><td style="color:#4a5568;font-family:monospace">${o._fecha}</td><td><span class="especie">${o.especie}</span></td><td><span class="badge-sec">${o.seccion||'—'}</span></td><td style="color:#4a5568">${o.mercado||'—'}</td><td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td><td style="color:#a0aec0">${o.cliente||'—'}</td><td style="color:#a78bfa">${o.productor||'—'}</td><td class="tr">${fmtInt(o.vn)}</td><td class="tr">${fmtDec(o.precio)}%</td><td class="tr">$${fmtInt(o.monto)}</td><td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td></tr>`;});document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';}
+function renderCauciones(){const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));document.getElementById('cau-count').textContent=ops.length||'—';document.getElementById('cau-monto').textContent=fmtK(ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0));document.getElementById('cau-pnl').innerHTML=fmtPnl(ops.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0),true)||'—';let html='';ops.forEach(o=>{html+=`<tr><td style="color:#4a5568;font-family:monospace">${o._fecha}</td><td style="color:#e2e8f0;font-weight:500">${o.cliente||'—'}</td><td style="color:#4a5568">${o.comitente||'—'}</td><td style="color:#4a5568">${o.mercado||'—'}</td><td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td><td class="tr">${fmtInt(o.vn)}</td><td class="tr">${fmtDec(o.precio)}%</td><td class="tr">$${fmtInt(o.monto)}</td><td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td></tr>`;});document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';}
+function renderComisiones(){const ops=getOpsInRange();const total=getTotalInRange();const pares=getPares(ops);const hb=getHBInRange();const comProd=pares.reduce((s,p)=>s+p.comProductor,0);const bruto=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);const hbPylMesa=hb.reduce((s,r)=>s+r.pylMesa,0);document.getElementById('com-pnl').innerHTML=fmtPnl(total,true)||'—';document.getElementById('com-bruto').innerHTML=fmtPnl(bruto,true,'pnl-pos')||'—';document.getElementById('com-prod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';document.getElementById('com-hb').innerHTML=hbPylMesa?fmtPnl(hbPylMesa,true,'pnl-pos'):'<span style="color:#4a5568">—</span>';let html='';pares.forEach(p=>{const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';html+=`<tr><td style="color:#4a5568;font-family:monospace">${p.fecha}</td><td><span class="especie">${p.especie}</span></td><td style="color:#a0aec0">${p.cliente}</td><td style="color:#a78bfa">${p.productor||'—'}</td><td>${tipoBadge}</td><td class="tr">${fmtInt(p.vn)}</td><td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td></tr>`;});document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';let hbHtml='';hb.forEach(r=>{hbHtml+=`<tr><td style="color:#4a5568;font-family:monospace">${r.fecha}</td><td style="color:#0ea5e9">${r.productor}</td><td class="tr" style="color:#a0aec0">${fmtPnl(r.comTotal,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td><td class="tr" style="color:#a78bfa">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td></tr>`;});document.getElementById('com-hb-tbody').innerHTML=hbHtml||'<tr><td colspan="5" style="text-align:center;padding:16px;color:#2d3748">Sin datos de homebroker para el período</td></tr>';}
 function renderAll(){renderRueda();renderMes();renderProductores();renderClientes();renderCuenta1000();renderCauciones();renderComisiones();}
-function showTab(t){
-  ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
-    document.getElementById('view-'+x).style.display=x===t?'':'none';
-    document.getElementById('tab-'+x).classList.toggle('active',x===t);
-  });
-  if(t==='mes')renderMes();
-}
-function updateClock(){
-  const now=new Date();
-  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
-  document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
-  const minLeft=17*60-(h*60+m);
-  const badge=document.getElementById('rueda-badge');
-  const openToday=getOpenPos((allOps[todayStr()]||[]).map(o=>o));
-  if(h>=17){badge.className='badge-closed';badge.textContent='Rueda cerrada';}
-  else if(minLeft<=30&&openToday.length>0){badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';}
-  else{badge.className='badge-open';badge.innerHTML='&#9679; Rueda abierta';}
-}
+function showTab(t){['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{document.getElementById('view-'+x).style.display=x===t?'':'none';document.getElementById('tab-'+x).classList.toggle('active',x===t);});if(t==='mes')renderMes();}
+function updateClock(){const now=new Date();const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);const minLeft=17*60-(h*60+m);const badge=document.getElementById('rueda-badge');const openToday=getOpenPos((allOps[todayStr()]||[]).map(o=>o));if(h>=17){badge.className='badge-closed';badge.textContent='Rueda cerrada';}else if(minLeft<=30&&openToday.length>0){badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';}else{badge.className='badge-open';badge.innerHTML='&#9679; Rueda abierta';}}
 setInterval(updateClock,1000);
 updateClock();
 checkAuth();
