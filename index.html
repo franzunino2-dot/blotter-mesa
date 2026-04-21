@@ -112,6 +112,36 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:120px;text-align:right}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
 @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:1fr}}
+
+/* ── Accordion productores combinado ── */
+.prod-card{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:6px;overflow:hidden;background:#111420}
+.prod-card-header{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:10px;transition:background .15s}
+.prod-card-header:hover{background:#161b28}
+.prod-card-toggle{font-size:10px;color:#4a5568;min-width:14px;transition:transform .2s}
+.prod-card-toggle.open{transform:rotate(90deg)}
+.prod-card-name{font-size:13px;font-weight:500;color:#a78bfa;font-family:monospace;min-width:140px}
+.prod-card-tags{display:flex;gap:5px;flex:1}
+.prod-tag{font-size:9px;padding:1px 6px;border-radius:3px}
+.prod-tag-mesa{background:#1a0a2a;color:#a78bfa;border:0.5px solid #a78bfa40}
+.prod-tag-hb{background:#0c2a3a;color:#0ea5e9;border:0.5px solid #0ea5e940}
+.prod-card-bar-wrap{flex:2;height:3px;background:#1e2330;border-radius:2px;min-width:60px}
+.prod-card-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,#a78bfa,#0ea5e9)}
+.prod-card-total{font-size:13px;font-weight:500;font-family:monospace;color:#4ade80;min-width:110px;text-align:right}
+.prod-card-body{display:none;border-top:0.5px solid #1e2330;padding:10px 14px;background:#0d0f14}
+.prod-card-body.open{display:block}
+.prod-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.prod-breakdown-item{background:#111420;border-radius:4px;padding:8px 12px;border:0.5px solid #1e2330}
+.prod-breakdown-label{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.prod-breakdown-value{font-size:14px;font-weight:500;font-family:monospace}
+.prod-breakdown-sub{font-size:9px;color:#2d3748;margin-top:2px}
+.prod-breakdown-item.mesa .prod-breakdown-value{color:#a78bfa}
+.prod-breakdown-item.hb .prod-breakdown-value{color:#0ea5e9}
+.prod-detail-table{width:100%;border-collapse:collapse}
+.prod-detail-table th{font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;padding:3px 6px;border-bottom:0.5px solid #1e2330;font-weight:400}
+.prod-detail-table td{font-size:10px;color:#a0aec0;padding:4px 6px;border-bottom:0.5px solid #111420}
+.prod-detail-table tr:last-child td{border-bottom:none}
+.prod-detail-table tr:hover td{background:#111420}
+.prod-section-divider{font-size:9px;color:#0ea5e9;text-transform:uppercase;letter-spacing:.05em;padding:6px 0 3px;border-bottom:0.5px solid #0ea5e920;margin-bottom:4px;display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -221,15 +251,13 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   </div>
   <div id="view-productores" style="display:none">
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período</div></div>
+      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período (mesa + HB)</div></div>
       <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div></div>
       <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
     </div>
-    <div class="section-label">Acumulado por productor</div>
-    <div id="prod-acum" style="margin-bottom:16px"></div>
-    <div class="hb-label"><span class="hb-badge">HB</span> Homebroker — comisiones del período</div>
-    <div id="prod-hb-acum" style="margin-bottom:16px"></div>
-    <div class="section-label">Detalle</div>
+    <div class="section-label">Acumulado por productor — click para desglosar</div>
+    <div id="prod-acum-combined" style="margin-bottom:16px"></div>
+    <div class="section-label">Detalle operaciones</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -487,7 +515,6 @@ function parseCSV(text){
     const fp=fecha.split('/');
     const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
     const rest=line.slice(fc+1);
-    // Col B: operaciones — primer [[ hasta su ]] correspondiente
     const j1=rest.indexOf('[[');
     const j2=rest.indexOf(']]',j1);
     if(j1>=0&&j2>j1){
@@ -500,7 +527,6 @@ function parseCSV(text){
         const rows=JSON.parse(jsonStr);
         if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }catch(e){}
-      // Col E: HB — ultimo [[ de la linea
       const hbJ1=rest.lastIndexOf('[[');
       const hbJ2=rest.lastIndexOf(']]');
       if(hbJ1>j2&&hbJ2>hbJ1){
@@ -566,6 +592,7 @@ function getPares(ops){
   });
   return pares;
 }
+
 function renderRueda(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -608,6 +635,7 @@ function renderRueda(){
   });
   document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
+
 function renderMes(){
   const now=new Date();
   if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
@@ -638,59 +666,160 @@ function renderMes(){
     document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
   }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
 }
+
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
+
+// ── PRODUCTORES COMBINADO ──────────────────────────────────────────────────
 function renderProductores(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
   const hb=getHBInRange();
-  const acum={};
+
+  // Construir mapa combinado: clave = nombre del productor (normalizado)
+  const combined={};
+
+  // Cargar datos de mesa (BYMA/SENEBI)
   pares.forEach(p=>{
     const key=p.productor;
-    if(!acum[key])acum[key]={nombre:key,pares:[],comProd:0,pylMesa:0,dias:new Set(),especies:new Set(),clientes:new Set()};
-    acum[key].pares.push(p);acum[key].comProd+=p.comProductor;acum[key].pylMesa+=p.pylMesa;
-    acum[key].dias.add(p.fecha);acum[key].especies.add(p.especie);acum[key].clientes.add(p.cliente);
+    if(!combined[key])combined[key]={
+      nombre:key,
+      // mesa
+      mesaComProd:0,mesaPylMesa:0,mesaPares:[],mesaDias:new Set(),mesaEspecies:new Set(),mesaClientes:new Set(),
+      // hb
+      hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
+      hasMesa:false,hasHB:false
+    };
+    combined[key].mesaComProd+=p.comProductor;
+    combined[key].mesaPylMesa+=p.pylMesa;
+    combined[key].mesaPares.push(p);
+    combined[key].mesaDias.add(p.fecha);
+    combined[key].mesaEspecies.add(p.especie);
+    combined[key].mesaClientes.add(p.cliente);
+    combined[key].hasMesa=true;
   });
-  const lista=Object.values(acum).sort((a,b)=>b.comProd-a.comProd);
-  const totalProd=lista.reduce((s,p)=>s+p.comProd,0);
-  document.getElementById('prod-total').innerHTML=fmtPnl(totalProd,true,'pnl-pos')||'—';
-  document.getElementById('prod-unicos').textContent=lista.length||'—';
-  if(lista[0]){document.getElementById('prod-top').textContent=lista[0].nombre;document.getElementById('prod-top-sub').textContent=fmtPnl(lista[0].comProd,false);}
-  else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}
-  const maxP=Math.max(...lista.map(p=>p.comProd),1);
-  document.getElementById('prod-acum').innerHTML=lista.length?lista.map(p=>`<div class="client-row">
-    <div class="client-name" style="color:#a78bfa">${p.nombre}</div>
-    <div class="client-ops-lbl">${p.dias.size}d · ${[...p.especies].slice(0,2).join('/')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:100px">${[...p.clientes].slice(0,2).join(', ')}</div>
-    <div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.comProd/maxP*100)}%;background:#a78bfa"></div></div>
-    <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
-    <div class="client-pnl">${fmtPnl(p.pylMesa,true)}</div>
-  </div>`).join(''):'<div class="empty-state">Sin productores</div>';
-  // NUEVO: seccion HB
-  const hbAcum={};
+
+  // Cargar datos HB — match por nombre (case-insensitive)
   hb.forEach(r=>{
-    if(!hbAcum[r.productor])hbAcum[r.productor]={nombre:r.productor,comTotal:0,pylMesa:0,comProd:0,dias:new Set()};
-    hbAcum[r.productor].comTotal+=r.comTotal;
-    hbAcum[r.productor].pylMesa+=r.pylMesa;
-    hbAcum[r.productor].comProd+=r.comProd;
-    hbAcum[r.productor].dias.add(r.fecha);
+    // buscar coincidencia en combined (puede haber ligeras diferencias de capitalización)
+    let key=Object.keys(combined).find(k=>k.toLowerCase()===r.productor.toLowerCase());
+    if(!key){
+      key=r.productor;
+      combined[key]={
+        nombre:r.productor,
+        mesaComProd:0,mesaPylMesa:0,mesaPares:[],mesaDias:new Set(),mesaEspecies:new Set(),mesaClientes:new Set(),
+        hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
+        hasMesa:false,hasHB:false
+      };
+    }
+    combined[key].hbComProd+=r.comProd;
+    combined[key].hbPylMesa+=r.pylMesa;
+    combined[key].hbComTotal+=r.comTotal;
+    combined[key].hbDias.add(r.fecha);
+    combined[key].hasHB=true;
   });
-  const hbLista=Object.values(hbAcum).sort((a,b)=>b.pylMesa-a.pylMesa);
-  const maxHB=Math.max(...hbLista.map(p=>p.pylMesa),1);
-  document.getElementById('prod-hb-acum').innerHTML=hbLista.length?hbLista.map(p=>`<div class="client-row">
-    <div class="client-name" style="color:#0ea5e9">${p.nombre}</div>
-    <div class="client-ops-lbl">${p.dias.size} sem.</div>
-    <div style="font-size:10px;color:#4a5568;min-width:100px">Com. total: ${fmtPnl(p.comTotal,false,'pnl-pos')}</div>
-    <div class="client-bar-wrap"><div class="client-bar" style="width:${Math.round(p.pylMesa/maxHB*100)}%;background:#0ea5e9"></div></div>
-    <div class="client-pnl" style="color:#0ea5e9">${fmtPnl(p.pylMesa,true,'pnl-pos')}</div>
-    <div style="font-size:10px;color:#4a5568;min-width:20px;text-align:center">→</div>
-    <div class="client-pnl" style="color:#a78bfa">${fmtPnl(p.comProd,true,'pnl-pos')}</div>
-  </div>`).join(''):'<div class="empty-state" style="font-size:11px">Sin datos de homebroker para el período</div>';
+
+  // Ordenar por total combinado descendente
+  const lista=Object.values(combined).sort((a,b)=>{
+    const totA=a.mesaComProd+a.hbComProd;
+    const totB=b.mesaComProd+b.hbComProd;
+    return totB-totA;
+  });
+
+  const totalGlobal=lista.reduce((s,p)=>s+p.mesaComProd+p.hbComProd,0);
+  const maxTotal=Math.max(...lista.map(p=>p.mesaComProd+p.hbComProd),1);
+
+  // Métricas
+  document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
+  document.getElementById('prod-unicos').textContent=lista.length||'—';
+  if(lista[0]){
+    document.getElementById('prod-top').textContent=lista[0].nombre;
+    document.getElementById('prod-top-sub').textContent=fmtPnl(lista[0].mesaComProd+lista[0].hbComProd,false);
+  }else{
+    document.getElementById('prod-top').textContent='—';
+    document.getElementById('prod-top-sub').textContent='—';
+  }
+
+  // Render accordion
+  let html='';
+  lista.forEach((p,idx)=>{
+    const total=p.mesaComProd+p.hbComProd;
+    const barPct=Math.round(total/maxTotal*100);
+    const tags=(p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
+
+    // Detalle de operaciones de mesa
+    let detMesaRows='';
+    p.mesaPares.forEach(op=>{
+      detMesaRows+=`<tr>
+        <td style="color:#4a5568;font-family:monospace">${op.fecha}</td>
+        <td><span class="especie">${op.especie}</span></td>
+        <td style="color:#a0aec0">${op.cliente}</td>
+        <td><span class="badge-sec">${op.seccion||'—'}</span></td>
+        <td class="tr">${fmtInt(op.vn)}</td>
+        <td class="tr" style="color:#a78bfa">${fmtPnl(op.comProductor,true,'pnl-pos')||'—'}</td>
+        <td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td>
+      </tr>`;
+    });
+
+    // Detalle HB (por semana/día)
+    let detHBRows='';
+    if(p.hasHB){
+      hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()).forEach(r=>{
+        detHBRows+=`<tr>
+          <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
+          <td style="color:#0ea5e9">Homebroker</td>
+          <td style="color:#4a5568">—</td>
+          <td style="color:#4a5568">—</td>
+          <td class="tr">—</td>
+          <td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
+          <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
+        </tr>`;
+      });
+    }
+
+    html+=`<div class="prod-card">
+      <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
+        <span class="prod-card-toggle" id="arrow-pc-${idx}">▶</span>
+        <span class="prod-card-name">${p.nombre}</span>
+        <div class="prod-card-tags">${tags}</div>
+        <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%"></div></div>
+        <span class="prod-card-total">${fmtPnl(total,true,'pnl-pos')||'—'}</span>
+      </div>
+      <div class="prod-card-body" id="pc-${idx}">
+        <div class="prod-breakdown">
+          <div class="prod-breakdown-item mesa">
+            <div class="prod-breakdown-label">Mesa (BYMA/SENEBI)</div>
+            <div class="prod-breakdown-value">${p.hasMesa?fmtPnl(p.mesaComProd,false,'pnl-pos')||'$0':'—'}</div>
+            <div class="prod-breakdown-sub">${p.mesaDias.size} día/s · ${[...p.mesaEspecies].slice(0,3).join(', ')||'—'}</div>
+          </div>
+          <div class="prod-breakdown-item hb">
+            <div class="prod-breakdown-label">Homebroker</div>
+            <div class="prod-breakdown-value">${p.hasHB?fmtPnl(p.hbComProd,false,'pnl-pos')||'$0':'—'}</div>
+            <div class="prod-breakdown-sub">${p.hbDias.size} sem. · com. total: ${p.hasHB?fmtPnl(p.hbComTotal,false,'pnl-pos'):'—'}</div>
+          </div>
+        </div>
+        ${(detMesaRows||detHBRows)?`
+        <table class="prod-detail-table">
+          <thead><tr>
+            <th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th>
+            <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th>
+          </tr></thead>
+          <tbody>
+            ${detMesaRows}
+            ${detHBRows?`<tr><td colspan="7" style="padding:0"><div class="prod-section-divider"><span class="hb-badge">HB</span> Homebroker</div></td></tr>${detHBRows}`:''}
+          </tbody>
+        </table>`:''}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('prod-acum-combined').innerHTML=lista.length?html:'<div class="empty-state">Sin productores en el período</div>';
+
+  // Tabla detalle (se mantiene igual)
   let detHtml='';
   lista.forEach(prod=>{
-    prod.pares.forEach((p,i)=>{detHtml+=`<tr>
+    prod.mesaPares.forEach((p,i)=>{detHtml+=`<tr>
       <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
       <td style="color:#a78bfa;font-weight:500">${i===0?prod.nombre:''}</td>
       <td style="color:#a0aec0">${p.cliente}</td>
@@ -704,6 +833,16 @@ function renderProductores(){
   });
   document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
 }
+
+function toggleProdCard(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById('arrow-'+id);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.classList.toggle('open',!isOpen);
+}
+// ── FIN PRODUCTORES ────────────────────────────────────────────────────────
+
 function renderClientes(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.tipo==='directo');
@@ -726,6 +865,7 @@ function renderClientes(){
   </tr>`;});html+=`<tr><td colspan="9" style="padding:2px;background:#0d0f14"></td></tr>`;});
   document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
+
 function renderCuenta1000(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -748,6 +888,7 @@ function renderCuenta1000(){
   </tr>`;});
   document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
+
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
   document.getElementById('cau-count').textContent=ops.length||'—';
@@ -767,6 +908,7 @@ function renderCauciones(){
   </tr>`;});
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 }
+
 function renderComisiones(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -794,6 +936,7 @@ function renderComisiones(){
   });
   document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
 }
+
 function renderAll(){renderRueda();renderMes();renderProductores();renderClientes();renderCuenta1000();renderCauciones();renderComisiones();}
 function showTab(t){
   ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
