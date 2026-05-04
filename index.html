@@ -71,7 +71,6 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .section-label{font-size:10px;color:#2d3748;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #1e2330}
-.hb-label{font-size:10px;color:#0ea5e9;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #0ea5e940;display:flex;align-items:center;gap:6px}
 .hb-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a3a;color:#0ea5e9;border:0.5px solid #0ea5e940}
 .table-wrap{overflow-x:auto;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;min-width:650px}
@@ -103,17 +102,10 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .cal-pnl{font-size:9px;font-family:monospace}
 .cal-pnl.pos{color:#4ade80}.cal-pnl.neg{color:#f87171}
 .cal-ops-cnt{font-size:9px;color:#2d3748}
-.client-row{display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid #1e2330;gap:10px}
-.client-row:last-child{border-bottom:none}
-.client-name{font-size:12px;font-weight:500;color:#e2e8f0;min-width:100px;font-family:monospace}
-.client-ops-lbl{font-size:10px;color:#4a5568;min-width:80px}
-.client-bar-wrap{flex:1;height:3px;background:#1e2330;border-radius:2px}
-.client-bar{height:100%;border-radius:2px}
-.client-pnl{font-size:12px;font-weight:500;font-family:monospace;min-width:120px;text-align:right}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
 @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics3{grid-template-columns:1fr}}
 
-/* ── Accordion productores combinado ── */
+/* Accordion productores */
 .prod-card{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:6px;overflow:hidden;background:#111420}
 .prod-card-header{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:10px;transition:background .15s}
 .prod-card-header:hover{background:#161b28}
@@ -142,6 +134,31 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .prod-detail-table tr:last-child td{border-bottom:none}
 .prod-detail-table tr:hover td{background:#111420}
 .prod-section-divider{font-size:9px;color:#0ea5e9;text-transform:uppercase;letter-spacing:.05em;padding:6px 0 3px;border-bottom:0.5px solid #0ea5e920;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+
+/* Liquidación sueldo */
+.liq-box{background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:12px 14px;margin-bottom:10px}
+.liq-title{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.liq-title-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:#1a1a00;color:#fbbf24;border:0.5px solid #fbbf2440}
+.liq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.liq-item{background:#0d0f14;border-radius:4px;padding:8px 10px;border:0.5px solid #1e2330;position:relative}
+.liq-item-label{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.liq-item-value{font-size:15px;font-weight:500;font-family:monospace}
+.liq-item-sub{font-size:9px;color:#2d3748;margin-top:3px}
+.liq-item.fijo .liq-item-value{color:#e2e8f0}
+.liq-item.variable .liq-item-value{color:#60a5fa}
+.liq-item.total .liq-item-value{color:#4ade80}
+.liq-item.total{border-color:#4ade8030}
+.liq-formula{font-size:10px;color:#2d3748;font-family:monospace;padding:6px 8px;background:#0a0c10;border-radius:4px;border:0.5px solid #1e2330}
+.liq-formula span{color:#4a5568}
+.liq-no-data{font-size:11px;color:#4a5568;font-style:italic;padding:4px 0}
+.liq-mes-breakdown{margin-top:8px}
+.liq-mes-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid #1e2330;font-size:10px}
+.liq-mes-row:last-child{border-bottom:none}
+.liq-mes-name{color:#4a5568;min-width:80px}
+.liq-mes-fijo{color:#e2e8f0;min-width:90px;text-align:right;font-family:monospace}
+.liq-mes-comtotal{color:#a78bfa;min-width:100px;text-align:right;font-family:monospace}
+.liq-mes-variable{color:#60a5fa;min-width:90px;text-align:right;font-family:monospace}
+.liq-mes-total{color:#4ade80;min-width:90px;text-align:right;font-family:monospace;font-weight:500}
 </style>
 </head>
 <body>
@@ -210,6 +227,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="tab" id="tab-cauciones" onclick="showTab('cauciones')">Cauciones</div>
     <div class="tab" id="tab-comisiones" onclick="showTab('comisiones')">Comisiones</div>
   </div>
+
+  <!-- RUEDA -->
   <div id="view-rueda">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div></div>
@@ -231,6 +250,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       </table>
     </div>
   </div>
+
+  <!-- MES -->
   <div id="view-mes" style="display:none">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L del mes</div><div class="metric-value green" id="mes-pnl">—</div><div class="metric-sub" id="mes-pnl-sub">—</div></div>
@@ -249,6 +270,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     </div>
     <div class="mes-cal-grid" id="mes-cal-grid"></div>
   </div>
+
+  <!-- PRODUCTORES -->
   <div id="view-productores" style="display:none">
     <div class="metrics3">
       <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período (mesa + HB)</div></div>
@@ -268,6 +291,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       </table>
     </div>
   </div>
+
+  <!-- CLIENTES -->
   <div id="view-clientes" style="display:none">
     <div class="metrics3">
       <div class="metric"><div class="metric-label">Clientes directos</div><div class="metric-value blue" id="cli-count">—</div><div class="metric-sub">sin productor</div></div>
@@ -284,6 +309,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       </table>
     </div>
   </div>
+
+  <!-- CUENTA 1000 -->
   <div id="view-cuenta1000" style="display:none">
     <div class="metrics3">
       <div class="metric"><div class="metric-label">P&L total mesa (P1)</div><div class="metric-value green" id="c1000-pnl">—</div><div class="metric-sub">suma col P = P1</div></div>
@@ -301,6 +328,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       </table>
     </div>
   </div>
+
+  <!-- CAUCIONES -->
   <div id="view-cauciones" style="display:none">
     <div class="metrics3">
       <div class="metric"><div class="metric-label">Cauciones</div><div class="metric-value blue" id="cau-count">—</div><div class="metric-sub">del período</div></div>
@@ -317,6 +346,8 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       </table>
     </div>
   </div>
+
+  <!-- COMISIONES -->
   <div id="view-comisiones" style="display:none">
     <div class="metrics">
       <div class="metric"><div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="com-pnl">—</div><div class="metric-sub">período</div></div>
@@ -335,9 +366,15 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     </div>
   </div>
 </div>
+
 <script>
 const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
+const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
+
+// sueldosFijos[nombreProductor][mesKey] = monto  (mesKey = "Abril", "mayo", etc. — lowercase para match)
+let sueldosFijos = {};
+
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},allHB={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
@@ -356,6 +393,87 @@ function rowToObj(r,fecha){
   };
 }
 
+// ── SUELDOS ──────────────────────────────────────────────────────────────────
+async function loadSueldos(){
+  try{
+    const r=await fetch(SUELDOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
+    if(!r.ok)return;
+    const text=await r.text();
+    parseSueldos(text);
+  }catch(e){console.warn('Sueldos no cargaron:',e);}
+}
+
+function parseSueldos(text){
+  sueldosFijos={};
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length<2)return;
+
+  // Fila 0: headers. Col 0 vacía, col 1+ = nombres de meses
+  const headers=parseCSVLine(lines[0]);
+  // headers[0] = '' o 'Productor', headers[1..] = mes names
+
+  for(let i=1;i<lines.length;i++){
+    const cols=parseCSVLine(lines[i]);
+    const nombre=(cols[0]||'').trim();
+    if(!nombre)continue;
+    const key=nombre.toLowerCase();
+    if(!sueldosFijos[key])sueldosFijos[key]={nombre};
+    for(let j=1;j<headers.length;j++){
+      const mes=(headers[j]||'').trim().toLowerCase();
+      if(!mes)continue;
+      const val=parseMonto(cols[j]||'');
+      sueldosFijos[key][mes]=val;
+    }
+  }
+}
+
+function parseCSVLine(line){
+  // Simple CSV parser que maneja comillas
+  const res=[];let cur='';let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){res.push(cur);cur='';}
+    else cur+=c;
+  }
+  res.push(cur);
+  return res;
+}
+
+function parseMonto(s){
+  // Limpia $, puntos de miles, espacios, etc.
+  const clean=s.replace(/[$\s.]/g,'').replace(/,/g,'.');
+  return parseFloat(clean)||0;
+}
+
+// Dado un nombre de productor y un array de meses (ej: ["abril","mayo"]),
+// devuelve la suma de sueldos fijos para esos meses
+function getSueldoFijo(nombre, mesesArr){
+  const key=nombre.toLowerCase();
+  const data=sueldosFijos[key];
+  if(!data)return null; // productor no encontrado en el sheet
+  let total=0;let found=false;
+  mesesArr.forEach(m=>{
+    const mv=m.toLowerCase();
+    if(data[mv]!==undefined&&data[mv]>0){total+=data[mv];found=true;}
+  });
+  return found?total:null;
+}
+
+// Extrae los nombres de meses únicos que toca un array de fechas "dd/mm/yyyy"
+function getMesesFromFechas(fechas){
+  const set=new Set();
+  fechas.forEach(f=>{
+    const parts=f.split('/');
+    if(parts.length===3){
+      const mIdx=parseInt(parts[1])-1;
+      set.add(MESES[mIdx].toLowerCase());
+    }
+  });
+  return [...set];
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
 function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
@@ -379,6 +497,7 @@ function checkAuth(){
   }
 }
 
+// ── UTILS ─────────────────────────────────────────────────────────────────────
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function strToTs(s){const[d,m,y]=s.split('/');return new Date(+y,+m-1,+d).getTime();}
@@ -397,7 +516,12 @@ function fmtK(n){
   if(Math.abs(v)>=1000)return'$'+Math.round(v/1000)+'k';
   return'$'+Math.abs(v).toLocaleString('es-AR');
 }
+function fmtPesos(n){
+  const v=Math.round(parseFloat(n)||0);
+  return'$'+v.toLocaleString('es-AR');
+}
 
+// ── CALENDARIO ────────────────────────────────────────────────────────────────
 function toggleCal(){
   const popup=document.getElementById('cal-popup');
   if(popup.classList.contains('open')){popup.classList.remove('open');pickStep=0;return;}
@@ -488,10 +612,15 @@ function getHBInRange(){
 }
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
 
+// ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function loadData(){
   setSyncState('loading','Actualizando...');
   try{
-    const r=await fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
+    // Carga en paralelo blotter + sueldos
+    const [r] = await Promise.all([
+      fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
+      loadSueldos()
+    ]);
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
     setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
@@ -593,6 +722,7 @@ function getPares(ops){
   return pares;
 }
 
+// ── RUEDA ─────────────────────────────────────────────────────────────────────
 function renderRueda(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -636,6 +766,7 @@ function renderRueda(){
   document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
+// ── MES ───────────────────────────────────────────────────────────────────────
 function renderMes(){
   const now=new Date();
   if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
@@ -666,31 +797,43 @@ function renderMes(){
     document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
   }else['mes-pnl','mes-best','mes-worst'].forEach(id=>document.getElementById(id).textContent='—');
 }
-
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
 
-// ── PRODUCTORES COMBINADO ──────────────────────────────────────────────────
+// ── PRODUCTORES ───────────────────────────────────────────────────────────────
 function renderProductores(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
   const hb=getHBInRange();
+  const fechasEnRango=getDatesInRange();
 
-  // Construir mapa combinado: clave = nombre del productor (normalizado)
+  // Mapa de comisión total (col O) por productor por mes
+  // Necesitamos saber, para cada productor, cuánto generó en col O por mes
+  // col O = comProductor (col Q en el sheet) ... OJO: col O del sheet es comisión bruta
+  // Aclaración: col O del sheet es la comisión bruta total (PHAROS + productor)
+  // En el objeto rowToObj, comProductor = col Q (solo parte del productor)
+  // Para el cálculo de sueldo necesitamos col O = pylMesa + comProductor (es la comisión total)
+  // Construir mapa combinado por productor
   const combined={};
 
-  // Cargar datos de mesa (BYMA/SENEBI)
   pares.forEach(p=>{
     const key=p.productor;
     if(!combined[key])combined[key]={
       nombre:key,
-      // mesa
       mesaComProd:0,mesaPylMesa:0,mesaPares:[],mesaDias:new Set(),mesaEspecies:new Set(),mesaClientes:new Set(),
-      // hb
       hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
-      hasMesa:false,hasHB:false
+      hasMesa:false,hasHB:false,
+      // comTotal acumulado por mes: {mesKey: {comTotal, comProductor}}
+      porMes:{}
     };
+    const mIdx=parseInt(p.fecha.split('/')[1])-1;
+    const mesNombre=MESES[mIdx];
+    if(!combined[key].porMes[mesNombre])combined[key].porMes[mesNombre]={comTotal:0,comProd:0};
+    // comisión total col O = pylMesa + comProductor (suma de ambas filas = comisión bruta)
+    combined[key].porMes[mesNombre].comTotal += p.pylMesa + p.comProductor;
+    combined[key].porMes[mesNombre].comProd  += p.comProductor;
+
     combined[key].mesaComProd+=p.comProductor;
     combined[key].mesaPylMesa+=p.pylMesa;
     combined[key].mesaPares.push(p);
@@ -700,9 +843,7 @@ function renderProductores(){
     combined[key].hasMesa=true;
   });
 
-  // Cargar datos HB — match por nombre (case-insensitive)
   hb.forEach(r=>{
-    // buscar coincidencia en combined (puede haber ligeras diferencias de capitalización)
     let key=Object.keys(combined).find(k=>k.toLowerCase()===r.productor.toLowerCase());
     if(!key){
       key=r.productor;
@@ -710,7 +851,7 @@ function renderProductores(){
         nombre:r.productor,
         mesaComProd:0,mesaPylMesa:0,mesaPares:[],mesaDias:new Set(),mesaEspecies:new Set(),mesaClientes:new Set(),
         hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
-        hasMesa:false,hasHB:false
+        hasMesa:false,hasHB:false,porMes:{}
       };
     }
     combined[key].hbComProd+=r.comProd;
@@ -718,9 +859,14 @@ function renderProductores(){
     combined[key].hbComTotal+=r.comTotal;
     combined[key].hbDias.add(r.fecha);
     combined[key].hasHB=true;
+    // También sumar HB al porMes
+    const mIdx=parseInt(r.fecha.split('/')[1])-1;
+    const mesNombre=MESES[mIdx];
+    if(!combined[key].porMes[mesNombre])combined[key].porMes[mesNombre]={comTotal:0,comProd:0};
+    combined[key].porMes[mesNombre].comTotal += r.comTotal;
+    combined[key].porMes[mesNombre].comProd  += r.comProd;
   });
 
-  // Ordenar por total combinado descendente
   const lista=Object.values(combined).sort((a,b)=>{
     const totA=a.mesaComProd+a.hbComProd;
     const totB=b.mesaComProd+b.hbComProd;
@@ -730,7 +876,6 @@ function renderProductores(){
   const totalGlobal=lista.reduce((s,p)=>s+p.mesaComProd+p.hbComProd,0);
   const maxTotal=Math.max(...lista.map(p=>p.mesaComProd+p.hbComProd),1);
 
-  // Métricas
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   document.getElementById('prod-unicos').textContent=lista.length||'—';
   if(lista[0]){
@@ -741,14 +886,100 @@ function renderProductores(){
     document.getElementById('prod-top-sub').textContent='—';
   }
 
-  // Render accordion
   let html='';
   lista.forEach((p,idx)=>{
     const total=p.mesaComProd+p.hbComProd;
     const barPct=Math.round(total/maxTotal*100);
     const tags=(p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
 
-    // Detalle de operaciones de mesa
+    // ── Calcular liquidación de sueldo por mes ──────────────────────────────
+    const mesesInvolucrados=Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+    let liqHtml='';
+
+    if(mesesInvolucrados.length>0){
+      let totalFijoAcum=0, totalVariableAcum=0, totalSueldoAcum=0;
+      let hayAlgunSueldo=false;
+      let mesRowsHtml='';
+
+      mesesInvolucrados.forEach(mesNombre=>{
+        const mesData=p.porMes[mesNombre];
+        const comTotalMes=mesData.comTotal;
+        const sueldoFijoMes=getSueldoFijo(p.nombre,[mesNombre.toLowerCase()]);
+
+        if(sueldoFijoMes!==null){
+          hayAlgunSueldo=true;
+          const variableBase=comTotalMes - sueldoFijoMes;
+          const variableMes=variableBase>0 ? variableBase*0.35 : 0;
+          const sueldoTotalMes=sueldoFijoMes + variableMes;
+          totalFijoAcum+=sueldoFijoMes;
+          totalVariableAcum+=variableMes;
+          totalSueldoAcum+=sueldoTotalMes;
+
+          mesRowsHtml+=`<div class="liq-mes-row">
+            <span class="liq-mes-name">${mesNombre}</span>
+            <span class="liq-mes-fijo">${fmtPesos(sueldoFijoMes)}</span>
+            <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
+            <span class="liq-mes-variable">${variableMes>0?fmtPesos(variableMes):'—'}</span>
+            <span class="liq-mes-total">${fmtPesos(sueldoTotalMes)}</span>
+          </div>`;
+        }else{
+          mesRowsHtml+=`<div class="liq-mes-row">
+            <span class="liq-mes-name">${mesNombre}</span>
+            <span class="liq-mes-fijo" style="color:#4a5568">sin datos</span>
+            <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
+            <span class="liq-mes-variable" style="color:#4a5568">—</span>
+            <span class="liq-mes-total" style="color:#4a5568">—</span>
+          </div>`;
+        }
+      });
+
+      if(hayAlgunSueldo){
+        liqHtml=`<div class="liq-box">
+          <div class="liq-title">
+            Liquidación sueldo
+            <span class="liq-title-badge">Variable se factura aparte</span>
+          </div>
+          <div class="liq-grid">
+            <div class="liq-item fijo">
+              <div class="liq-item-label">Sueldo fijo</div>
+              <div class="liq-item-value">${fmtPesos(totalFijoAcum)}</div>
+              <div class="liq-item-sub">por recibo</div>
+            </div>
+            <div class="liq-item variable">
+              <div class="liq-item-label">Variable (35%)</div>
+              <div class="liq-item-value">${totalVariableAcum>0?fmtPesos(totalVariableAcum):'$0'}</div>
+              <div class="liq-item-sub">factura aparte · ${totalVariableAcum>0?'(Com. total − Fijo) × 35%':'sin variable'}</div>
+            </div>
+            <div class="liq-item total">
+              <div class="liq-item-label">Total a cobrar</div>
+              <div class="liq-item-value">${fmtPesos(totalSueldoAcum)}</div>
+              <div class="liq-item-sub">fijo + variable</div>
+            </div>
+          </div>
+          ${mesesInvolucrados.length>1?`
+          <div class="liq-mes-breakdown">
+            <div class="liq-mes-row" style="border-bottom:0.5px solid #1e2330;margin-bottom:4px">
+              <span class="liq-mes-name" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mes</span>
+              <span class="liq-mes-fijo" style="color:#2d3748;font-size:9px;text-transform:uppercase">Fijo</span>
+              <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total</span>
+              <span class="liq-mes-variable" style="color:#2d3748;font-size:9px;text-transform:uppercase">Variable</span>
+              <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Total</span>
+            </div>
+            ${mesRowsHtml}
+          </div>`:''}
+          <div class="liq-formula" style="margin-top:8px">
+            <span>fórmula:</span> Variable = MAX(0, (Com.Total − Fijo) × 35%) · Sueldo Total = Fijo + Variable
+          </div>
+        </div>`;
+      }else{
+        liqHtml=`<div class="liq-box">
+          <div class="liq-title">Liquidación sueldo</div>
+          <div class="liq-no-data">Sin datos de sueldo fijo en Securities_Realidad_2026 para este período</div>
+        </div>`;
+      }
+    }
+
+    // ── Detalle de operaciones de mesa ──────────────────────────────────────
     let detMesaRows='';
     p.mesaPares.forEach(op=>{
       detMesaRows+=`<tr>
@@ -762,7 +993,6 @@ function renderProductores(){
       </tr>`;
     });
 
-    // Detalle HB (por semana/día)
     let detHBRows='';
     if(p.hasHB){
       hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()).forEach(r=>{
@@ -799,6 +1029,7 @@ function renderProductores(){
             <div class="prod-breakdown-sub">${p.hbDias.size} sem. · com. total: ${p.hasHB?fmtPnl(p.hbComTotal,false,'pnl-pos'):'—'}</div>
           </div>
         </div>
+        ${liqHtml}
         ${(detMesaRows||detHBRows)?`
         <table class="prod-detail-table">
           <thead><tr>
@@ -816,7 +1047,6 @@ function renderProductores(){
 
   document.getElementById('prod-acum-combined').innerHTML=lista.length?html:'<div class="empty-state">Sin productores en el período</div>';
 
-  // Tabla detalle (se mantiene igual)
   let detHtml='';
   lista.forEach(prod=>{
     prod.mesaPares.forEach((p,i)=>{detHtml+=`<tr>
@@ -841,8 +1071,8 @@ function toggleProdCard(id){
   body.classList.toggle('open',!isOpen);
   arrow.classList.toggle('open',!isOpen);
 }
-// ── FIN PRODUCTORES ────────────────────────────────────────────────────────
 
+// ── CLIENTES ──────────────────────────────────────────────────────────────────
 function renderClientes(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.tipo==='directo');
@@ -866,6 +1096,7 @@ function renderClientes(){
   document.getElementById('cli-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin clientes directos</td></tr>';
 }
 
+// ── CUENTA 1000 ───────────────────────────────────────────────────────────────
 function renderCuenta1000(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -889,6 +1120,7 @@ function renderCuenta1000(){
   document.getElementById('c1000-tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
+// ── CAUCIONES ─────────────────────────────────────────────────────────────────
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
   document.getElementById('cau-count').textContent=ops.length||'—';
@@ -909,6 +1141,7 @@ function renderCauciones(){
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 }
 
+// ── COMISIONES ────────────────────────────────────────────────────────────────
 function renderComisiones(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
@@ -937,6 +1170,7 @@ function renderComisiones(){
   document.getElementById('com-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
 }
 
+// ── RENDER ALL & TABS ─────────────────────────────────────────────────────────
 function renderAll(){renderRueda();renderMes();renderProductores();renderClientes();renderCuenta1000();renderCauciones();renderComisiones();}
 function showTab(t){
   ['rueda','mes','productores','clientes','cuenta1000','cauciones','comisiones'].forEach(x=>{
@@ -945,6 +1179,8 @@ function showTab(t){
   });
   if(t==='mes')renderMes();
 }
+
+// ── RELOJ ─────────────────────────────────────────────────────────────────────
 function updateClock(){
   const now=new Date();
   const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
