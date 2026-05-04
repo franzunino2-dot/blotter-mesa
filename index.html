@@ -888,8 +888,8 @@ function renderProductores(){
     return totB-totA;
   });
 
-  const totalGlobal=lista.reduce((s,p)=>s+p.mesaComProd+p.hbComProd,0);
-  const maxTotal=Math.max(...lista.map(p=>p.mesaComProd+p.hbComProd),1);
+  const totalGlobal=lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
+  const maxTotal=Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
 
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   document.getElementById('prod-unicos').textContent=lista.length||'—';
@@ -903,8 +903,10 @@ function renderProductores(){
 
   let html='';
   lista.forEach((p,idx)=>{
-    const total=p.mesaComProd+p.hbComProd;
-    const barPct=Math.round(total/maxTotal*100);
+    const comProdTotal=p.mesaComProd+p.hbComProd;
+    const comTotal=Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
+    const total=comTotal; // header muestra col O (total generado)
+    const barPct=Math.round(comTotal/maxTotal*100);
     const tags=(p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
 
     // ── Calcular liquidación de sueldo por mes ──────────────────────────────
@@ -954,7 +956,22 @@ function renderProductores(){
             Liquidación sueldo
             <span class="liq-title-badge">Variable se factura aparte</span>
           </div>
-          <div class="liq-grid">
+          <div class="liq-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;margin-bottom:8px">
+            <div class="liq-item" style="border-color:#a78bfa30">
+              <div class="liq-item-label">Com. Prod (Q)</div>
+              <div class="liq-item-value" style="color:#a78bfa;font-size:13px">${fmtPesos(p.mesaComProd+p.hbComProd)}</div>
+              <div class="liq-item-sub">col Q</div>
+            </div>
+            <div class="liq-item" style="border-color:#4ade8030">
+              <div class="liq-item-label">P&L Mesa (P)</div>
+              <div class="liq-item-value" style="color:#4ade80;font-size:13px">${fmtPesos(p.mesaPylMesa+p.hbPylMesa)}</div>
+              <div class="liq-item-sub">col P</div>
+            </div>
+            <div class="liq-item" style="border-color:#60a5fa30">
+              <div class="liq-item-label">Com. Total (O)</div>
+              <div class="liq-item-value" style="color:#60a5fa;font-size:13px">${fmtPesos(Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0))}</div>
+              <div class="liq-item-sub">Q + P · entra en fórmula</div>
+            </div>
             <div class="liq-item fijo">
               <div class="liq-item-label">Sueldo fijo</div>
               <div class="liq-item-value">${fmtPesos(totalFijoAcum)}</div>
@@ -963,13 +980,15 @@ function renderProductores(){
             <div class="liq-item variable">
               <div class="liq-item-label">Variable (35%)</div>
               <div class="liq-item-value">${totalVariableAcum>0?fmtPesos(totalVariableAcum):'$0'}</div>
-              <div class="liq-item-sub">factura aparte · ${totalVariableAcum>0?'(Com. total − Fijo) × 35%':'sin variable'}</div>
+              <div class="liq-item-sub">factura aparte</div>
             </div>
-            <div class="liq-item total">
+          </div>
+          <div class="liq-item total" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:8px">
+            <div>
               <div class="liq-item-label">Total a cobrar</div>
-              <div class="liq-item-value">${fmtPesos(totalSueldoAcum)}</div>
               <div class="liq-item-sub">fijo + variable</div>
             </div>
+            <div class="liq-item-value" style="font-size:18px">${fmtPesos(totalSueldoAcum)}</div>
           </div>
           ${mesesInvolucrados.length>1?`
           <div class="liq-mes-breakdown">
@@ -1029,7 +1048,10 @@ function renderProductores(){
         <span class="prod-card-name">${p.nombre}</span>
         <div class="prod-card-tags">${tags}</div>
         <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%"></div></div>
-        <span class="prod-card-total">${fmtPnl(total,true,'pnl-pos')||'—'}</span>
+        <span class="prod-card-total" style="text-align:right">
+          <span style="color:#60a5fa;font-size:13px;font-weight:500;font-family:monospace">+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
+          <span style="display:block;font-size:9px;color:#4a5568;margin-top:1px">com.prod: +$${Math.round(comProdTotal).toLocaleString('es-AR')}</span>
+        </span>
       </div>
       <div class="prod-card-body" id="pc-${idx}">
         <div class="prod-breakdown">
@@ -1054,6 +1076,12 @@ function renderProductores(){
           <tbody>
             ${detMesaRows}
             ${detHBRows?`<tr><td colspan="7" style="padding:0"><div class="prod-section-divider"><span class="hb-badge">HB</span> Homebroker</div></td></tr>${detHBRows}`:''}
+            <tr style="border-top:0.5px solid #2d3748;background:#111420">
+              <td colspan="4" style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;padding:5px 6px">Total período</td>
+              <td class="tr" style="font-size:11px;color:#a0aec0;font-family:monospace;padding:5px 6px"></td>
+              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
+            </tr>
           </tbody>
         </table>`:''}
       </div>
