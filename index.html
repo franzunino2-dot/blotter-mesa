@@ -1024,6 +1024,7 @@ function renderProductores(){
         <td class="tr">${fmtInt(op.vn)}</td>
         <td class="tr" style="color:#a78bfa">${fmtPnl(op.comProductor,true,'pnl-pos')||'—'}</td>
         <td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td>
+        <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td>
       </tr>`;
     });
 
@@ -1038,6 +1039,7 @@ function renderProductores(){
           <td class="tr">—</td>
           <td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
           <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
+          <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td>
         </tr>`;
       });
     }
@@ -1073,7 +1075,7 @@ function renderProductores(){
         <table class="prod-detail-table">
           <thead><tr>
             <th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th>
-            <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th>
+            <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th>
           </tr></thead>
           <tbody>
             ${detMesaRows}
@@ -1083,6 +1085,7 @@ function renderProductores(){
               <td class="tr" style="font-size:11px;color:#a0aec0;font-family:monospace;padding:5px 6px"></td>
               <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</td>
               <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd+p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
             </tr>
           </tbody>
         </table>`:''}
