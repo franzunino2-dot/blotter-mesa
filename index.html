@@ -1048,22 +1048,24 @@ function renderProductores(){
         <span class="prod-card-name">${p.nombre}</span>
         <div class="prod-card-tags">${tags}</div>
         <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%"></div></div>
-        <span class="prod-card-total" style="text-align:right">
-          <span style="color:#60a5fa;font-size:13px;font-weight:500;font-family:monospace">+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
-          <span style="display:block;font-size:9px;color:#4a5568;margin-top:1px">com.prod: +$${Math.round(comProdTotal).toLocaleString('es-AR')}</span>
-        </span>
+        <span class="prod-card-total">+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
       </div>
       <div class="prod-card-body" id="pc-${idx}">
-        <div class="prod-breakdown">
-          <div class="prod-breakdown-item mesa">
-            <div class="prod-breakdown-label">Mesa (BYMA/SENEBI)</div>
-            <div class="prod-breakdown-value">${p.hasMesa?fmtPnl(p.mesaComProd,false,'pnl-pos')||'$0':'—'}</div>
-            <div class="prod-breakdown-sub">${p.mesaDias.size} día/s · ${[...p.mesaEspecies].slice(0,3).join(', ')||'—'}</div>
+        <div class="prod-breakdown" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="prod-breakdown-item" style="border-color:#4ade8030">
+            <div class="prod-breakdown-label">Para la mesa (P&L)</div>
+            <div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</div>
+            <div class="prod-breakdown-sub">col P · ${p.mesaDias.size} día/s${p.hasHB?' + HB':''}</div>
           </div>
-          <div class="prod-breakdown-item hb">
-            <div class="prod-breakdown-label">Homebroker</div>
-            <div class="prod-breakdown-value">${p.hasHB?fmtPnl(p.hbComProd,false,'pnl-pos')||'$0':'—'}</div>
-            <div class="prod-breakdown-sub">${p.hbDias.size} sem. · com. total: ${p.hasHB?fmtPnl(p.hbComTotal,false,'pnl-pos'):'—'}</div>
+          <div class="prod-breakdown-item" style="border-color:#a78bfa30">
+            <div class="prod-breakdown-label">Para el productor (Q)</div>
+            <div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</div>
+            <div class="prod-breakdown-sub">col Q · comisión productor</div>
+          </div>
+          <div class="prod-breakdown-item" style="border-color:#60a5fa30">
+            <div class="prod-breakdown-label">Total generado (O)</div>
+            <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
+            <div class="prod-breakdown-sub">col O = P&L + com. prod.</div>
           </div>
         </div>
         ${liqHtml}
