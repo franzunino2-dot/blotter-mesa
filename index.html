@@ -441,9 +441,24 @@ function parseCSVLine(line){
 }
 
 function parseMonto(s){
-  // Limpia $, puntos de miles, espacios, etc.
-  const clean=s.replace(/[$\s.]/g,'').replace(/,/g,'.');
-  return parseFloat(clean)||0;
+  let c=s.replace(/[$\s"]/g,'').trim();
+  if(!c)return 0;
+  const hasComa=c.includes(',');
+  const hasPunto=c.includes('.');
+  if(hasComa&&hasPunto){
+    const lastComa=c.lastIndexOf(',');
+    const lastPunto=c.lastIndexOf('.');
+    if(lastPunto>lastComa){c=c.replace(/,/g,'');}
+    else{c=c.replace(/\./g,'').replace(',','.');}
+  }else if(hasComa){
+    const afterComa=c.split(',').pop();
+    if(afterComa.length<=2){c=c.replace(',','.');}
+    else{c=c.replace(/,/g,'');}
+  }else if(hasPunto){
+    const afterPunto=c.split('.').pop();
+    if(afterPunto.length>2){c=c.replace(/\./g,'');}
+  }
+  return parseFloat(c)||0;
 }
 
 // Dado un nombre de productor y un array de meses (ej: ["abril","mayo"]),
