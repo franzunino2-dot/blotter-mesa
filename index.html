@@ -235,11 +235,11 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div id="view-rueda">
     <div class="metrics">
       <div class="metric metric-tooltip">
-        <div class="tt">Suma de col P (P1) de todos los días del período.<br>Es el P&L bruto de la mesa antes de descontar<br>el variable de productores empleados.</div>
-        <div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div>
+        <div class="tt">Suma de col P de todas las operaciones del período.<br>Referencial — mezcla lógicas de empleados y externos.<br>No representa el facturado real de la mesa.</div>
+        <div class="metric-label">P&L bruto (col P)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div>
       </div>
       <div class="metric metric-tooltip">
-        <div class="tt">P&L mesa − variable de empleados.<br>Productores externos: la mesa retiene col P.<br>Productores empleados: retiene col O − variable.<br>Es lo que efectivamente factura la mesa.</div>
+        <div class="tt">Lo que efectivamente factura la mesa:<br>· Externos: col P (neto directo)<br>· Empleados: col O − MAX(0, (col O − sueldo) × %)<br>· Sin productor: col P<br>Es el número real de facturación.</div>
         <div class="metric-label">Facturado neto mesa</div><div class="metric-value green" id="r-neto">—</div><div class="metric-sub" id="r-neto-sub">—</div>
       </div>
       <div class="metric metric-tooltip">
@@ -778,55 +778,89 @@ function getPares(ops){
 }
 
 // ── RUEDA ─────────────────────────────────────────────────────────────────────
-function calcVariableEmpleados(){
-  // Calcula el total de variable de empleados en el rango actual
-  // Para cada productor empleado (está en sueldosFijos), variable = MAX(0, (comTotal_mes - sueldo_mes) * pct)
-  // Agrupamos por productor+mes igual que en renderProductores
-  const ops=getOpsInRange();
-  const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
-  const hb=getHBInRange();
 
-  // Agrupar por productor → mes → comTotal
+// Agrupa operaciones por productor → mes → { comTotal (col O), pylMesa (col P) }
+// Incluye tanto mesa como HB
+function agruparPorProdMes(pares, hb){
   const porProd={};
   pares.forEach(p=>{
+    if(!p.productor)return;
     const key=p.productor;
     if(!porProd[key])porProd[key]={};
     const mIdx=parseInt(p.fecha.split('/')[1])-1;
     const mes=MESES[mIdx];
-    if(!porProd[key][mes])porProd[key][mes]=0;
-    porProd[key][mes]+=p.pylMesa+p.comProductor;
+    if(!porProd[key][mes])porProd[key][mes]={comTotal:0,pylMesa:0};
+    porProd[key][mes].comTotal += p.pylMesa + p.comProductor; // col O = col P + col Q
+    porProd[key][mes].pylMesa  += p.pylMesa;                  // col P
   });
   hb.forEach(r=>{
     const key=Object.keys(porProd).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
     if(!porProd[key])porProd[key]={};
     const mIdx=parseInt(r.fecha.split('/')[1])-1;
     const mes=MESES[mIdx];
-    if(!porProd[key][mes])porProd[key][mes]=0;
-    porProd[key][mes]+=r.comTotal;
+    if(!porProd[key][mes])porProd[key][mes]={comTotal:0,pylMesa:0};
+    porProd[key][mes].comTotal += r.comTotal;
+    porProd[key][mes].pylMesa  += r.pylMesa;
   });
+  return porProd;
+}
 
-  let totalVariable=0;
+// Calcula lo que factura la mesa desglosado:
+// - externos: col P por productor
+// - empleados: col O − MAX(0, (col O − sueldo) × %)
+// Devuelve { facturadoNeto, totalVariableEmpleados, desglose[] }
+function calcFacturadoMesa(){
+  const ops=getOpsInRange();
+  const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
+  const hb=getHBInRange();
+  const porProd=agruparPorProdMes(pares,hb);
+
+  // También sumamos las operaciones sin productor (directos + propios)
+  // Para esas, la mesa factura directamente col P
+  const paresNoProd=getPares(ops).filter(p=>!p.productor||p.productor==='');
+  const pylNoProd=paresNoProd.reduce((s,p)=>s+p.pylMesa,0);
+
+  let facturadoEmpleados=0;
+  let facturadoExternos=0;
+  let totalVariableEmpleados=0;
+  const desglose=[];
+
   Object.entries(porProd).forEach(([nombre,porMes])=>{
     const datosProd=getDatosProductor(nombre,Object.keys(porMes));
-    if(!datosProd)return; // externo → no descuenta nada
-    const {porcentaje}=datosProd;
-    Object.entries(porMes).forEach(([mes,comTotal])=>{
-      const key=nombre.toLowerCase();
-      const dataSheet=sueldosFijos[key];
-      const sueldoMes=dataSheet?(dataSheet[mes.toLowerCase()]||0):0;
-      const variableBase=comTotal-sueldoMes;
-      const variable=Math.max(0,variableBase*porcentaje);
-      totalVariable+=variable;
-    });
+    let facProd=0;
+    let varProd=0;
+
+    if(!datosProd){
+      // EXTERNO: mesa factura col P
+      Object.values(porMes).forEach(m=>{ facProd+=m.pylMesa; });
+      facturadoExternos+=facProd;
+      desglose.push({nombre,tipo:'externo',facturado:facProd,variable:0});
+    } else {
+      // EMPLEADO: mesa factura col O − variable
+      const {porcentaje}=datosProd;
+      Object.entries(porMes).forEach(([mes,m])=>{
+        const key=nombre.toLowerCase();
+        const dataSheet=sueldosFijos[key];
+        const sueldoMes=dataSheet?(dataSheet[mes.toLowerCase()]||0):0;
+        const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
+        const facMes=m.comTotal-variable;
+        facProd+=facMes;
+        varProd+=variable;
+      });
+      facturadoEmpleados+=facProd;
+      totalVariableEmpleados+=varProd;
+      desglose.push({nombre,tipo:'empleado',facturado:facProd,variable:varProd});
+    }
   });
-  return totalVariable;
+
+  const facturadoNeto = facturadoEmpleados + facturadoExternos + pylNoProd;
+  return { facturadoNeto, totalVariableEmpleados, facturadoEmpleados, facturadoExternos, pylNoProd, desglose };
 }
 
 function renderRueda(){
   const ops=getOpsInRange();
-  const total=getTotalInRange();
-  const totalVariable=calcVariableEmpleados();
-  const neto=total-totalVariable;
+  const total=getTotalInRange(); // suma col P global (referencial)
+  const { facturadoNeto, totalVariableEmpleados, facturadoEmpleados, facturadoExternos, pylNoProd } = calcFacturadoMesa();
   const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));
   const pares=getPares(ops);
   const prodActivos=new Set(pares.filter(p=>p.productor).map(p=>p.productor));
@@ -836,9 +870,9 @@ function renderRueda(){
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
 
-  document.getElementById('r-neto').innerHTML=fmtPnl(neto,true)||'—';
-  document.getElementById('r-neto').className='metric-value '+(neto>=0?'green':'red');
-  document.getElementById('r-neto-sub').textContent=totalVariable>0?'− $'+Math.round(totalVariable).toLocaleString('es-AR')+' variable':'sin variable empleados';
+  document.getElementById('r-neto').innerHTML=fmtPnl(facturadoNeto,true)||'—';
+  document.getElementById('r-neto').className='metric-value '+(facturadoNeto>=0?'green':'red');
+  document.getElementById('r-neto-sub').textContent=totalVariableEmpleados>0?'− $'+Math.round(totalVariableEmpleados).toLocaleString('es-AR')+' variable emp.':'sin empleados en período';
 
   document.getElementById('r-vol').textContent=fmtK(vol);
   document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
