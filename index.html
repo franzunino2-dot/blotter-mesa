@@ -372,7 +372,7 @@ const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
 
-// sueldosFijos[nombreProductor][mesKey] = monto  (mesKey = "Abril", "mayo", etc. — lowercase para match)
+// sueldosFijos[nombreLower] = { nombre, porcentaje (0-1), abril: X, mayo: X, ... }
 let sueldosFijos = {};
 
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -408,27 +408,42 @@ function parseSueldos(text){
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   if(lines.length<2)return;
 
-  // Fila 0: headers. Col 0 vacía, col 1+ = nombres de meses
+  // Fila 0: col A = "Porcentaje", col B = "Productor", col C+ = nombres de meses
   const headers=parseCSVLine(lines[0]);
-  // headers[0] = '' o 'Productor', headers[1..] = mes names
+  // headers[0] = "Porcentaje", headers[1] = "Productor", headers[2..] = meses
 
   for(let i=1;i<lines.length;i++){
     const cols=parseCSVLine(lines[i]);
-    const nombre=(cols[0]||'').trim();
+    // col A (índice 0) = porcentaje, col B (índice 1) = nombre
+    const pctRaw=(cols[0]||'').trim();
+    const nombre=(cols[1]||'').trim();
     if(!nombre)continue;
+
+    // Parsear porcentaje: puede venir como "35%" o "0.35"
+    let pct=0;
+    if(pctRaw.includes('%')){
+      pct=parseFloat(pctRaw.replace('%','').trim())/100;
+    }else{
+      pct=parseFloat(pctRaw)||0;
+      // Si viene como número entero tipo 35, convertir
+      if(pct>1)pct=pct/100;
+    }
+
     const key=nombre.toLowerCase();
-    if(!sueldosFijos[key])sueldosFijos[key]={nombre};
-    for(let j=1;j<headers.length;j++){
+    sueldosFijos[key]={nombre, porcentaje:pct};
+
+    // col C en adelante = sueldos por mes (headers[2..])
+    for(let j=2;j<headers.length;j++){
       const mes=(headers[j]||'').trim().toLowerCase();
       if(!mes)continue;
       const val=parseMonto(cols[j]||'');
       sueldosFijos[key][mes]=val;
     }
   }
+  console.log('Sueldos cargados:', sueldosFijos);
 }
 
 function parseCSVLine(line){
-  // Simple CSV parser que maneja comillas
   const res=[];let cur='';let inQ=false;
   for(let i=0;i<line.length;i++){
     const c=line[i];
@@ -461,31 +476,28 @@ function parseMonto(s){
   return parseFloat(c)||0;
 }
 
-// Dado un nombre de productor y un array de meses (ej: ["abril","mayo"]),
-// devuelve la suma de sueldos fijos para esos meses
-function getSueldoFijo(nombre, mesesArr){
+// Retorna { sueldo, porcentaje } para un productor en un conjunto de meses,
+// o null si el productor no está en el sheet.
+// sueldo = suma de sueldos fijos de los meses involucrados
+// porcentaje = el % del productor (único, no varía por mes)
+function getDatosProductor(nombre, mesesArr){
   const key=nombre.toLowerCase();
   const data=sueldosFijos[key];
-  if(!data)return null; // productor no encontrado en el sheet
-  let total=0;let found=false;
+  if(!data)return null;
+
+  const porcentaje=data.porcentaje||0;
+  let sueldoTotal=0;
+  let hayAlgunSueldo=false;
+
   mesesArr.forEach(m=>{
     const mv=m.toLowerCase();
-    if(data[mv]!==undefined&&data[mv]>0){total+=data[mv];found=true;}
-  });
-  return found?total:null;
-}
-
-// Extrae los nombres de meses únicos que toca un array de fechas "dd/mm/yyyy"
-function getMesesFromFechas(fechas){
-  const set=new Set();
-  fechas.forEach(f=>{
-    const parts=f.split('/');
-    if(parts.length===3){
-      const mIdx=parseInt(parts[1])-1;
-      set.add(MESES[mIdx].toLowerCase());
+    if(data[mv]!==undefined&&data[mv]>0){
+      sueldoTotal+=data[mv];
+      hayAlgunSueldo=true;
     }
   });
-  return [...set];
+
+  return{ porcentaje, sueldoTotal: hayAlgunSueldo?sueldoTotal:0, hayAlgunSueldo };
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -535,6 +547,7 @@ function fmtPesos(n){
   const v=Math.round(parseFloat(n)||0);
   return'$'+v.toLocaleString('es-AR');
 }
+function fmtPct(p){return Math.round(p*100)+'%';}
 
 // ── CALENDARIO ────────────────────────────────────────────────────────────────
 function toggleCal(){
@@ -631,7 +644,6 @@ function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d
 async function loadData(){
   setSyncState('loading','Actualizando...');
   try{
-    // Carga en paralelo blotter + sueldos
     const [r] = await Promise.all([
       fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
       loadSueldos()
@@ -821,15 +833,7 @@ function renderProductores(){
   const ops=getOpsInRange();
   const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
   const hb=getHBInRange();
-  const fechasEnRango=getDatesInRange();
 
-  // Mapa de comisión total (col O) por productor por mes
-  // Necesitamos saber, para cada productor, cuánto generó en col O por mes
-  // col O = comProductor (col Q en el sheet) ... OJO: col O del sheet es comisión bruta
-  // Aclaración: col O del sheet es la comisión bruta total (PHAROS + productor)
-  // En el objeto rowToObj, comProductor = col Q (solo parte del productor)
-  // Para el cálculo de sueldo necesitamos col O = pylMesa + comProductor (es la comisión total)
-  // Construir mapa combinado por productor
   const combined={};
 
   pares.forEach(p=>{
@@ -839,13 +843,11 @@ function renderProductores(){
       mesaComProd:0,mesaPylMesa:0,mesaPares:[],mesaDias:new Set(),mesaEspecies:new Set(),mesaClientes:new Set(),
       hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
       hasMesa:false,hasHB:false,
-      // comTotal acumulado por mes: {mesKey: {comTotal, comProductor}}
       porMes:{}
     };
     const mIdx=parseInt(p.fecha.split('/')[1])-1;
     const mesNombre=MESES[mIdx];
     if(!combined[key].porMes[mesNombre])combined[key].porMes[mesNombre]={comTotal:0,comProd:0};
-    // comisión total col O = pylMesa + comProductor (suma de ambas filas = comisión bruta)
     combined[key].porMes[mesNombre].comTotal += p.pylMesa + p.comProductor;
     combined[key].porMes[mesNombre].comProd  += p.comProductor;
 
@@ -874,7 +876,6 @@ function renderProductores(){
     combined[key].hbComTotal+=r.comTotal;
     combined[key].hbDias.add(r.fecha);
     combined[key].hasHB=true;
-    // También sumar HB al porMes
     const mIdx=parseInt(r.fecha.split('/')[1])-1;
     const mesNombre=MESES[mIdx];
     if(!combined[key].porMes[mesNombre])combined[key].porMes[mesNombre]={comTotal:0,comProd:0};
@@ -883,8 +884,8 @@ function renderProductores(){
   });
 
   const lista=Object.values(combined).sort((a,b)=>{
-    const totA=a.mesaComProd+a.hbComProd;
-    const totB=b.mesaComProd+b.hbComProd;
+    const totA=Object.values(a.porMes).reduce((s,m)=>s+m.comTotal,0);
+    const totB=Object.values(b.porMes).reduce((s,m)=>s+m.comTotal,0);
     return totB-totA;
   });
 
@@ -895,7 +896,8 @@ function renderProductores(){
   document.getElementById('prod-unicos').textContent=lista.length||'—';
   if(lista[0]){
     document.getElementById('prod-top').textContent=lista[0].nombre;
-    document.getElementById('prod-top-sub').textContent=fmtPnl(lista[0].mesaComProd+lista[0].hbComProd,false);
+    const topTotal=Object.values(lista[0].porMes).reduce((s,m)=>s+m.comTotal,0);
+    document.getElementById('prod-top-sub').textContent=fmtPesos(topTotal);
   }else{
     document.getElementById('prod-top').textContent='—';
     document.getElementById('prod-top-sub').textContent='—';
@@ -903,114 +905,117 @@ function renderProductores(){
 
   let html='';
   lista.forEach((p,idx)=>{
-    const comProdTotal=p.mesaComProd+p.hbComProd;
     const comTotal=Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
-    const total=comTotal; // header muestra col O (total generado)
     const barPct=Math.round(comTotal/maxTotal*100);
     const tags=(p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
 
-    // ── Calcular liquidación de sueldo por mes ──────────────────────────────
+    // ── Obtener datos del productor (porcentaje + sueldo) ───────────────────
     const mesesInvolucrados=Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+    const datosProd = getDatosProductor(p.nombre, mesesInvolucrados);
+
     let liqHtml='';
 
-    if(mesesInvolucrados.length>0){
-      let totalFijoAcum=0, totalVariableAcum=0, totalSueldoAcum=0;
-      let hayAlgunSueldo=false;
+    if(datosProd && mesesInvolucrados.length>0){
+      const { porcentaje, sueldoTotal, hayAlgunSueldo } = datosProd;
+      const pctLabel = fmtPct(porcentaje);
+
+      let totalFijoAcum=0, totalVariableAcum=0;
+      let hayAlgunSueldoEnMes=false;
       let mesRowsHtml='';
 
       mesesInvolucrados.forEach(mesNombre=>{
         const mesData=p.porMes[mesNombre];
         const comTotalMes=mesData.comTotal;
-        const sueldoFijoMes=getSueldoFijo(p.nombre,[mesNombre.toLowerCase()]);
 
-        if(sueldoFijoMes!==null){
-          hayAlgunSueldo=true;
-          const variableBase=comTotalMes - sueldoFijoMes;
-          const variableMes=variableBase>0 ? variableBase*0.35 : 0;
-          const sueldoTotalMes=sueldoFijoMes + variableMes;
-          totalFijoAcum+=sueldoFijoMes;
-          totalVariableAcum+=variableMes;
-          totalSueldoAcum+=sueldoTotalMes;
+        // Obtener sueldo del mes específico
+        const key=p.nombre.toLowerCase();
+        const dataSheet=sueldosFijos[key];
+        const sueldoFijoMes=dataSheet?( dataSheet[mesNombre.toLowerCase()]||0 ):0;
+        const tieneSueldoMes=sueldoFijoMes>0;
 
-          mesRowsHtml+=`<div class="liq-mes-row">
-            <span class="liq-mes-name">${mesNombre}</span>
-            <span class="liq-mes-fijo">${fmtPesos(sueldoFijoMes)}</span>
-            <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
-            <span class="liq-mes-variable">${variableMes>0?fmtPesos(variableMes):'—'}</span>
-            <span class="liq-mes-total">${fmtPesos(sueldoTotalMes)}</span>
-          </div>`;
-        }else{
-          mesRowsHtml+=`<div class="liq-mes-row">
-            <span class="liq-mes-name">${mesNombre}</span>
-            <span class="liq-mes-fijo" style="color:#4a5568">sin datos</span>
-            <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
-            <span class="liq-mes-variable" style="color:#4a5568">—</span>
-            <span class="liq-mes-total" style="color:#4a5568">—</span>
-          </div>`;
+        if(tieneSueldoMes) hayAlgunSueldoEnMes=true;
+
+        const variableBase = comTotalMes - sueldoFijoMes;
+        const variableMes = tieneSueldoMes ? Math.max(0, variableBase * porcentaje) : 0;
+        const sueldoTotalMes = sueldoFijoMes + variableMes;
+
+        if(tieneSueldoMes){
+          totalFijoAcum += sueldoFijoMes;
+          totalVariableAcum += variableMes;
         }
+
+        mesRowsHtml+=`<div class="liq-mes-row">
+          <span class="liq-mes-name">${mesNombre}</span>
+          <span class="liq-mes-fijo">${tieneSueldoMes ? fmtPesos(sueldoFijoMes) : '<span style="color:#4a5568">sin datos</span>'}</span>
+          <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
+          <span class="liq-mes-variable">${tieneSueldoMes && variableMes>0 ? fmtPesos(variableMes) : '—'}</span>
+          <span class="liq-mes-total">${tieneSueldoMes ? fmtPesos(sueldoTotalMes) : '<span style="color:#4a5568">—</span>'}</span>
+        </div>`;
       });
 
-      if(hayAlgunSueldo){
-        liqHtml=`<div class="liq-box">
-          <div class="liq-title">
-            Liquidación sueldo
-            <span class="liq-title-badge">Variable se factura aparte</span>
+      const totalSueldoAcum = totalFijoAcum + totalVariableAcum;
+
+      liqHtml=`<div class="liq-box">
+        <div class="liq-title">
+          Liquidación sueldo
+          <span class="liq-title-badge">${pctLabel} variable · factura aparte</span>
+        </div>
+        <div class="liq-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;margin-bottom:8px">
+          <div class="liq-item" style="border-color:#a78bfa30">
+            <div class="liq-item-label">Com. Prod (Q)</div>
+            <div class="liq-item-value" style="color:#a78bfa;font-size:13px">${fmtPesos(p.mesaComProd+p.hbComProd)}</div>
+            <div class="liq-item-sub">col Q</div>
           </div>
-          <div class="liq-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;margin-bottom:8px">
-            <div class="liq-item" style="border-color:#a78bfa30">
-              <div class="liq-item-label">Com. Prod (Q)</div>
-              <div class="liq-item-value" style="color:#a78bfa;font-size:13px">${fmtPesos(p.mesaComProd+p.hbComProd)}</div>
-              <div class="liq-item-sub">col Q</div>
-            </div>
-            <div class="liq-item" style="border-color:#4ade8030">
-              <div class="liq-item-label">P&L Mesa (P)</div>
-              <div class="liq-item-value" style="color:#4ade80;font-size:13px">${fmtPesos(p.mesaPylMesa+p.hbPylMesa)}</div>
-              <div class="liq-item-sub">col P</div>
-            </div>
-            <div class="liq-item" style="border-color:#60a5fa30">
-              <div class="liq-item-label">Com. Total (O)</div>
-              <div class="liq-item-value" style="color:#60a5fa;font-size:13px">${fmtPesos(Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0))}</div>
-              <div class="liq-item-sub">Q + P · entra en fórmula</div>
-            </div>
-            <div class="liq-item fijo">
-              <div class="liq-item-label">Sueldo fijo</div>
-              <div class="liq-item-value">${fmtPesos(totalFijoAcum)}</div>
-              <div class="liq-item-sub">por recibo</div>
-            </div>
-            <div class="liq-item variable">
-              <div class="liq-item-label">Variable (35%)</div>
-              <div class="liq-item-value">${totalVariableAcum>0?fmtPesos(totalVariableAcum):'$0'}</div>
-              <div class="liq-item-sub">factura aparte</div>
-            </div>
+          <div class="liq-item" style="border-color:#4ade8030">
+            <div class="liq-item-label">P&L Mesa (P)</div>
+            <div class="liq-item-value" style="color:#4ade80;font-size:13px">${fmtPesos(p.mesaPylMesa+p.hbPylMesa)}</div>
+            <div class="liq-item-sub">col P</div>
           </div>
-          <div class="liq-item total" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:8px">
-            <div>
-              <div class="liq-item-label">Total a cobrar</div>
-              <div class="liq-item-sub">fijo + variable</div>
-            </div>
-            <div class="liq-item-value" style="font-size:18px">${fmtPesos(totalSueldoAcum)}</div>
+          <div class="liq-item" style="border-color:#60a5fa30">
+            <div class="liq-item-label">Com. Total (O)</div>
+            <div class="liq-item-value" style="color:#60a5fa;font-size:13px">${fmtPesos(comTotal)}</div>
+            <div class="liq-item-sub">Q + P · base fórmula</div>
           </div>
-          ${mesesInvolucrados.length>1?`
-          <div class="liq-mes-breakdown">
-            <div class="liq-mes-row" style="border-bottom:0.5px solid #1e2330;margin-bottom:4px">
-              <span class="liq-mes-name" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mes</span>
-              <span class="liq-mes-fijo" style="color:#2d3748;font-size:9px;text-transform:uppercase">Fijo</span>
-              <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total</span>
-              <span class="liq-mes-variable" style="color:#2d3748;font-size:9px;text-transform:uppercase">Variable</span>
-              <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Total</span>
-            </div>
-            ${mesRowsHtml}
-          </div>`:''}
-          <div class="liq-formula" style="margin-top:8px">
-            <span>fórmula:</span> Variable = MAX(0, (Com.Total − Fijo) × 35%) · Sueldo Total = Fijo + Variable
+          <div class="liq-item fijo">
+            <div class="liq-item-label">Sueldo fijo</div>
+            <div class="liq-item-value">${hayAlgunSueldoEnMes ? fmtPesos(totalFijoAcum) : '<span style="font-size:11px;color:#4a5568">sin datos</span>'}</div>
+            <div class="liq-item-sub">por recibo</div>
           </div>
-        </div>`;
-      }else{
-        liqHtml=`<div class="liq-box">
-          <div class="liq-title">Liquidación sueldo</div>
-          <div class="liq-no-data">Sin datos de sueldo fijo en Securities_Realidad_2026 para este período</div>
-        </div>`;
-      }
+          <div class="liq-item variable">
+            <div class="liq-item-label">Variable (${pctLabel})</div>
+            <div class="liq-item-value">${hayAlgunSueldoEnMes ? (totalVariableAcum>0?fmtPesos(totalVariableAcum):'$0') : '<span style="font-size:11px;color:#4a5568">sin datos</span>'}</div>
+            <div class="liq-item-sub">factura aparte</div>
+          </div>
+        </div>
+        ${hayAlgunSueldoEnMes ? `
+        <div class="liq-item total" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:8px">
+          <div>
+            <div class="liq-item-label">Total a cobrar</div>
+            <div class="liq-item-sub">fijo + variable</div>
+          </div>
+          <div class="liq-item-value" style="font-size:18px">${fmtPesos(totalSueldoAcum)}</div>
+        </div>` : ''}
+        ${mesesInvolucrados.length>0 ? `
+        <div class="liq-mes-breakdown">
+          <div class="liq-mes-row" style="border-bottom:0.5px solid #1e2330;margin-bottom:4px">
+            <span class="liq-mes-name" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mes</span>
+            <span class="liq-mes-fijo" style="color:#2d3748;font-size:9px;text-transform:uppercase">Fijo</span>
+            <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total</span>
+            <span class="liq-mes-variable" style="color:#2d3748;font-size:9px;text-transform:uppercase">Variable</span>
+            <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Total</span>
+          </div>
+          ${mesRowsHtml}
+        </div>` : ''}
+        <div class="liq-formula" style="margin-top:8px">
+          <span>fórmula:</span> Variable = MAX(0, (Com.Total − Fijo) × ${pctLabel}) · Sueldo Total = Fijo + Variable
+        </div>
+      </div>`;
+    } else if(!datosProd) {
+      // Productor no está en el sheet de sueldos
+      liqHtml=`<div class="liq-box">
+        <div class="liq-title">Liquidación sueldo</div>
+        <div class="liq-no-data">Sin configuración en Securities_Realidad_2026 para este productor</div>
+      </div>`;
     }
 
     // ── Detalle de operaciones de mesa ──────────────────────────────────────
@@ -1085,7 +1090,7 @@ function renderProductores(){
               <td class="tr" style="font-size:11px;color:#a0aec0;font-family:monospace;padding:5px 6px"></td>
               <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</td>
               <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd+p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">+$${Math.round(comTotal).toLocaleString('es-AR')}</td>
             </tr>
           </tbody>
         </table>`:''}
