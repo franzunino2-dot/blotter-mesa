@@ -292,10 +292,14 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- PRODUCTORES -->
   <div id="view-productores" style="display:none">
-    <div class="metrics3">
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
       <div class="metric metric-tooltip">
         <div class="tt">Suma de com. total (col O = P&L + com. prod.)<br>de todos los productores en el período.</div>
         <div class="metric-label">Total facturado productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período · col O</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Lo que retiene la mesa de los productores:<br>· Empleados: col O − MAX(0,(col O − sueldo) × %)<br>· Externos: col P</div>
+        <div class="metric-label">Neto comisiones mesa</div><div class="metric-value green" id="prod-neto-mesa">—</div><div class="metric-sub">después de variable empleados</div>
       </div>
       <div class="metric metric-tooltip">
         <div class="tt">El productor con mayor com. total (col O)<br>en el período seleccionado.</div>
@@ -942,6 +946,97 @@ function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay()
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
 
+// Helper: breakdown 2 filas para EMPLEADO
+function buildBreakdownEmpleado(p, comTotal, datosProd, mesesInvolucrados, hb){
+  const {porcentaje}=datosProd;
+  const pctLabel=fmtPct(porcentaje);
+  let totalFijo=0, totalVariable=0;
+  let hayAlgunSueldo=false;
+
+  mesesInvolucrados.forEach(mesNombre=>{
+    const key=p.nombre.toLowerCase();
+    const dataSheet=sueldosFijos[key];
+    const sueldoMes=dataSheet?(dataSheet[mesNombre.toLowerCase()]||0):0;
+    if(sueldoMes>0){
+      hayAlgunSueldo=true;
+      const mesData=p.porMes[mesNombre];
+      const variable=Math.max(0,(mesData.comTotal-sueldoMes)*porcentaje);
+      totalFijo+=sueldoMes;
+      totalVariable+=variable;
+    }
+  });
+
+  const totalMesa=comTotal-totalVariable;
+  const totalCobra=totalFijo+totalVariable;
+
+  const tt=(texto)=>`<div class="tt">${texto}</div>`;
+
+  return `<div style="margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
+      <div class="prod-breakdown-item metric-tooltip" style="border-color:#60a5fa30">
+        ${tt('Suma de col O (= col P + col Q)<br>de todas las operaciones del período.<br>Es la base sobre la que se calcula<br>el variable del empleado.')}
+        <div class="prod-breakdown-label">Total generado (O)</div>
+        <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
+        <div class="prod-breakdown-sub">col O = col P + col Q</div>
+      </div>
+      <div class="prod-breakdown-item metric-tooltip" style="border-color:#e2e8f030">
+        ${tt('Sueldo fijo mensual del empleado.<br>Se descuenta de col O antes de<br>aplicar el % variable.<br>Fuente: Securities_Realidad_2026.')}
+        <div class="prod-breakdown-label">Sueldo fijo</div>
+        <div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div>
+        <div class="prod-breakdown-sub">por recibo · fijo mensual</div>
+      </div>
+      <div class="prod-breakdown-item metric-tooltip" style="border-color:#60a5fa30">
+        ${tt('Variable = MAX(0, (col O − fijo) × '+pctLabel+')<br>Lo que factura el empleado aparte<br>del sueldo fijo. Sale de col O,<br>no de col Q.')}
+        <div class="prod-breakdown-label">Variable (${pctLabel})</div>
+        <div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div>
+        <div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="prod-breakdown-item metric-tooltip" style="border-color:#f87171 30">
+        ${tt('Total que cobra el empleado:<br>Sueldo fijo + Variable.<br>El fijo va por recibo, el variable<br>lo factura aparte.')}
+        <div class="prod-breakdown-label">Total cobra el empleado</div>
+        <div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div>
+        <div class="prod-breakdown-sub">fijo + variable · factura aparte</div>
+      </div>
+      <div class="prod-breakdown-item metric-tooltip" style="border-color:#4ade8040">
+        ${tt('Lo que factura la mesa de este empleado:<br>col O − variable del empleado.<br>Fórmula: col O − MAX(0,(O − fijo) × '+pctLabel+')')}
+        <div class="prod-breakdown-label">Total mesa</div>
+        <div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O (sin sueldo cargado)'}</div>
+        <div class="prod-breakdown-sub">col O − variable · facturado real</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Helper: breakdown para EXTERNO
+function buildBreakdownExterno(p, comTotal, hb){
+  const pylTotal=p.mesaPylMesa+p.hbPylMesa;
+  const comProdTotal=p.mesaComProd+p.hbComProd;
+  const tt=(texto)=>`<div class="tt">${texto}</div>`;
+
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+    <div class="prod-breakdown-item metric-tooltip" style="border-color:#60a5fa30">
+      ${tt('Suma de col O (= col P + col Q)<br>de todas las operaciones del período.<br>Es el total generado por este productor.')}
+      <div class="prod-breakdown-label">Total generado (O)</div>
+      <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
+      <div class="prod-breakdown-sub">col O = col P + col Q</div>
+    </div>
+    <div class="prod-breakdown-item metric-tooltip" style="border-color:#a78bfa30">
+      ${tt('Comisión del productor externo (col Q).<br>Es lo que cobra el externo por<br>las operaciones que trajo.<br>No hay fijo ni variable — cobra col Q directo.')}
+      <div class="prod-breakdown-label">Comisión productor (Q)</div>
+      <div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(comProdTotal).toLocaleString('es-AR')}</div>
+      <div class="prod-breakdown-sub">col Q · cobra directo</div>
+    </div>
+    <div class="prod-breakdown-item metric-tooltip" style="border-color:#4ade8040">
+      ${tt('Lo que factura la mesa de este productor externo.<br>= col P = col O − col Q.<br>El externo no tiene sueldo ni variable,<br>así que la mesa se queda con col P directo.')}
+      <div class="prod-breakdown-label">Total mesa (P)</div>
+      <div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div>
+      <div class="prod-breakdown-sub">col P · facturado real mesa</div>
+    </div>
+  </div>`;
+}
+
 // ── PRODUCTORES ───────────────────────────────────────────────────────────────
 function renderProductores(){
   const ops=getOpsInRange();
@@ -1008,6 +1103,28 @@ function renderProductores(){
 
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   document.getElementById('prod-unicos').textContent=lista.length||'—';
+
+  // Neto comisiones mesa = suma por productor de lo que retiene la mesa
+  let netoMesaTotal=0;
+  lista.forEach(p=>{
+    const mesesProd=Object.keys(p.porMes);
+    const datosProd=getDatosProductor(p.nombre,mesesProd);
+    if(!datosProd){
+      // externo: retiene col P
+      netoMesaTotal+=p.mesaPylMesa+p.hbPylMesa;
+    } else {
+      // empleado: col O − variable por mes
+      const {porcentaje}=datosProd;
+      Object.entries(p.porMes).forEach(([mes,m])=>{
+        const key=p.nombre.toLowerCase();
+        const dataSheet=sueldosFijos[key];
+        const sueldoMes=dataSheet?(dataSheet[mes.toLowerCase()]||0):0;
+        const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
+        netoMesaTotal+=(m.comTotal-variable);
+      });
+    }
+  });
+  document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
   if(lista[0]){
     document.getElementById('prod-top').textContent=lista[0].nombre;
     const topTotal=Object.values(lista[0].porMes).reduce((s,m)=>s+m.comTotal,0);
@@ -1029,106 +1146,46 @@ function renderProductores(){
 
     let liqHtml='';
 
-    if(datosProd && mesesInvolucrados.length>0){
-      const { porcentaje, sueldoTotal, hayAlgunSueldo } = datosProd;
-      const pctLabel = fmtPct(porcentaje);
-
-      let totalFijoAcum=0, totalVariableAcum=0;
-      let hayAlgunSueldoEnMes=false;
+    if(datosProd && mesesInvolucrados.length>1){
+      // Solo mostrar desglose por mes cuando hay más de un mes
+      const {porcentaje}=datosProd;
+      const pctLabel=fmtPct(porcentaje);
       let mesRowsHtml='';
 
       mesesInvolucrados.forEach(mesNombre=>{
         const mesData=p.porMes[mesNombre];
         const comTotalMes=mesData.comTotal;
-
-        // Obtener sueldo del mes específico
         const key=p.nombre.toLowerCase();
         const dataSheet=sueldosFijos[key];
-        const sueldoFijoMes=dataSheet?( dataSheet[mesNombre.toLowerCase()]||0 ):0;
+        const sueldoFijoMes=dataSheet?(dataSheet[mesNombre.toLowerCase()]||0):0;
         const tieneSueldoMes=sueldoFijoMes>0;
-
-        if(tieneSueldoMes) hayAlgunSueldoEnMes=true;
-
-        const variableBase = comTotalMes - sueldoFijoMes;
-        const variableMes = tieneSueldoMes ? Math.max(0, variableBase * porcentaje) : 0;
-        const sueldoTotalMes = sueldoFijoMes + variableMes;
-
-        if(tieneSueldoMes){
-          totalFijoAcum += sueldoFijoMes;
-          totalVariableAcum += variableMes;
-        }
+        const variableMes=tieneSueldoMes?Math.max(0,(comTotalMes-sueldoFijoMes)*porcentaje):0;
+        const totalMesaMes=comTotalMes-variableMes;
 
         mesRowsHtml+=`<div class="liq-mes-row">
           <span class="liq-mes-name">${mesNombre}</span>
-          <span class="liq-mes-fijo">${tieneSueldoMes ? fmtPesos(sueldoFijoMes) : '<span style="color:#4a5568">sin datos</span>'}</span>
+          <span class="liq-mes-fijo">${tieneSueldoMes?fmtPesos(sueldoFijoMes):'<span style="color:#4a5568">—</span>'}</span>
           <span class="liq-mes-comtotal">${fmtPesos(comTotalMes)}</span>
-          <span class="liq-mes-variable">${tieneSueldoMes && variableMes>0 ? fmtPesos(variableMes) : '—'}</span>
-          <span class="liq-mes-total">${tieneSueldoMes ? fmtPesos(sueldoTotalMes) : '<span style="color:#4a5568">—</span>'}</span>
+          <span class="liq-mes-variable">${tieneSueldoMes&&variableMes>0?fmtPesos(variableMes):'—'}</span>
+          <span class="liq-mes-total" style="color:#4ade80">${tieneSueldoMes?fmtPesos(totalMesaMes):'<span style="color:#4a5568">—</span>'}</span>
         </div>`;
       });
 
-      const totalSueldoAcum = totalFijoAcum + totalVariableAcum;
-
-      liqHtml=`<div class="liq-box">
-        <div class="liq-title">
-          Liquidación sueldo
-          <span class="liq-title-badge">${pctLabel} variable · factura aparte</span>
-        </div>
-        <div class="liq-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;margin-bottom:8px">
-          <div class="liq-item" style="border-color:#a78bfa30">
-            <div class="liq-item-label">Com. Prod (Q)</div>
-            <div class="liq-item-value" style="color:#a78bfa;font-size:13px">${fmtPesos(p.mesaComProd+p.hbComProd)}</div>
-            <div class="liq-item-sub">col Q</div>
-          </div>
-          <div class="liq-item" style="border-color:#4ade8030">
-            <div class="liq-item-label">P&L Mesa (P)</div>
-            <div class="liq-item-value" style="color:#4ade80;font-size:13px">${fmtPesos(p.mesaPylMesa+p.hbPylMesa)}</div>
-            <div class="liq-item-sub">col P</div>
-          </div>
-          <div class="liq-item" style="border-color:#60a5fa30">
-            <div class="liq-item-label">Com. Total (O)</div>
-            <div class="liq-item-value" style="color:#60a5fa;font-size:13px">${fmtPesos(comTotal)}</div>
-            <div class="liq-item-sub">Q + P · base fórmula</div>
-          </div>
-          <div class="liq-item fijo">
-            <div class="liq-item-label">Sueldo fijo</div>
-            <div class="liq-item-value">${hayAlgunSueldoEnMes ? fmtPesos(totalFijoAcum) : '<span style="font-size:11px;color:#4a5568">sin datos</span>'}</div>
-            <div class="liq-item-sub">por recibo</div>
-          </div>
-          <div class="liq-item variable">
-            <div class="liq-item-label">Variable (${pctLabel})</div>
-            <div class="liq-item-value">${hayAlgunSueldoEnMes ? (totalVariableAcum>0?fmtPesos(totalVariableAcum):'$0') : '<span style="font-size:11px;color:#4a5568">sin datos</span>'}</div>
-            <div class="liq-item-sub">factura aparte</div>
-          </div>
-        </div>
-        ${hayAlgunSueldoEnMes ? `
-        <div class="liq-item total" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:8px">
-          <div>
-            <div class="liq-item-label">Total a cobrar</div>
-            <div class="liq-item-sub">fijo + variable</div>
-          </div>
-          <div class="liq-item-value" style="font-size:18px">${fmtPesos(totalSueldoAcum)}</div>
-        </div>` : ''}
-        ${mesesInvolucrados.length>0 ? `
+      liqHtml=`<div class="liq-box" style="margin-bottom:10px">
+        <div class="liq-title">Desglose por mes <span class="liq-title-badge">${pctLabel} variable</span></div>
         <div class="liq-mes-breakdown">
           <div class="liq-mes-row" style="border-bottom:0.5px solid #1e2330;margin-bottom:4px">
             <span class="liq-mes-name" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mes</span>
             <span class="liq-mes-fijo" style="color:#2d3748;font-size:9px;text-transform:uppercase">Fijo</span>
-            <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total</span>
+            <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total (O)</span>
             <span class="liq-mes-variable" style="color:#2d3748;font-size:9px;text-transform:uppercase">Variable</span>
-            <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Total</span>
+            <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mesa</span>
           </div>
           ${mesRowsHtml}
-        </div>` : ''}
-        <div class="liq-formula" style="margin-top:8px">
-          <span>fórmula:</span> Variable = MAX(0, (Com.Total − Fijo) × ${pctLabel}) · Sueldo Total = Fijo + Variable
         </div>
-      </div>`;
-    } else if(!datosProd) {
-      // Productor no está en el sheet de sueldos
-      liqHtml=`<div class="liq-box">
-        <div class="liq-title">Liquidación sueldo</div>
-        <div class="liq-no-data">Sin configuración en Securities_Realidad_2026 para este productor</div>
+        <div class="liq-formula" style="margin-top:8px">
+          <span>fórmula:</span> Variable = MAX(0, (O − Fijo) × ${pctLabel}) · Mesa = O − Variable
+        </div>
       </div>`;
     }
 
@@ -1167,28 +1224,12 @@ function renderProductores(){
       <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
         <span class="prod-card-toggle" id="arrow-pc-${idx}">▶</span>
         <span class="prod-card-name">${p.nombre}</span>
-        <div class="prod-card-tags">${tags}</div>
+        <div class="prod-card-tags">${tags}${datosProd?'<span class="prod-tag" style="background:#1a1a00;color:#fbbf24;border:0.5px solid #fbbf2440">empleado</span>':'<span class="prod-tag" style="background:#0a1a0a;color:#4ade80;border:0.5px solid #4ade8040">externo</span>'}</div>
         <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%"></div></div>
         <span class="prod-card-total">+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
       </div>
       <div class="prod-card-body" id="pc-${idx}">
-        <div class="prod-breakdown" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="prod-breakdown-item" style="border-color:#4ade8030">
-            <div class="prod-breakdown-label">Para la mesa (P&L)</div>
-            <div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</div>
-            <div class="prod-breakdown-sub">col P · ${p.mesaDias.size} día/s${p.hasHB?' + HB':''}</div>
-          </div>
-          <div class="prod-breakdown-item" style="border-color:#a78bfa30">
-            <div class="prod-breakdown-label">Para el productor (Q)</div>
-            <div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</div>
-            <div class="prod-breakdown-sub">col Q · comisión productor</div>
-          </div>
-          <div class="prod-breakdown-item" style="border-color:#60a5fa30">
-            <div class="prod-breakdown-label">Total generado (O)</div>
-            <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
-            <div class="prod-breakdown-sub">col O = P&L + com. prod.</div>
-          </div>
-        </div>
+        ${datosProd ? buildBreakdownEmpleado(p, comTotal, datosProd, mesesInvolucrados, hb) : buildBreakdownExterno(p, comTotal, hb)}
         ${liqHtml}
         ${(detMesaRows||detHBRows)?`
         <table class="prod-detail-table">
