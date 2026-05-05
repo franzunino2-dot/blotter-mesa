@@ -60,7 +60,10 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .tabs{display:flex;border-bottom:0.5px solid #1e2330;margin-bottom:16px;flex-wrap:wrap}
 .tab{padding:7px 14px;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;color:#4a5568;white-space:nowrap}
 .tab.active{color:#e2e8f0;border-bottom-color:#378ADD}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.metric-tooltip{position:relative}
+.metric-tooltip .tt{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e2330;border:0.5px solid #2d3748;border-radius:5px;padding:6px 10px;font-size:10px;color:#a0aec0;white-space:nowrap;z-index:200;pointer-events:none;line-height:1.5}
+.metric-tooltip:hover .tt{display:block}
 .metrics3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .metric{background:#111420;border-radius:6px;padding:10px 12px;border:0.5px solid #1e2330}
 .metric-label{font-size:10px;color:#4a5568;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
@@ -231,10 +234,26 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <!-- RUEDA -->
   <div id="view-rueda">
     <div class="metrics">
-      <div class="metric"><div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Productores activos</div><div class="metric-value purple" id="r-prod">—</div><div class="metric-sub" id="r-prod-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div></div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Suma de col P (P1) de todos los días del período.<br>Es el P&L bruto de la mesa antes de descontar<br>el variable de productores empleados.</div>
+        <div class="metric-label">P&L mesa (P1)</div><div class="metric-value green" id="r-pnl">—</div><div class="metric-sub" id="r-pnl-sub">—</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">P&L mesa − variable de empleados.<br>Productores externos: la mesa retiene col P.<br>Productores empleados: retiene col O − variable.<br>Es lo que efectivamente factura la mesa.</div>
+        <div class="metric-label">Facturado neto mesa</div><div class="metric-value green" id="r-neto">—</div><div class="metric-sub" id="r-neto-sub">—</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Suma del monto operado (compras + ventas)<br>del período seleccionado.</div>
+        <div class="metric-label">Volumen operado</div><div class="metric-value white" id="r-vol">—</div><div class="metric-sub" id="r-vol-sub">—</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Productores con al menos una operación<br>en el período seleccionado.</div>
+        <div class="metric-label">Productores activos</div><div class="metric-value purple" id="r-prod">—</div><div class="metric-sub" id="r-prod-sub">—</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Posiciones donde VN comprado ≠ VN vendido<br>al cierre del día de hoy.</div>
+        <div class="metric-label">Posiciones abiertas</div><div class="metric-value amber" id="r-pos">—</div><div class="metric-sub" id="r-pos-sub">—</div>
+      </div>
     </div>
     <div class="section-label">Operaciones del período</div>
     <div class="table-wrap">
@@ -274,9 +293,18 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <!-- PRODUCTORES -->
   <div id="view-productores" style="display:none">
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">Total com. productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período (mesa + HB)</div></div>
-      <div class="metric"><div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Suma de com. total (col O = P&L + com. prod.)<br>de todos los productores en el período.</div>
+        <div class="metric-label">Total facturado productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período · col O</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">El productor con mayor com. total (col O)<br>en el período seleccionado.</div>
+        <div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div>
+      </div>
+      <div class="metric metric-tooltip">
+        <div class="tt">Cantidad de productores distintos<br>con operaciones en el período.</div>
+        <div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div>
+      </div>
     </div>
     <div class="section-label">Acumulado por productor — click para desglosar</div>
     <div id="prod-acum-combined" style="margin-bottom:16px"></div>
@@ -750,16 +778,68 @@ function getPares(ops){
 }
 
 // ── RUEDA ─────────────────────────────────────────────────────────────────────
+function calcVariableEmpleados(){
+  // Calcula el total de variable de empleados en el rango actual
+  // Para cada productor empleado (está en sueldosFijos), variable = MAX(0, (comTotal_mes - sueldo_mes) * pct)
+  // Agrupamos por productor+mes igual que en renderProductores
+  const ops=getOpsInRange();
+  const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
+  const hb=getHBInRange();
+
+  // Agrupar por productor → mes → comTotal
+  const porProd={};
+  pares.forEach(p=>{
+    const key=p.productor;
+    if(!porProd[key])porProd[key]={};
+    const mIdx=parseInt(p.fecha.split('/')[1])-1;
+    const mes=MESES[mIdx];
+    if(!porProd[key][mes])porProd[key][mes]=0;
+    porProd[key][mes]+=p.pylMesa+p.comProductor;
+  });
+  hb.forEach(r=>{
+    const key=Object.keys(porProd).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
+    if(!porProd[key])porProd[key]={};
+    const mIdx=parseInt(r.fecha.split('/')[1])-1;
+    const mes=MESES[mIdx];
+    if(!porProd[key][mes])porProd[key][mes]=0;
+    porProd[key][mes]+=r.comTotal;
+  });
+
+  let totalVariable=0;
+  Object.entries(porProd).forEach(([nombre,porMes])=>{
+    const datosProd=getDatosProductor(nombre,Object.keys(porMes));
+    if(!datosProd)return; // externo → no descuenta nada
+    const {porcentaje}=datosProd;
+    Object.entries(porMes).forEach(([mes,comTotal])=>{
+      const key=nombre.toLowerCase();
+      const dataSheet=sueldosFijos[key];
+      const sueldoMes=dataSheet?(dataSheet[mes.toLowerCase()]||0):0;
+      const variableBase=comTotal-sueldoMes;
+      const variable=Math.max(0,variableBase*porcentaje);
+      totalVariable+=variable;
+    });
+  });
+  return totalVariable;
+}
+
 function renderRueda(){
   const ops=getOpsInRange();
   const total=getTotalInRange();
+  const totalVariable=calcVariableEmpleados();
+  const neto=total-totalVariable;
   const openPos=getOpenPos(ops.filter(o=>o._fecha===todayStr()));
   const pares=getPares(ops);
   const prodActivos=new Set(pares.filter(p=>p.productor).map(p=>p.productor));
   const vol=ops.reduce((a,o)=>a+(parseFloat(o.monto)||0),0);
+
   document.getElementById('r-pnl').innerHTML=fmtPnl(total,true)||'—';
   document.getElementById('r-pnl').className='metric-value '+(total>=0?'green':'red');
   document.getElementById('r-pnl-sub').textContent=getDatesInRange().length+' día/s';
+
+  document.getElementById('r-neto').innerHTML=fmtPnl(neto,true)||'—';
+  document.getElementById('r-neto').className='metric-value '+(neto>=0?'green':'red');
+  document.getElementById('r-neto-sub').textContent=totalVariable>0?'− $'+Math.round(totalVariable).toLocaleString('es-AR')+' variable':'sin variable empleados';
+
   document.getElementById('r-vol').textContent=fmtK(vol);
   document.getElementById('r-vol-sub').textContent=pares.length+' operaciones';
   document.getElementById('r-prod').textContent=prodActivos.size||'—';
