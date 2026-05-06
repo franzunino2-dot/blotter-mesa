@@ -277,7 +277,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- PRODUCTORES -->
   <div id="view-productores" style="display:none">
-    <div class="metrics4">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
       <div class="metric">
         <div class="tt">Suma de col O (= col P + col Q) de todos los productores en el período. Es el total generado antes de pagar a los productores.</div>
         <div class="metric-label">Total facturado productores</div>
@@ -285,10 +285,16 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-sub">período · col O</div>
       </div>
       <div class="metric">
-        <div class="tt">Lo que retiene la mesa de las operaciones con productores. Empleados: col O − fijo − variable. Externos: col P.</div>
+        <div class="tt">Lo que cobran los productores en total: empleados = fijo + variable; externos = col Q.</div>
+        <div class="metric-label">Com. pagada productores</div>
+        <div class="metric-value purple" id="prod-compagada">—</div>
+        <div class="metric-sub">fijo+var (emp.) · col Q (ext.)</div>
+      </div>
+      <div class="metric">
+        <div class="tt">Lo que retiene la mesa: total facturado − com. pagada a productores.</div>
         <div class="metric-label">Neto comisiones mesa</div>
         <div class="metric-value green" id="prod-neto-mesa">—</div>
-        <div class="metric-sub">después de pagar productores</div>
+        <div class="metric-sub">facturado − com. productores</div>
       </div>
       <div class="metric">
         <div class="tt">El productor con mayor comisión total (col O) en el período seleccionado.</div>
@@ -933,6 +939,8 @@ function renderProductores(){
   });
 
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
+  const comPagadaProductores=calcComProductores(pares,hb);
+  document.getElementById('prod-compagada').innerHTML=fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
   document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
   if(lista[0]){
     document.getElementById('prod-top').textContent=lista[0].nombre;
