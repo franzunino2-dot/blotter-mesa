@@ -936,10 +936,7 @@ function renderProductores(){
   const comPagadaProductores=calcComProductores(pares,hb);
   document.getElementById('prod-compagada').innerHTML=fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
   document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
-  if(lista[0]){
-    document.getElementById('prod-top').textContent=lista[0].nombre;
-    document.getElementById('prod-top-sub').textContent=fmtPesos(Object.values(lista[0].porMes).reduce((s,m)=>s+m.comTotal,0));
-  }else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}
+  // prod-top eliminado
   document.getElementById('prod-unicos').textContent=lista.length||'—';
 
   let html='';
