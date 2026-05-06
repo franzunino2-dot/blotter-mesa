@@ -221,7 +221,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- RUEDA -->
   <div id="view-rueda">
-    <div class="metrics3">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
       <div class="metric">
         <div class="tt">Suma de col O (P&L mesa + com. productor) de todas las operaciones del período. Es el total generado antes de pagar a los productores.</div>
         <div class="metric-label">Facturado bruto</div>
@@ -234,11 +234,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-value purple" id="r-comprod">—</div>
         <div class="metric-sub" id="r-comprod-sub">lo que se llevan</div>
       </div>
-      <div class="metric tt-right">
+      <div class="metric">
         <div class="tt">Facturado bruto menos lo que cobran los productores. Es lo que queda neto para la mesa.</div>
         <div class="metric-label">Neto mesa</div>
         <div class="metric-value green" id="r-neto">—</div>
         <div class="metric-sub" id="r-neto-sub">bruto - com. productores</div>
+      </div>
+      <div class="metric tt-right">
+        <div class="tt">Gastos operativos del mes (fila TOTAL GENERAL de la sheet Gastos Equanima). Si el período abarca varios meses se suman.</div>
+        <div class="metric-label">Gastos del período</div>
+        <div class="metric-value red" id="r-gastos">—</div>
+        <div class="metric-sub" id="r-gastos-sub">gastos operativos</div>
       </div>
     </div>
     <div class="section-label">Operaciones del período</div>
@@ -340,8 +346,10 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
+const GASTOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
 
 let sueldosFijos={};
+let gastosPorMes={};
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},allHB={},allBrutos={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
@@ -414,6 +422,51 @@ function getDatosProductor(nombre,mesesArr){
   let sueldoTotal=0,hayAlgunSueldo=false;
   mesesArr.forEach(m=>{const mv=m.toLowerCase();if(data[mv]>0){sueldoTotal+=data[mv];hayAlgunSueldo=true;}});
   return{porcentaje,sueldoTotal:hayAlgunSueldo?sueldoTotal:0,hayAlgunSueldo};
+}
+
+// ── GASTOS ───────────────────────────────────────────────────────────────────
+async function loadGastos(){
+  try{
+    const r=await fetch(GASTOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
+    if(!r.ok)return;
+    parseGastos(await r.text());
+  }catch(e){console.warn('Gastos no cargaron:',e);}
+}
+function parseGastos(text){
+  gastosPorMes={};
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  // Mapeo mes -> columna (H=abril=idx7, I=mayo=idx8, ...)
+  const MESES_COL={'abril':7,'mayo':8,'junio':9,'julio':10,'agosto':11,'septiembre':12,'octubre':13,'noviembre':14,'diciembre':15};
+  // Buscar la fila que tenga "TOTAL GENERAL" en col A
+  let filaTotal=-1;
+  for(let i=0;i<lines.length;i++){
+    const cols=parseCSVLine(lines[i]);
+    const celA=(cols[0]||'').trim().toUpperCase();
+    if(celA.includes('TOTAL GENERAL')||celA.includes('TOTAL')){
+      filaTotal=i;
+      // no break — quedarse con la última que coincida (la fila 72)
+    }
+  }
+  if(filaTotal<0){console.warn('Gastos: no se encontro fila TOTAL GENERAL');return;}
+  const row=parseCSVLine(lines[filaTotal]);
+  console.log('Gastos fila TOTAL GENERAL (idx '+filaTotal+'):', row.slice(7,16));
+  Object.entries(MESES_COL).forEach(([mes,colIdx])=>{
+    const val=parseMonto(row[colIdx]||'');
+    if(val>0)gastosPorMes[mes]=val;
+  });
+  console.log('Gastos por mes:', gastosPorMes);
+}
+function getGastosInRange(){
+  const dates=getDatesInRange();
+  if(!dates.length)return 0;
+  const mesesEnRango=new Set();
+  dates.forEach(d=>{
+    const mes=MESES[parseInt(d.split('/')[1])-1].toLowerCase();
+    mesesEnRango.add(mes);
+  });
+  let total=0;
+  mesesEnRango.forEach(mes=>{if(gastosPorMes[mes])total+=gastosPorMes[mes];});
+  return total;
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -558,7 +611,8 @@ async function loadData(){
   try{
     const[r]=await Promise.all([
       fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
-      loadSueldos()
+      loadSueldos(),
+      loadGastos()
     ]);
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
@@ -721,6 +775,10 @@ function renderRueda(){
   document.getElementById('r-neto').innerHTML=fmtPnl(neto,true)||'—';
   document.getElementById('r-neto').className='metric-value '+(neto>=0?'green':'red');
   document.getElementById('r-neto-sub').textContent='bruto - com. productores';
+
+  const gastos=getGastosInRange();
+  document.getElementById('r-gastos').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
+  document.getElementById('r-gastos-sub').textContent=gastos>0?'período seleccionado':'sin datos';
 
   // Alerta posiciones abiertas
   const map={};
