@@ -694,7 +694,7 @@ function calcComProductores(pares, hb){
         const ds=sueldosFijos[nombre.toLowerCase()];
         const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
         const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
-        total+=sueldoMes+variable;
+        total+=variable; // solo el variable, el fijo va por RRHH aparte
       });
     }
   });
