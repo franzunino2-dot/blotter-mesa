@@ -286,11 +286,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="mes-cal-grid" id="mes-cal-grid"></div>
   </div>
 
-  <!-- PRODUCTORES -->
-  <div id="view-productores" style="display:none">
-    <div class="metrics2">
-      <div class="metric">
-        <div class="tt">El productor con mayor comisión total (col O) en el período seleccionado.</div>
+ O) en el período seleccionado.</div>
         <div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div>
       </div>
       <div class="metric tt-right">
@@ -976,10 +972,33 @@ function renderProductores(){
       </div>`;
     }
 
-    // Detalle operaciones
-    let detMesaRows='';
-    p.mesaPares.forEach(op=>{
-      detMesaRows+=`<tr>
+    // Separar ops en SENEBI vs Mesa
+    const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
+    const opsMesa   = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
+
+    // Subtotales SENEBI
+    const senebiComProd = opsSENEBI.reduce((s,op)=>s+op.comProductor,0);
+    const senebiPylMesa = opsSENEBI.reduce((s,op)=>s+op.pylMesa,0);
+    const senebiTotal   = senebiComProd + senebiPylMesa;
+
+    // Subtotales Mesa (no SENEBI)
+    const mesaComProd2 = opsMesa.reduce((s,op)=>s+op.comProductor,0);
+    const mesaPylMesa2 = opsMesa.reduce((s,op)=>s+op.pylMesa,0);
+    const mesaTotal2   = mesaComProd2 + mesaPylMesa2;
+
+    // HB
+    const hbRows = p.hasHB ? hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()) : [];
+    const hbComProdSum = hbRows.reduce((s,r)=>s+r.comProd,0);
+    const hbPylMesaSum = hbRows.reduce((s,r)=>s+r.pylMesa,0);
+    const hbTotalSum   = hbComProdSum + hbPylMesaSum;
+
+    // Total global = Mesa + SENEBI + HB
+    const grandComProd = p.mesaComProd + p.hbComProd;
+    const grandPylMesa = p.mesaPylMesa + p.hbPylMesa;
+    const grandTotal   = grandComProd + grandPylMesa;
+
+    function rowOp(op){
+      return `<tr>
         <td style="color:#4a5568;font-family:monospace">${op.fecha}</td>
         <td><span class="especie">${op.especie}</span></td>
         <td style="color:#a0aec0">${op.cliente}</td>
@@ -989,21 +1008,25 @@ function renderProductores(){
         <td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td>
         <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td>
       </tr>`;
-    });
-    let detHBRows='';
-    if(p.hasHB){
-      hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()).forEach(r=>{
-        detHBRows+=`<tr>
-          <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
-          <td style="color:#0ea5e9">Homebroker</td>
-          <td style="color:#4a5568">—</td><td style="color:#4a5568">—</td>
-          <td class="tr">—</td>
-          <td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
-          <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
-          <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td>
-        </tr>`;
-      });
     }
+    function subtotalRow(label,color,cp,pyl,tot){
+      return `<tr style="background:#111420;border-top:0.5px solid #2d3748">
+        <td colspan="4" style="font-size:9px;color:${color};text-transform:uppercase;letter-spacing:.04em;padding:5px 6px;font-weight:500">${label}</td>
+        <td class="tr" style="padding:5px 6px"></td>
+        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">${cp?fmtPnl(cp,true,'pnl-pos'):'—'}</td>
+        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">${pyl?fmtPnl(pyl,true,'pnl-pos'):'—'}</td>
+        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">${tot?fmtPnl(tot,true,'pnl-pos'):'—'}</td>
+      </tr>`;
+    }
+    function sectionDiv(label,color,badge){
+      return `<tr><td colspan="8" style="padding:0">
+        <div style="font-size:9px;color:${color};text-transform:uppercase;letter-spacing:.05em;padding:6px 6px 3px;border-bottom:0.5px solid ${color}20;margin-bottom:0;display:flex;align-items:center;gap:6px">
+          ${badge?`<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${color}15;color:${color};border:0.5px solid ${color}40">${badge}</span>`:''}${label}
+        </div>
+      </td></tr>`;
+    }
+
+    const hasOps = opsMesa.length||opsSENEBI.length||hbRows.length;
 
     html+=`<div class="prod-card">
       <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
@@ -1016,21 +1039,36 @@ function renderProductores(){
       <div class="prod-card-body" id="pc-${idx}">
         ${datosProd?buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados):buildBreakdownExterno(p,comTotal)}
         ${liqHtml}
-        ${(detMesaRows||detHBRows)?`
+        ${hasOps?`
         <table class="prod-detail-table">
           <thead><tr>
             <th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th>
             <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th>
           </tr></thead>
           <tbody>
-            ${detMesaRows}
-            ${detHBRows?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider"><span class="hb-badge">HB</span> Homebroker</div></td></tr>${detHBRows}`:''}
-            <tr style="border-top:0.5px solid #2d3748;background:#111420">
-              <td colspan="4" style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;padding:5px 6px">Total período</td>
-              <td class="tr" style="padding:5px 6px"></td>
-              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">+$${Math.round(p.mesaComProd+p.hbComProd).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">+$${Math.round(p.mesaPylMesa+p.hbPylMesa).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:12px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">+$${Math.round(comTotal).toLocaleString('es-AR')}</td>
+            ${opsMesa.length?sectionDiv('Mesa','#a0aec0',''):''}
+            ${opsMesa.map(rowOp).join('')}
+            ${opsMesa.length?subtotalRow('Subtotal Mesa','#a0aec0',mesaComProd2,mesaPylMesa2,mesaTotal2):''}
+            ${opsSENEBI.length?sectionDiv('SENEBI','#f59e0b','SENEBI'):''}
+            ${opsSENEBI.map(rowOp).join('')}
+            ${opsSENEBI.length?subtotalRow('Subtotal SENEBI','#f59e0b',senebiComProd,senebiPylMesa,senebiTotal):''}
+            ${hbRows.length?sectionDiv('Homebroker','#0ea5e9','HB'):''}
+            ${hbRows.map(r=>`<tr>
+              <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
+              <td style="color:#0ea5e9">Homebroker</td>
+              <td style="color:#4a5568">—</td><td style="color:#4a5568">—</td>
+              <td class="tr">—</td>
+              <td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
+              <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
+              <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td>
+            </tr>`).join('')}
+            ${hbRows.length?subtotalRow('Subtotal HB','#0ea5e9',hbComProdSum,hbPylMesaSum,hbTotalSum):''}
+            <tr style="border-top:0.5px solid #378ADD;background:#0c1628">
+              <td colspan="4" style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;padding:6px 6px;font-weight:600">Total período</td>
+              <td class="tr" style="padding:6px 6px"></td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#a78bfa;padding:6px 6px">+$${Math.round(grandComProd).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#4ade80;padding:6px 6px">+$${Math.round(grandPylMesa).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa;padding:6px 6px">+$${Math.round(grandTotal).toLocaleString('es-AR')}</td>
             </tr>
           </tbody>
         </table>`:''}
