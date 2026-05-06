@@ -62,19 +62,14 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .tab.active{color:#e2e8f0;border-bottom-color:#378ADD}
 .metrics3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .metrics2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.metrics4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .metric{background:#111420;border-radius:6px;padding:10px 12px;border:0.5px solid #1e2330;position:relative}
 .metric-label{font-size:10px;color:#4a5568;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
 .metric-value{font-size:20px;font-weight:500;font-family:monospace;line-height:1.1}
 .metric-sub{font-size:10px;color:#2d3748;margin-top:3px}
-/* TOOLTIPS */
-.metric .tt{
-  display:none;position:absolute;bottom:calc(100% + 8px);left:0;
-  background:#1a1f2e;border:0.5px solid #2d3748;border-radius:6px;padding:8px 12px;
-  font-size:11px;color:#a0aec0;white-space:normal;width:220px;z-index:9999;
-  pointer-events:none;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.7);
-}
+.metric .tt{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:#1a1f2e;border:0.5px solid #2d3748;border-radius:6px;padding:8px 12px;font-size:11px;color:#a0aec0;white-space:normal;width:220px;z-index:9999;pointer-events:none;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.7)}
 .metric:hover .tt{display:block}
-.metric.tt-right .tt{left:auto;right:0;}
+.metric.tt-right .tt{left:auto;right:0}
 .green{color:#4ade80}.red{color:#f87171}.white{color:#e2e8f0}.amber{color:#fbbf24}.blue{color:#60a5fa}.purple{color:#a78bfa}
 .alert{background:#1a0a00;border:0.5px solid #92400e;border-radius:4px;padding:7px 12px;margin-bottom:12px;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:8px}
 .alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
@@ -112,7 +107,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .cal-pnl.pos{color:#4ade80}.cal-pnl.neg{color:#f87171}
 .cal-ops-cnt{font-size:9px;color:#2d3748}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
-@media(max-width:700px){.metrics3{grid-template-columns:repeat(2,1fr)}.metrics2{grid-template-columns:1fr}}
+@media(max-width:700px){.metrics3,.metrics4{grid-template-columns:repeat(2,1fr)}.metrics2{grid-template-columns:1fr}}
 /* Accordion productores */
 .prod-card{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:6px;overflow:hidden;background:#111420}
 .prod-card-header{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:10px;transition:background .15s}
@@ -133,21 +128,15 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .prod-breakdown-label{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 .prod-breakdown-value{font-size:14px;font-weight:500;font-family:monospace}
 .prod-breakdown-sub{font-size:9px;color:#2d3748;margin-top:2px}
-/* Tooltips dentro de prod-breakdown-item */
-.prod-breakdown-item .tt{
-  display:none;position:absolute;bottom:calc(100% + 8px);left:0;
-  background:#1a1f2e;border:0.5px solid #2d3748;border-radius:6px;padding:8px 12px;
-  font-size:11px;color:#a0aec0;white-space:normal;width:220px;z-index:9999;
-  pointer-events:none;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.7);
-}
+.prod-breakdown-item .tt{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:#1a1f2e;border:0.5px solid #2d3748;border-radius:6px;padding:8px 12px;font-size:11px;color:#a0aec0;white-space:normal;width:220px;z-index:9999;pointer-events:none;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.7)}
 .prod-breakdown-item:hover .tt{display:block}
-.prod-breakdown-item.tt-right .tt{left:auto;right:0;}
+.prod-breakdown-item.tt-right .tt{left:auto;right:0}
 .prod-detail-table{width:100%;border-collapse:collapse}
 .prod-detail-table th{font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;padding:3px 6px;border-bottom:0.5px solid #1e2330;font-weight:400}
 .prod-detail-table td{font-size:10px;color:#a0aec0;padding:4px 6px;border-bottom:0.5px solid #111420}
 .prod-detail-table tr:last-child td{border-bottom:none}
 .prod-detail-table tr:hover td{background:#111420}
-.prod-section-divider{font-size:9px;color:#0ea5e9;text-transform:uppercase;letter-spacing:.05em;padding:6px 0 3px;border-bottom:0.5px solid #0ea5e920;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.prod-section-divider{font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:6px 6px 3px;margin-bottom:0;display:flex;align-items:center;gap:6px}
 /* Liquidación sueldo */
 .liq-box{background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:12px 14px;margin-bottom:10px}
 .liq-title{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -240,7 +229,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-sub" id="r-bruto-sub">col O · todas las ops</div>
       </div>
       <div class="metric">
-        <div class="tt">Lo que cobraron los productores: empleados cobran fijo + variable sobre col O; externos cobran col Q directo.</div>
+        <div class="tt">Lo que cobran los productores: empleados cobran fijo + variable sobre col O; externos cobran col Q directo.</div>
         <div class="metric-label">Com. productores</div>
         <div class="metric-value purple" id="r-comprod">—</div>
         <div class="metric-sub" id="r-comprod-sub">lo que se llevan</div>
@@ -249,7 +238,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="tt">Facturado bruto menos lo que cobran los productores. Es lo que queda neto para la mesa.</div>
         <div class="metric-label">Neto mesa</div>
         <div class="metric-value green" id="r-neto">—</div>
-        <div class="metric-sub" id="r-neto-sub">bruto − com. productores</div>
+        <div class="metric-sub" id="r-neto-sub">bruto - com. productores</div>
       </div>
     </div>
     <div class="section-label">Operaciones del período</div>
@@ -272,7 +261,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="metrics3">
       <div class="metric"><div class="metric-label">P&L del mes</div><div class="metric-value green" id="mes-pnl">—</div><div class="metric-sub" id="mes-pnl-sub">—</div></div>
       <div class="metric"><div class="metric-label">Mejor día</div><div class="metric-value green" id="mes-best">—</div><div class="metric-sub" id="mes-best-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Peor día</div><div class="metric-value red" id="mes-worst">—</div><div class="metric-sub" id="mes-worst-sub">—</div></div>
+      <div class="metric tt-right"><div class="metric-label">Peor día</div><div class="metric-value red" id="mes-worst">—</div><div class="metric-sub" id="mes-worst-sub">—</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       <button onclick="prevMonth()" style="background:#111420;border:0.5px solid #1e2330;color:#a0aec0;padding:3px 12px;border-radius:4px;cursor:pointer;font-size:12px">&#8592;</button>
@@ -286,12 +275,32 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="mes-cal-grid" id="mes-cal-grid"></div>
   </div>
 
- O) en el período seleccionado.</div>
-        <div class="metric-label">Mayor productor</div><div class="metric-value amber" id="prod-top">—</div><div class="metric-sub" id="prod-top-sub">—</div>
+  <!-- PRODUCTORES -->
+  <div id="view-productores" style="display:none">
+    <div class="metrics4">
+      <div class="metric">
+        <div class="tt">Suma de col O (= col P + col Q) de todos los productores en el período. Es el total generado antes de pagar a los productores.</div>
+        <div class="metric-label">Total facturado productores</div>
+        <div class="metric-value amber" id="prod-total">—</div>
+        <div class="metric-sub">período · col O</div>
+      </div>
+      <div class="metric">
+        <div class="tt">Lo que retiene la mesa de las operaciones con productores. Empleados: col O − fijo − variable. Externos: col P.</div>
+        <div class="metric-label">Neto comisiones mesa</div>
+        <div class="metric-value green" id="prod-neto-mesa">—</div>
+        <div class="metric-sub">después de pagar productores</div>
+      </div>
+      <div class="metric">
+        <div class="tt">El productor con mayor comisión total (col O) en el período seleccionado.</div>
+        <div class="metric-label">Mayor productor</div>
+        <div class="metric-value amber" id="prod-top">—</div>
+        <div class="metric-sub" id="prod-top-sub">—</div>
       </div>
       <div class="metric tt-right">
         <div class="tt">Cantidad de productores distintos con operaciones en el período.</div>
-        <div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div>
+        <div class="metric-label">Productores únicos</div>
+        <div class="metric-value white" id="prod-unicos">—</div>
+        <div class="metric-sub">en el período</div>
       </div>
     </div>
     <div class="section-label">Acumulado por productor — click para desglosar</div>
@@ -357,7 +366,6 @@ async function loadSueldos(){
     parseSueldos(await r.text());
   }catch(e){console.warn('Sueldos no cargaron:',e);}
 }
-
 function parseSueldos(text){
   sueldosFijos={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -380,7 +388,6 @@ function parseSueldos(text){
     }
   }
 }
-
 function parseCSVLine(line){
   const res=[];let cur='';let inQ=false;
   for(let i=0;i<line.length;i++){
@@ -391,7 +398,6 @@ function parseCSVLine(line){
   }
   res.push(cur);return res;
 }
-
 function parseMonto(s){
   let c=s.replace(/[$\s"]/g,'').trim();if(!c)return 0;
   const hasComa=c.includes(','),hasPunto=c.includes('.');
@@ -400,7 +406,6 @@ function parseMonto(s){
   else if(hasPunto){if(c.split('.').pop().length>2)c=c.replace(/\./g,'');}
   return parseFloat(c)||0;
 }
-
 function getDatosProductor(nombre,mesesArr){
   const key=nombre.toLowerCase();
   const data=sueldosFijos[key];
@@ -564,7 +569,6 @@ async function loadData(){
     updateDisplay();renderAll();
   }catch(e){setSyncState('error','Error: '+e.message);}
 }
-
 function parseCSV(text){
   allOps={};allTotals={};allHB={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -598,7 +602,6 @@ function parseCSV(text){
     }
   }
 }
-
 function setSyncState(s,msg){
   document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
   document.getElementById('sync-label').textContent=msg;
@@ -642,108 +645,79 @@ function getPares(ops){
   return pares;
 }
 
-// ── CÁLCULO DE COM. PRODUCTORES (lo que cobran, no lo que queda en mesa) ──────
-// Empleados: fijo + variable (= lo que cobra el empleado en total)
-// Externos:  col Q directo
-function calcComProductores(){
-  const ops=getOpsInRange();
-  const pares=getPares(ops);
-  const hb=getHBInRange();
-
-  // Agrupar por productor y mes
+// ── CÁLCULO COM. PRODUCTORES (lo que cobran) ──────────────────────────────────
+// Empleados: fijo + variable = MAX(0,(colO-sueldo)*pct)
+// Externos:  col Q
+function calcComProductores(pares, hb){
   const porProd={};
   pares.filter(p=>p.productor).forEach(p=>{
     const key=p.productor;
     if(!porProd[key])porProd[key]={porMes:{}};
     const mes=MESES[parseInt(p.fecha.split('/')[1])-1];
     if(!porProd[key].porMes[mes])porProd[key].porMes[mes]={comTotal:0,comProd:0};
-    porProd[key].porMes[mes].comTotal += p.pylMesa + p.comProductor; // col O
-    porProd[key].porMes[mes].comProd  += p.comProductor;             // col Q
+    porProd[key].porMes[mes].comTotal+=p.pylMesa+p.comProductor;
+    porProd[key].porMes[mes].comProd+=p.comProductor;
   });
   hb.forEach(r=>{
     let key=Object.keys(porProd).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
     if(!porProd[key])porProd[key]={porMes:{}};
     const mes=MESES[parseInt(r.fecha.split('/')[1])-1];
     if(!porProd[key].porMes[mes])porProd[key].porMes[mes]={comTotal:0,comProd:0};
-    porProd[key].porMes[mes].comTotal += r.comTotal;
-    porProd[key].porMes[mes].comProd  += r.comProd;
+    porProd[key].porMes[mes].comTotal+=r.comTotal;
+    porProd[key].porMes[mes].comProd+=r.comProd;
   });
-
-  let totalComProductores=0;
-
+  let total=0;
   Object.entries(porProd).forEach(([nombre,data])=>{
-    const mesesProd=Object.keys(data.porMes);
-    const datosProd=getDatosProductor(nombre,mesesProd);
-
-    if(!datosProd){
-      // Externo: cobra col Q
-      Object.values(data.porMes).forEach(m=>{ totalComProductores+=m.comProd; });
-    } else {
-      // Empleado: cobra fijo + variable
-      // Variable = MAX(0, (col O - sueldo) * porcentaje)
-      // Total que cobra = fijo + variable
-      const {porcentaje}=datosProd;
+    const meses=Object.keys(data.porMes);
+    const dp=getDatosProductor(nombre,meses);
+    if(!dp){
+      Object.values(data.porMes).forEach(m=>{total+=m.comProd;});
+    }else{
+      const{porcentaje}=dp;
       Object.entries(data.porMes).forEach(([mes,m])=>{
-        const key2=nombre.toLowerCase();
-        const ds=sueldosFijos[key2];
+        const ds=sueldosFijos[nombre.toLowerCase()];
         const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
         const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
-        totalComProductores += sueldoMes + variable;
+        total+=sueldoMes+variable;
       });
     }
   });
-
-  return totalComProductores;
+  return total;
 }
 
 // ── RUEDA ─────────────────────────────────────────────────────────────────────
 function renderRueda(){
   const ops=getOpsInRange();
   const pares=getPares(ops);
-
-  // Facturado bruto = suma col O de todas las ops
+  const hb=getHBInRange();
   const bruto=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
-
-  // Com. productores = lo que cobran (fijo+variable para empleados, col Q para externos)
-  const comProd=calcComProductores();
-
-  // Neto mesa = bruto - com. productores
+  const comProd=calcComProductores(pares,hb);
   const neto=bruto-comProd;
 
   document.getElementById('r-bruto').innerHTML=fmtPnl(bruto,true,'pnl-pos')||'—';
   document.getElementById('r-bruto-sub').textContent=pares.length+' operaciones · col O';
-
   document.getElementById('r-comprod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';
   document.getElementById('r-comprod-sub').textContent='empleados: fijo+var · externos: col Q';
-
   document.getElementById('r-neto').innerHTML=fmtPnl(neto,true)||'—';
   document.getElementById('r-neto').className='metric-value '+(neto>=0?'green':'red');
-  document.getElementById('r-neto-sub').textContent='bruto − com. productores';
+  document.getElementById('r-neto-sub').textContent='bruto - com. productores';
 
   // Alerta posiciones abiertas
-  const openPos=[];
-  const todayOps=(allOps[todayStr()]||[]);
   const map={};
-  todayOps.forEach(o=>{
+  (allOps[todayStr()]||[]).forEach(o=>{
     const k=o.especie+'|'+(o.plazo||'0');
     if(!map[k])map[k]={especie:o.especie,vnC:0,vnV:0};
     if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
     else map[k].vnV+=parseFloat(o.vn)||0;
   });
-  Object.values(map).forEach(x=>{if(Math.round(x.vnC-x.vnV)>0)openPos.push(x);});
+  const openPos=Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
   const banner=document.getElementById('alert-banner');
-  if(openPos.length>0){
-    banner.style.display='flex';
-    document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');
-  } else banner.style.display='none';
+  if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');}
+  else banner.style.display='none';
 
-  // Tabla
   let html='';
   pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':
-      p.tipo==='directo'?'<span class="badge-directo">directo</span>':
-      p.tipo==='propio'?'<span class="badge-propio">propio</span>':
-      '<span class="badge-sec">caución</span>';
+    const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
     html+=`<tr>
       <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
       <td><span class="especie">${p.especie}</span></td>
@@ -788,7 +762,6 @@ function renderMes(){
       ${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op</span>`:''}
     </div>`;
   }
-  document.getElementById('mes-dias')?document.getElementById('mes-dias').textContent=diasOp:'';
   if(diasOp>0){
     document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);
     document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');
@@ -797,9 +770,7 @@ function renderMes(){
     document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
     document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);
     document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
-  }else{
-    ['mes-pnl','mes-best','mes-worst'].forEach(id=>{document.getElementById(id).textContent='—';});
-  }
+  }else{['mes-pnl','mes-best','mes-worst'].forEach(id=>{document.getElementById(id).textContent='—';});}
 }
 function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
@@ -820,26 +791,26 @@ function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
       totalVariable+=Math.max(0,(mesData.comTotal-sueldoMes)*porcentaje);
     }
   });
-  const totalMesa=comTotal-(totalFijo+totalVariable);
   const totalCobra=totalFijo+totalVariable;
-  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
+  const totalMesa=comTotal-totalCobra;
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
     <div class="prod-breakdown-item">
-      <div class="tt">Suma de col O de todas las operaciones del período.</div>
+      <div class="tt">Suma de col O de todas las operaciones del período. Col O = col P + col Q.</div>
       <div class="prod-breakdown-label">Total generado (O)</div>
       <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
       <div class="prod-breakdown-sub">col O = col P + col Q</div>
     </div>
     <div class="prod-breakdown-item">
-      <div class="tt">Sueldo fijo mensual + variable (MAX(0,(O−fijo)×${pctLabel})). Es lo que cobra el empleado en total.</div>
+      <div class="tt">Total que cobra el empleado: sueldo fijo + variable (MAX(0,(O-fijo)x${pctLabel})).</div>
       <div class="prod-breakdown-label">Total cobra (fijo+var)</div>
       <div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div>
       <div class="prod-breakdown-sub">fijo ${hayAlgunSueldo?fmtPesos(totalFijo):'—'} · var ${hayAlgunSueldo?fmtPesos(totalVariable):'—'}</div>
     </div>
     <div class="prod-breakdown-item tt-right">
-      <div class="tt">Lo que factura la mesa: col O − (fijo + variable del empleado).</div>
+      <div class="tt">Lo que queda en la mesa: col O - fijo - variable del empleado.</div>
       <div class="prod-breakdown-label">Neto mesa</div>
       <div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O (sin sueldo)'}</div>
-      <div class="prod-breakdown-sub">O − fijo − variable · ${pctLabel}</div>
+      <div class="prod-breakdown-sub">O - fijo - variable · ${pctLabel}</div>
     </div>
   </div>`;
 }
@@ -849,7 +820,7 @@ function buildBreakdownExterno(p,comTotal){
   const pylTotal=p.mesaPylMesa+p.hbPylMesa;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
     <div class="prod-breakdown-item">
-      <div class="tt">Suma de col O de todas las operaciones del período.</div>
+      <div class="tt">Suma de col O de todas las operaciones del período. Col O = col P + col Q.</div>
       <div class="prod-breakdown-label">Total generado (O)</div>
       <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
       <div class="prod-breakdown-sub">col O = col P + col Q</div>
@@ -861,7 +832,7 @@ function buildBreakdownExterno(p,comTotal){
       <div class="prod-breakdown-sub">col Q · cobra directo</div>
     </div>
     <div class="prod-breakdown-item tt-right">
-      <div class="tt">Lo que queda en la mesa: col P = col O − col Q.</div>
+      <div class="tt">Lo que queda en la mesa: col P = col O - col Q.</div>
       <div class="prod-breakdown-label">Neto mesa (P)</div>
       <div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div>
       <div class="prod-breakdown-sub">col P · facturado real mesa</div>
@@ -877,11 +848,7 @@ function renderProductores(){
 
   pares.forEach(p=>{
     const key=p.productor;
-    if(!combined[key])combined[key]={
-      nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],
-      hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
-      hasMesa:false,hasHB:false,porMes:{}
-    };
+    if(!combined[key])combined[key]={nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
     const mes=MESES[parseInt(p.fecha.split('/')[1])-1];
     if(!combined[key].porMes[mes])combined[key].porMes[mes]={comTotal:0,comProd:0};
     combined[key].porMes[mes].comTotal+=p.pylMesa+p.comProductor;
@@ -891,18 +858,11 @@ function renderProductores(){
     combined[key].mesaPares.push(p);
     combined[key].hasMesa=true;
   });
-
   hb.forEach(r=>{
     let key=Object.keys(combined).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
-    if(!combined[key])combined[key]={
-      nombre:r.productor,mesaComProd:0,mesaPylMesa:0,mesaPares:[],
-      hbComProd:0,hbPylMesa:0,hbComTotal:0,hbDias:new Set(),
-      hasMesa:false,hasHB:false,porMes:{}
-    };
+    if(!combined[key])combined[key]={nombre:r.productor,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
     combined[key].hbComProd+=r.comProd;
     combined[key].hbPylMesa+=r.pylMesa;
-    combined[key].hbComTotal+=r.comTotal;
-    combined[key].hbDias.add(r.fecha);
     combined[key].hasHB=true;
     const mes=MESES[parseInt(r.fecha.split('/')[1])-1];
     if(!combined[key].porMes[mes])combined[key].porMes[mes]={comTotal:0,comProd:0};
@@ -917,14 +877,32 @@ function renderProductores(){
   });
 
   const maxTotal=Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
+  const totalGlobal=lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
 
+  // Neto mesa = lo que retiene la mesa de cada productor
+  let netoMesaTotal=0;
+  lista.forEach(p=>{
+    const mesesProd=Object.keys(p.porMes);
+    const dp=getDatosProductor(p.nombre,mesesProd);
+    if(!dp){
+      netoMesaTotal+=p.mesaPylMesa+p.hbPylMesa;
+    }else{
+      const{porcentaje}=dp;
+      Object.entries(p.porMes).forEach(([mes,m])=>{
+        const ds=sueldosFijos[p.nombre.toLowerCase()];
+        const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
+        const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
+        netoMesaTotal+=(m.comTotal-sueldoMes-variable);
+      });
+    }
+  });
+
+  document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
+  document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
   if(lista[0]){
     document.getElementById('prod-top').textContent=lista[0].nombre;
     document.getElementById('prod-top-sub').textContent=fmtPesos(Object.values(lista[0].porMes).reduce((s,m)=>s+m.comTotal,0));
-  }else{
-    document.getElementById('prod-top').textContent='—';
-    document.getElementById('prod-top-sub').textContent='—';
-  }
+  }else{document.getElementById('prod-top').textContent='—';document.getElementById('prod-top-sub').textContent='—';}
   document.getElementById('prod-unicos').textContent=lista.length||'—';
 
   let html='';
@@ -935,7 +913,7 @@ function renderProductores(){
     const mesesInvolucrados=Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
     const datosProd=getDatosProductor(p.nombre,mesesInvolucrados);
 
-    // Desglose por mes (solo si hay más de 1 mes y es empleado)
+    // Desglose por mes (empleados con más de 1 mes)
     let liqHtml='';
     if(datosProd&&mesesInvolucrados.length>1){
       const{porcentaje}=datosProd;
@@ -968,34 +946,26 @@ function renderProductores(){
           </div>
           ${mesRowsHtml}
         </div>
-        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O − Fijo) × ${pctLabel}) · Mesa = O − Fijo − Variable</div>
+        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel}) · Mesa = O - Fijo - Variable</div>
       </div>`;
     }
 
-    // Separar ops en SENEBI vs Mesa
-    const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
-    const opsMesa   = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
-
-    // Subtotales SENEBI
-    const senebiComProd = opsSENEBI.reduce((s,op)=>s+op.comProductor,0);
-    const senebiPylMesa = opsSENEBI.reduce((s,op)=>s+op.pylMesa,0);
-    const senebiTotal   = senebiComProd + senebiPylMesa;
-
-    // Subtotales Mesa (no SENEBI)
-    const mesaComProd2 = opsMesa.reduce((s,op)=>s+op.comProductor,0);
-    const mesaPylMesa2 = opsMesa.reduce((s,op)=>s+op.pylMesa,0);
-    const mesaTotal2   = mesaComProd2 + mesaPylMesa2;
-
-    // HB
-    const hbRows = p.hasHB ? hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()) : [];
-    const hbComProdSum = hbRows.reduce((s,r)=>s+r.comProd,0);
-    const hbPylMesaSum = hbRows.reduce((s,r)=>s+r.pylMesa,0);
-    const hbTotalSum   = hbComProdSum + hbPylMesaSum;
-
-    // Total global = Mesa + SENEBI + HB
-    const grandComProd = p.mesaComProd + p.hbComProd;
-    const grandPylMesa = p.mesaPylMesa + p.hbPylMesa;
-    const grandTotal   = grandComProd + grandPylMesa;
+    // Separar ops en SENEBI vs Mesa normal
+    const opsSENEBI=p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
+    const opsMesa=p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
+    const senebiComProd=opsSENEBI.reduce((s,op)=>s+op.comProductor,0);
+    const senebiPylMesa=opsSENEBI.reduce((s,op)=>s+op.pylMesa,0);
+    const senebiTotal=senebiComProd+senebiPylMesa;
+    const mesaComProd2=opsMesa.reduce((s,op)=>s+op.comProductor,0);
+    const mesaPylMesa2=opsMesa.reduce((s,op)=>s+op.pylMesa,0);
+    const mesaTotal2=mesaComProd2+mesaPylMesa2;
+    const hbRows=p.hasHB?hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()):[];
+    const hbComProdSum=hbRows.reduce((s,r)=>s+r.comProd,0);
+    const hbPylMesaSum=hbRows.reduce((s,r)=>s+r.pylMesa,0);
+    const hbTotalSum=hbComProdSum+hbPylMesaSum;
+    const grandComProd=p.mesaComProd+p.hbComProd;
+    const grandPylMesa=p.mesaPylMesa+p.hbPylMesa;
+    const grandTotal=grandComProd+grandPylMesa;
 
     function rowOp(op){
       return `<tr>
@@ -1009,8 +979,13 @@ function renderProductores(){
         <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td>
       </tr>`;
     }
-    function subtotalRow(label,color,cp,pyl,tot){
-      return `<tr style="background:#111420;border-top:0.5px solid #2d3748">
+    function secDiv(label,color,badge){
+      return `<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:${color};border-bottom:0.5px solid ${color}30">
+        ${badge?`<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${color}15;border:0.5px solid ${color}40">${badge}</span>`:''}${label}
+      </div></td></tr>`;
+    }
+    function subtRow(label,color,cp,pyl,tot){
+      return `<tr style="background:#111420;border-top:0.5px solid #1e2330">
         <td colspan="4" style="font-size:9px;color:${color};text-transform:uppercase;letter-spacing:.04em;padding:5px 6px;font-weight:500">${label}</td>
         <td class="tr" style="padding:5px 6px"></td>
         <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">${cp?fmtPnl(cp,true,'pnl-pos'):'—'}</td>
@@ -1018,16 +993,8 @@ function renderProductores(){
         <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">${tot?fmtPnl(tot,true,'pnl-pos'):'—'}</td>
       </tr>`;
     }
-    function sectionDiv(label,color,badge){
-      return `<tr><td colspan="8" style="padding:0">
-        <div style="font-size:9px;color:${color};text-transform:uppercase;letter-spacing:.05em;padding:6px 6px 3px;border-bottom:0.5px solid ${color}20;margin-bottom:0;display:flex;align-items:center;gap:6px">
-          ${badge?`<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${color}15;color:${color};border:0.5px solid ${color}40">${badge}</span>`:''}${label}
-        </div>
-      </td></tr>`;
-    }
 
-    const hasOps = opsMesa.length||opsSENEBI.length||hbRows.length;
-
+    const hasOps=opsMesa.length||opsSENEBI.length||hbRows.length;
     html+=`<div class="prod-card">
       <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
         <span class="prod-card-toggle" id="arrow-pc-${idx}">▶</span>
@@ -1039,20 +1006,19 @@ function renderProductores(){
       <div class="prod-card-body" id="pc-${idx}">
         ${datosProd?buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados):buildBreakdownExterno(p,comTotal)}
         ${liqHtml}
-        ${hasOps?`
-        <table class="prod-detail-table">
+        ${hasOps?`<table class="prod-detail-table">
           <thead><tr>
             <th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th>
             <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th>
           </tr></thead>
           <tbody>
-            ${opsMesa.length?sectionDiv('Mesa','#a0aec0',''):''}
+            ${opsMesa.length?secDiv('Mesa','#a0aec0',''):''}
             ${opsMesa.map(rowOp).join('')}
-            ${opsMesa.length?subtotalRow('Subtotal Mesa','#a0aec0',mesaComProd2,mesaPylMesa2,mesaTotal2):''}
-            ${opsSENEBI.length?sectionDiv('SENEBI','#f59e0b','SENEBI'):''}
+            ${opsMesa.length?subtRow('Subtotal Mesa','#a0aec0',mesaComProd2,mesaPylMesa2,mesaTotal2):''}
+            ${opsSENEBI.length?secDiv('SENEBI','#f59e0b','SENEBI'):''}
             ${opsSENEBI.map(rowOp).join('')}
-            ${opsSENEBI.length?subtotalRow('Subtotal SENEBI','#f59e0b',senebiComProd,senebiPylMesa,senebiTotal):''}
-            ${hbRows.length?sectionDiv('Homebroker','#0ea5e9','HB'):''}
+            ${opsSENEBI.length?subtRow('Subtotal SENEBI','#f59e0b',senebiComProd,senebiPylMesa,senebiTotal):''}
+            ${hbRows.length?secDiv('Homebroker','#0ea5e9','HB'):''}
             ${hbRows.map(r=>`<tr>
               <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
               <td style="color:#0ea5e9">Homebroker</td>
@@ -1062,13 +1028,13 @@ function renderProductores(){
               <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
               <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td>
             </tr>`).join('')}
-            ${hbRows.length?subtotalRow('Subtotal HB','#0ea5e9',hbComProdSum,hbPylMesaSum,hbTotalSum):''}
+            ${hbRows.length?subtRow('Subtotal HB','#0ea5e9',hbComProdSum,hbPylMesaSum,hbTotalSum):''}
             <tr style="border-top:0.5px solid #378ADD;background:#0c1628">
-              <td colspan="4" style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;padding:6px 6px;font-weight:600">Total período</td>
-              <td class="tr" style="padding:6px 6px"></td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#a78bfa;padding:6px 6px">+$${Math.round(grandComProd).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#4ade80;padding:6px 6px">+$${Math.round(grandPylMesa).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa;padding:6px 6px">+$${Math.round(grandTotal).toLocaleString('es-AR')}</td>
+              <td colspan="4" style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;padding:6px;font-weight:600">Total período</td>
+              <td class="tr" style="padding:6px"></td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#a78bfa;padding:6px">+$${Math.round(grandComProd).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#4ade80;padding:6px">+$${Math.round(grandPylMesa).toLocaleString('es-AR')}</td>
+              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa;padding:6px">+$${Math.round(grandTotal).toLocaleString('es-AR')}</td>
             </tr>
           </tbody>
         </table>`:''}
@@ -1100,9 +1066,8 @@ function renderProductores(){
 function toggleProdCard(id){
   const body=document.getElementById(id);
   const arrow=document.getElementById('arrow-'+id);
-  const isOpen=body.classList.contains('open');
-  body.classList.toggle('open',!isOpen);
-  arrow.classList.toggle('open',!isOpen);
+  body.classList.toggle('open',!body.classList.contains('open'));
+  arrow.classList.toggle('open',!arrow.classList.contains('open'));
 }
 
 // ── CAUCIONES ─────────────────────────────────────────────────────────────────
