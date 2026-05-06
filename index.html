@@ -972,27 +972,12 @@ function renderProductores(){
   const maxTotal=Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
   const totalGlobal=lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
 
-  // Neto mesa = lo que retiene la mesa de cada productor
-  let netoMesaTotal=0;
-  lista.forEach(p=>{
-    const mesesProd=Object.keys(p.porMes);
-    const dp=getDatosProductor(p.nombre,mesesProd);
-    if(!dp){
-      netoMesaTotal+=p.mesaPylMesa+p.hbPylMesa;
-    }else{
-      const{porcentaje}=dp;
-      Object.entries(p.porMes).forEach(([mes,m])=>{
-        const ds=sueldosFijos[p.nombre.toLowerCase()];
-        const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
-        const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
-        netoMesaTotal+=(m.comTotal-sueldoMes-variable);
-      });
-    }
-  });
-
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   const comPagadaProductores=calcComProductores(pares,hb);
   document.getElementById('prod-compagada').innerHTML=fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
+  // Neto mesa = total facturado - comisiones pagadas a productores
+  // Es exactamente la suma del "Total mesa" de cada productor
+  const netoMesaTotal=totalGlobal-comPagadaProductores;
   document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
   // prod-top eliminado
   document.getElementById('prod-unicos').textContent=lista.length||'—';
