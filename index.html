@@ -592,6 +592,7 @@ function parseCSV(text){
         const rows=JSON.parse(jsonStr);
         if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }catch(e){}
+      // HB: puede ser [[...]] o []
       const hbJ1=rest.lastIndexOf('[['),hbJ2=rest.lastIndexOf(']]');
       if(hbJ1>j2&&hbJ2>hbJ1){
         const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
@@ -599,14 +600,24 @@ function parseCSV(text){
           const hbRows=JSON.parse(hbStr);
           if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
         }catch(e){}
-        // Col F: comisionTotalBruta (O3 de la sheet) viene después del segundo ]]
+        // Col F viene después del último ]]
         const afterHB=rest.slice(hbJ2+2);
-        const brutoMatch=afterHB.match(/[\d.]+/);
-        if(brutoMatch){const bv=parseFloat(brutoMatch[0]);if(bv>0)allBrutos[fechaNorm]=bv;}
+        const brutoMatch=afterHB.match(/([\d]+\.?[\d]*)/);
+        if(brutoMatch){const bv=parseFloat(brutoMatch[1]);if(bv>0)allBrutos[fechaNorm]=bv;}
+      } else {
+        // Sin HB doble: col F viene después del [] vacío
+        // Buscar el último ] y leer lo que sigue
+        const lastBracket=rest.lastIndexOf(']');
+        if(lastBracket>j2){
+          const afterLast=rest.slice(lastBracket+1);
+          const brutoMatch=afterLast.match(/([\d]+\.?[\d]*)/);
+          if(brutoMatch){const bv=parseFloat(brutoMatch[1]);if(bv>0)allBrutos[fechaNorm]=bv;}
+        }
       }
     }
   }
 }
+
 function setSyncState(s,msg){
   document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
   document.getElementById('sync-label').textContent=msg;
