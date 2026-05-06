@@ -792,28 +792,43 @@ function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
     }
   });
   const totalCobra=totalFijo+totalVariable;
-  const totalMesa=comTotal-totalCobra;
-  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+  const totalMesa=comTotal-totalVariable; // fijo va por recibo aparte, no se descuenta del col O
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
     <div class="prod-breakdown-item">
-      <div class="tt">Suma de col O de todas las operaciones del período. Col O = col P + col Q.</div>
+      <div class="tt">Suma de col O de todas las operaciones del período. Es el total generado antes de pagar al productor. Col O = col P + col Q.</div>
       <div class="prod-breakdown-label">Total generado (O)</div>
       <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
       <div class="prod-breakdown-sub">col O = col P + col Q</div>
     </div>
     <div class="prod-breakdown-item">
-      <div class="tt">Total que cobra el empleado: sueldo fijo + variable (MAX(0,(O-fijo)x${pctLabel})).</div>
-      <div class="prod-breakdown-label">Total cobra (fijo+var)</div>
-      <div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div>
-      <div class="prod-breakdown-sub">fijo ${hayAlgunSueldo?fmtPesos(totalFijo):'—'} · var ${hayAlgunSueldo?fmtPesos(totalVariable):'—'}</div>
+      <div class="tt">Sueldo fijo mensual del productor, tomado de la sheet de sueldos. Se paga por recibo separado y no se descuenta del col O — es un costo de RRHH aparte.</div>
+      <div class="prod-breakdown-label">Sueldo fijo</div>
+      <div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div>
+      <div class="prod-breakdown-sub">por recibo · fijo mensual</div>
     </div>
     <div class="prod-breakdown-item tt-right">
-      <div class="tt">Lo que queda en la mesa: col O - fijo - variable del empleado.</div>
-      <div class="prod-breakdown-label">Neto mesa</div>
-      <div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O (sin sueldo)'}</div>
-      <div class="prod-breakdown-sub">O - fijo - variable · ${pctLabel}</div>
+      <div class="tt">Variable = MAX(0, (col O − sueldo fijo) × ${pctLabel}). Es lo que factura el productor aparte del sueldo fijo, calculado sobre el excedente generado.</div>
+      <div class="prod-breakdown-label">Variable (${pctLabel})</div>
+      <div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div>
+      <div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div class="prod-breakdown-item">
+      <div class="tt">Total que cobra el productor: sueldo fijo (por recibo de sueldo) + variable (lo factura aparte). El fijo lo paga Equanima por RRHH.</div>
+      <div class="prod-breakdown-label">Total cobra el productor</div>
+      <div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div>
+      <div class="prod-breakdown-sub">fijo $${hayAlgunSueldo?Math.round(totalFijo).toLocaleString('es-AR'):'—'} · var $${hayAlgunSueldo?Math.round(totalVariable).toLocaleString('es-AR'):'—'}</div>
+    </div>
+    <div class="prod-breakdown-item tt-right">
+      <div class="tt">Lo que retiene la mesa de este productor: col O − variable. El fijo no se descuenta acá porque Equanima lo paga por RRHH separado.</div>
+      <div class="prod-breakdown-label">Total mesa</div>
+      <div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O (sin sueldo cargado)'}</div>
+      <div class="prod-breakdown-sub">col O − variable · facturado real</div>
     </div>
   </div>`;
 }
+
 
 function buildBreakdownExterno(p,comTotal){
   const comProdTotal=p.mesaComProd+p.hbComProd;
@@ -925,7 +940,7 @@ function renderProductores(){
         const sueldoFijoMes=ds?(ds[mesNombre.toLowerCase()]||0):0;
         const tieneSueldoMes=sueldoFijoMes>0;
         const variableMes=tieneSueldoMes?Math.max(0,(mesData.comTotal-sueldoFijoMes)*porcentaje):0;
-        const totalMesaMes=mesData.comTotal-sueldoFijoMes-variableMes;
+        const totalMesaMes=mesData.comTotal-variableMes; // fijo va por recibo aparte
         mesRowsHtml+=`<div class="liq-mes-row">
           <span class="liq-mes-name">${mesNombre}</span>
           <span class="liq-mes-fijo">${tieneSueldoMes?fmtPesos(sueldoFijoMes):'<span style="color:#4a5568">—</span>'}</span>
@@ -946,7 +961,7 @@ function renderProductores(){
           </div>
           ${mesRowsHtml}
         </div>
-        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel}) · Mesa = O - Fijo - Variable</div>
+        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel}) · Mesa = O - Variable (fijo va por recibo aparte)</div>
       </div>`;
     }
 
