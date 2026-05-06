@@ -343,7 +343,7 @@ const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bv
 
 let sueldosFijos={};
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-let allOps={},allTotals={},allHB={};
+let allOps={},allTotals={},allHB={},allBrutos={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
 let calY,calM,mesCalY,mesCalM;
 const I={sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
@@ -550,6 +550,7 @@ function getHBInRange(){
   return hb;
 }
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
+function getBrutoInRange(){return getDatesInRange().reduce((s,d)=>s+(allBrutos[d]||0),0);}
 
 // ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function loadData(){
@@ -570,7 +571,7 @@ async function loadData(){
   }catch(e){setSyncState('error','Error: '+e.message);}
 }
 function parseCSV(text){
-  allOps={};allTotals={};allHB={};
+  allOps={};allTotals={};allHB={};allBrutos={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   for(let i=1;i<lines.length;i++){
     const line=lines[i];
@@ -598,6 +599,10 @@ function parseCSV(text){
           const hbRows=JSON.parse(hbStr);
           if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
         }catch(e){}
+        // Col F: comisionTotalBruta (O3 de la sheet) viene después del segundo ]]
+        const afterHB=rest.slice(hbJ2+2);
+        const brutoMatch=afterHB.match(/[\d.]+/);
+        if(brutoMatch){const bv=parseFloat(brutoMatch[0]);if(bv>0)allBrutos[fechaNorm]=bv;}
       }
     }
   }
@@ -690,7 +695,11 @@ function renderRueda(){
   const ops=getOpsInRange();
   const pares=getPares(ops);
   const hb=getHBInRange();
-  const bruto=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
+  // Facturado bruto: O3 de la sheet (suma real de toda la col O por día)
+  const brutoSheet=getBrutoInRange();
+  // Fallback: si la col F aún no está en el CSV, calcular desde las ops
+  const brutoCalc=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
+  const bruto=brutoSheet>0?brutoSheet:brutoCalc;
   const comProd=calcComProductores(pares,hb);
   const neto=bruto-comProd;
 
