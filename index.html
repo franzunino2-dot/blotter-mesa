@@ -461,92 +461,46 @@ function parseGastos(text){
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   const parsed=lines.map(l=>parseCSVLine(l));
 
-  // 1. Encontrar la fila de headers (la que tenga "Abr" o "abr" o "abril")
-  let headerRowIdx=-1;
-  let colMap={}; // mes_lower -> colIdx
-  for(let i=0;i<parsed.length;i++){
-    const row=parsed[i];
-    for(let c=0;c<row.length;c++){
-      const v=normalizar(row[c]);
-      if(v==='abr'||v==='abril'||v.startsWith('abr')){
-        headerRowIdx=i;
-        // Mapear todas las columnas de mes
-        const MES_MAP={
-          'abr':'abril','abril':'abril',
-          'may':'mayo','mayo':'mayo',
-          'jun':'junio','junio':'junio',
-          'jul':'julio','julio':'julio',
-          'ago':'agosto','agosto':'agosto',
-          'sep':'septiembre','sept':'septiembre','septiembre':'septiembre',
-          'oct':'octubre','octubre':'octubre',
-          'nov':'noviembre','noviembre':'noviembre',
-          'dic':'diciembre','diciembre':'diciembre'
-        };
-        for(let cc=0;cc<row.length;cc++){
-          const vv=normalizar(row[cc]);
-          if(MES_MAP[vv])colMap[MES_MAP[vv]]=cc;
-        }
-        break;
-      }
-    }
-    if(headerRowIdx>=0)break;
-  }
-  if(headerRowIdx<0){console.warn('Gastos: no se encontró fila de headers');return;}
-  console.log('Gastos headers en fila',headerRowIdx,'colMap:',colMap);
-
-  // 2. Encontrar la fila "TOTAL GENERAL"
-  let totalRowIdx=-1;
-  for(let i=headerRowIdx+1;i<parsed.length;i++){
-    const rowJoined=normalizar(parsed[i].join(''));
-    if(rowJoined.includes('totalgeneral')||rowJoined.includes('total general')){
-      totalRowIdx=i;
-      break;
-    }
-  }
-  if(totalRowIdx<0){console.warn('Gastos: no se encontró fila TOTAL GENERAL');return;}
-  console.log('Gastos TOTAL GENERAL en fila',totalRowIdx,'valores:',Object.entries(colMap).map(([m,c])=>m+'='+parsed[totalRowIdx][c]));
-
-  // 3. Leer el total por mes de esa fila
-  Object.entries(colMap).forEach(([mes,colIdx])=>{
-    const val=parseMonto(parsed[totalRowIdx][colIdx]||'');
-    if(val>0)gastosPorMes[mes]=val;
-  });
-
-  // 4. Encontrar filas de subtotales para el desglose
-  // Son las filas que tienen col A con texto y col B vacía (son los subtotales)
-  // Labels de subtotales a buscar:
-  const SUBTOTALES=[
-    'subtotal sueldos','subtotal gastos oficina','subtotal computacion','subtotal sist',
-    'subtotal info','subtotal compliance','subtotal hon','subtotal mercado',
-    'subtotal bancos','subtotal regulatorio','impuestos','gastos extraordinarios'
+  // Columnas fijas: H=abril=7, I=mayo=8, J=junio=9, K=julio=10,
+  // L=agosto=11, M=sep=12, N=oct=13, O=nov=14, P=dic=15
+  const MESES_COL=[
+    {mes:'abril',col:7},{mes:'mayo',col:8},{mes:'junio',col:9},
+    {mes:'julio',col:10},{mes:'agosto',col:11},{mes:'septiembre',col:12},
+    {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
-  const filasDesglose=[];
-  for(let i=headerRowIdx+1;i<totalRowIdx;i++){
-    const celA=normalizar(parsed[i][0]||'');
-    const celB=(parsed[i][1]||'').trim();
-    // Es subtotal si: col A tiene texto, col B vacía, y matchea algún subtotal
-    if(celA&&!celB){
-      const esSubtotal=SUBTOTALES.some(s=>celA.includes(s.split(' ')[1]||s));
-      if(esSubtotal||(celA.startsWith('subtotal')||celA.includes('impuesto')||celA.includes('extraordinario'))){
-        filasDesglose.push(i);
-      }
-    }
-  }
-  console.log('Gastos filas desglose:',filasDesglose.map(i=>(parsed[i][0]||'').trim()));
 
-  // 5. Armar detalle por mes
-  Object.entries(colMap).forEach(([mes,colIdx])=>{
+  // Fila 75 = índice 74 → TOTAL GENERAL
+  const filaTotal=74;
+
+  // Filas de subtotales para desglose (índice 0-based)
+  // fila 8=7, 24=23, 29=28, 31=30, 35=34, 44=43, 50=49, 61=60, 65=64, 68=67, 71=70, 74=73
+  const FILAS_DETALLE=[7,23,28,30,34,43,49,60,64,67,70,73];
+
+  if(parsed.length<=filaTotal){
+    console.warn('Gastos: CSV tiene menos de 75 filas, tiene',parsed.length);
+    return;
+  }
+
+  const rowTotal=parsed[filaTotal];
+  console.log('Gastos fila 75 (idx 74):', rowTotal.slice(7,16));
+
+  MESES_COL.forEach(({mes,col})=>{
+    const val=parseMonto(rowTotal[col]||'');
+    if(val>0)gastosPorMes[mes]=val;
+    // Desglose
     const detalle=[];
-    filasDesglose.forEach(fi=>{
+    FILAS_DETALLE.forEach(fi=>{
+      if(!parsed[fi])return;
       const label=(parsed[fi][0]||'').trim();
       if(!label)return;
-      const val=parseMonto(parsed[fi][colIdx]||'');
-      if(val>0)detalle.push({label,val});
+      const val2=parseMonto(parsed[fi][col]||'');
+      if(val2>0)detalle.push({label,val:val2});
     });
     if(detalle.length)gastosDetalle[mes]=detalle;
   });
-  console.log('Gastos por mes:', gastosPorMes);
+  console.log('Gastos por mes:',gastosPorMes);
 }
+
 
 function normalizar(s){
   return String(s).trim().toLowerCase()
