@@ -471,9 +471,9 @@ function parseGastos(text){
   ];
 
   // Fila 75 = índice 74 (0-based, sin filtrar vacías)
-  const filaTotal=74;
+  const filaTotal=75;
   // Filas de subtotales: 8=7, 24=23, 29=28, 31=30, 35=34, 44=43, 50=49, 61=60, 65=64, 68=67, 71=70, 74=73
-  const FILAS_DETALLE=[7,23,28,30,34,43,49,60,64,67,70,73];
+  const FILAS_DETALLE=[8,24,29,31,35,44,50,61,65,68,71,74];
 
   if(parsed.length<=filaTotal){
     console.warn('Gastos: CSV tiene',parsed.length,'filas, necesita al menos 75');
