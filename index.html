@@ -585,31 +585,38 @@ function parsePosi(text){
   posiTradingBook=[];posiPropietary=[];
   const lines=text.split('\n').map(l=>l.trim());
   const parsed=lines.map(l=>parseCSVLine(l));
-  let modo=''; // 'trading' o 'propietary'
+  let modo='';
+  // Columnas: A=0(label), B=1(especie), C=2(fechaEnt), D=3(dias), E=4(pxEntrada),
+  //           F=5(VN), G=6(monto), H=7(pxCarry), I=8(caucion), J=9(costoTotal),
+  //           K=10(pxHoy), L=11(posicion), M=12(pnl), N=13(pct)
   for(let i=0;i<parsed.length;i++){
     const row=parsed[i];
     const joined=row.join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    // Detectar sección
     if(joined.includes('trading book')){modo='trading';continue;}
     if(joined.includes('propietary book')||joined.includes('proprietary book')){modo='propietary';continue;}
     if(!modo)continue;
-    // Saltar headers y filas vacías
+    const label=(row[0]||'').trim();
     const especie=(row[1]||'').trim();
-    if(!especie||especie.toLowerCase()==='especie')continue;
-    const vn=parseMonto(row[2]||'');
-    const precioEntrada=(row[3]||'').trim();
-    const monto=parseMonto(row[4]||'');
-    const pxHoy=(row[5]||'').trim();
-    const posicion=parseMonto(row[6]||'');
-    const pnl=parseMonto(row[7]||'');
-    const pct=(row[8]||'').trim();
-    const label=(row[0]||'').trim(); // col A: puede tener label como "P/Chelo"
-    if(!vn&&!posicion&&!pnl)continue;
-    const obj={especie,vn,precioEntrada,monto,pxHoy,posicion,pnl,pct,label};
+    // Solo procesar filas TOTAL (tienen "TOTAL" en col C o D) o filas con especie
+    const esTotal=normalizar(label+row[2]+row[3]).includes('total');
+    if(!especie&&!esTotal)continue;
+    if(especie.toLowerCase()==='especie')continue; // header
+    const precioEntrada=(row[4]||'').trim();
+    const vn=parseMonto(row[5]||'');
+    const monto=parseMonto(row[6]||'');
+    const pxCarry=(row[7]||'').trim();
+    const caucion=(row[8]||'').trim();
+    const costoTotal=parseMonto(row[9]||'');
+    const pxHoy=(row[10]||'').trim();
+    const posicion=parseMonto(row[11]||'');
+    const pnl=parseMonto(row[12]||'');
+    const pct=(row[13]||'').trim();
+    if(!vn&&!posicion&&!pnl&&!monto&&!costoTotal)continue;
+    const obj={label,especie,precioEntrada,vn,monto,pxCarry,caucion,costoTotal,pxHoy,posicion,pnl,pct,esTotal};
     if(modo==='trading')posiTradingBook.push(obj);
-    else if(modo==='propietary')posiPropietary.push(obj);
+    else posiPropietary.push(obj);
   }
-  console.log('Posi Trading:',posiTradingBook.length,'Propietary:',posiPropietary.length);
+  console.log('Posi Trading:',posiTradingBook,'Propietary:',posiPropietary);
 }
 
 // ── CAUCION CAPACIDAD ────────────────────────────────────────────────────────
@@ -1389,21 +1396,23 @@ function showTab(t){
 // ── POSICION TAB ─────────────────────────────────────────────────────────────
 function renderPosi(){
   function buildRows(data){
-    if(!data.length)return'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    if(!data.length)return'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
     let html='';
     data.forEach(r=>{
-      const pctNum=parseFloat((r.pct||'0').replace('%','').replace(',','.'));
-      const pnlColor=r.pnl>=0?'#4ade80':'#f87171';
-      const pctColor=r.pnl>=0?'#4ade80':'#f87171';
-      html+=`<tr>
-        <td style="color:#4a5568;font-size:10px">${r.label||''}</td>
-        <td><span class="especie">${r.especie}</span></td>
+      const pnlColor=r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
+      const pctColor=r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
+      const isTotal=r.esTotal;
+      const rowStyle=isTotal?'background:#111420;border-top:0.5px solid #2d3748':'';
+      const labelStyle=isTotal?'font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em':'color:#4a5568;font-size:10px';
+      html+=`<tr style="${rowStyle}">
+        <td style="${labelStyle}">${isTotal?'TOTAL':r.label||''}</td>
+        <td>${r.especie?'<span class="especie">'+r.especie+'</span>':''}</td>
         <td class="tr" style="color:#a0aec0;font-family:monospace">${r.vn?fmtInt(r.vn):'—'}</td>
         <td class="tr" style="color:#4a5568">${r.precioEntrada||'—'}</td>
         <td class="tr" style="color:#a0aec0;font-family:monospace">${r.monto?'$'+fmtInt(r.monto):'—'}</td>
         <td class="tr" style="color:#60a5fa">${r.pxHoy||'—'}</td>
-        <td class="tr" style="color:#e2e8f0;font-family:monospace">${r.posicion?'$'+fmtInt(r.posicion):'—'}</td>
-        <td class="tr" style="color:${pnlColor};font-family:monospace">${r.pnl?(r.pnl>=0?'+':'')+fmtPnl(r.pnl,true):'—'}</td>
+        <td class="tr" style="color:#e2e8f0;font-family:monospace;font-weight:${isTotal?600:400}">${r.posicion?'$'+fmtInt(r.posicion):'—'}</td>
+        <td class="tr" style="color:${pnlColor};font-family:monospace;font-weight:${isTotal?600:400}">${r.pnl?(r.pnl>0?'+':'')+fmtPnl(r.pnl,true):'—'}</td>
         <td class="tr" style="color:${pctColor};font-weight:500">${r.pct||'—'}</td>
       </tr>`;
     });
