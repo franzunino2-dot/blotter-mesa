@@ -468,7 +468,7 @@ function parseGastos(text){
     const row=parsed[i];
     for(let c=0;c<row.length;c++){
       const v=normalizar(row[c]);
-      if(v==='abr'||v==='abril'){
+      if(v==='abr'||v==='abril'||v.startsWith('abr')){
         headerRowIdx=i;
         // Mapear todas las columnas de mes
         const MES_MAP={
@@ -497,8 +497,8 @@ function parseGastos(text){
   // 2. Encontrar la fila "TOTAL GENERAL"
   let totalRowIdx=-1;
   for(let i=headerRowIdx+1;i<parsed.length;i++){
-    const v=normalizar((parsed[i][0]||'')+(parsed[i][1]||''));
-    if(v.includes('total general')||v.includes('totalgeneral')){
+    const rowJoined=normalizar(parsed[i].join(''));
+    if(rowJoined.includes('totalgeneral')||rowJoined.includes('total general')){
       totalRowIdx=i;
       break;
     }
