@@ -218,6 +218,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="tab" id="tab-productores" onclick="showTab('productores')">Productores</div>
     <div class="tab" id="tab-cauciones" onclick="showTab('cauciones')">Cauciones</div>
     <div class="tab" id="tab-gastos" onclick="showTab('gastos')">Gastos</div>
+    <div class="tab" id="tab-posi" onclick="showTab('posi')">Posición</div>
   </div>
 
   <!-- RUEDA -->
@@ -330,6 +331,32 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     </div>
   </div>
 
+  <!-- POSICION -->
+  <div id="view-posi" style="display:none">
+    <div class="section-label">Trading Book</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th>
+          <th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th>
+          <th class="tr">P&L</th><th class="tr">%</th>
+        </tr></thead>
+        <tbody id="posi-trading-tbody"></tbody>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:8px">Propietary Book</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th>
+          <th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th>
+          <th class="tr">P&L</th><th class="tr">%</th>
+        </tr></thead>
+        <tbody id="posi-prop-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- GASTOS -->
   <div id="view-gastos" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -380,6 +407,7 @@ const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
 const GASTOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
+const POSI_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1670934243&single=true&output=csv';
 const CAUCION_CAP_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMkhA35YTcz24kL9EsL1vLWFLJlnu_PWiFQKlp6nbrBfXnegq3fKaGpq8RlydvcL6217Ql3Oi/pub?gid=12153366&single=true&output=csv';
 
 let sueldosFijos={};
@@ -387,6 +415,8 @@ let gastosPorMes={};
 let gastosDetalle={};
 let caucionCapData=[];
 let caucionCapFecha='';
+let posiTradingBook=[];
+let posiPropietary=[];
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},allHB={},allBrutos={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
@@ -541,6 +571,45 @@ function getGastosInRange(){
   let total=0;
   mesesEnRango.forEach(mes=>{if(gastosPorMes[mes])total+=gastosPorMes[mes];});
   return total;
+}
+
+// ── POSICION ────────────────────────────────────────────────────────────────
+async function loadPosi(){
+  try{
+    const r=await fetch(POSI_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
+    if(!r.ok)return;
+    parsePosi(await r.text());
+  }catch(e){console.warn('Posi no cargó:',e);}
+}
+function parsePosi(text){
+  posiTradingBook=[];posiPropietary=[];
+  const lines=text.split('\n').map(l=>l.trim());
+  const parsed=lines.map(l=>parseCSVLine(l));
+  let modo=''; // 'trading' o 'propietary'
+  for(let i=0;i<parsed.length;i++){
+    const row=parsed[i];
+    const joined=row.join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    // Detectar sección
+    if(joined.includes('trading book')){modo='trading';continue;}
+    if(joined.includes('propietary book')||joined.includes('proprietary book')){modo='propietary';continue;}
+    if(!modo)continue;
+    // Saltar headers y filas vacías
+    const especie=(row[1]||'').trim();
+    if(!especie||especie.toLowerCase()==='especie')continue;
+    const vn=parseMonto(row[2]||'');
+    const precioEntrada=(row[3]||'').trim();
+    const monto=parseMonto(row[4]||'');
+    const pxHoy=(row[5]||'').trim();
+    const posicion=parseMonto(row[6]||'');
+    const pnl=parseMonto(row[7]||'');
+    const pct=(row[8]||'').trim();
+    const label=(row[0]||'').trim(); // col A: puede tener label como "P/Chelo"
+    if(!vn&&!posicion&&!pnl)continue;
+    const obj={especie,vn,precioEntrada,monto,pxHoy,posicion,pnl,pct,label};
+    if(modo==='trading')posiTradingBook.push(obj);
+    else if(modo==='propietary')posiPropietary.push(obj);
+  }
+  console.log('Posi Trading:',posiTradingBook.length,'Propietary:',posiPropietary.length);
 }
 
 // ── CAUCION CAPACIDAD ────────────────────────────────────────────────────────
@@ -719,7 +788,8 @@ async function loadData(){
       fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
       loadSueldos(),
       loadGastos(),
-      loadCaucionCap()
+      loadCaucionCap(),
+      loadPosi()
     ]);
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
@@ -1305,14 +1375,42 @@ function renderCauciones(){
 }
 
 // ── RENDER ALL & TABS ─────────────────────────────────────────────────────────
-function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();}
+function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();renderPosi();}
 function showTab(t){
-  ['rueda','mes','productores','cauciones','gastos'].forEach(x=>{
+  ['rueda','mes','productores','cauciones','gastos','posi'].forEach(x=>{
     document.getElementById('view-'+x).style.display=x===t?'':'none';
     document.getElementById('tab-'+x).classList.toggle('active',x===t);
   });
   if(t==='mes')renderMes();
   if(t==='gastos')renderGastos();
+  if(t==='posi')renderPosi();
+}
+
+// ── POSICION TAB ─────────────────────────────────────────────────────────────
+function renderPosi(){
+  function buildRows(data){
+    if(!data.length)return'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    let html='';
+    data.forEach(r=>{
+      const pctNum=parseFloat((r.pct||'0').replace('%','').replace(',','.'));
+      const pnlColor=r.pnl>=0?'#4ade80':'#f87171';
+      const pctColor=r.pnl>=0?'#4ade80':'#f87171';
+      html+=`<tr>
+        <td style="color:#4a5568;font-size:10px">${r.label||''}</td>
+        <td><span class="especie">${r.especie}</span></td>
+        <td class="tr" style="color:#a0aec0;font-family:monospace">${r.vn?fmtInt(r.vn):'—'}</td>
+        <td class="tr" style="color:#4a5568">${r.precioEntrada||'—'}</td>
+        <td class="tr" style="color:#a0aec0;font-family:monospace">${r.monto?'$'+fmtInt(r.monto):'—'}</td>
+        <td class="tr" style="color:#60a5fa">${r.pxHoy||'—'}</td>
+        <td class="tr" style="color:#e2e8f0;font-family:monospace">${r.posicion?'$'+fmtInt(r.posicion):'—'}</td>
+        <td class="tr" style="color:${pnlColor};font-family:monospace">${r.pnl?(r.pnl>=0?'+':'')+fmtPnl(r.pnl,true):'—'}</td>
+        <td class="tr" style="color:${pctColor};font-weight:500">${r.pct||'—'}</td>
+      </tr>`;
+    });
+    return html;
+  }
+  document.getElementById('posi-trading-tbody').innerHTML=buildRows(posiTradingBook);
+  document.getElementById('posi-prop-tbody').innerHTML=buildRows(posiPropietary);
 }
 
 // ── GASTOS TAB ───────────────────────────────────────────────────────────────
