@@ -221,7 +221,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- RUEDA -->
   <div id="view-rueda">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
       <div class="metric">
         <div class="tt">Suma de col O (P&L mesa + com. productor) de todas las operaciones del período. Es el total generado antes de pagar a los productores.</div>
         <div class="metric-label">Facturado bruto</div>
@@ -245,6 +245,12 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-label">Gastos del período</div>
         <div class="metric-value red" id="r-gastos">—</div>
         <div class="metric-sub" id="r-gastos-sub">gastos operativos</div>
+      </div>
+      <div class="metric tt-right">
+        <div class="tt">Neto mesa menos los gastos operativos del período. Verde = ganancia, rojo = pérdida.</div>
+        <div class="metric-label">Resultado neto</div>
+        <div class="metric-value" id="r-resultado">—</div>
+        <div class="metric-sub" id="r-resultado-sub">neto mesa − gastos</div>
       </div>
     </div>
     <div class="section-label">Operaciones del período</div>
@@ -779,6 +785,11 @@ function renderRueda(){
   const gastos=getGastosInRange();
   document.getElementById('r-gastos').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
   document.getElementById('r-gastos-sub').textContent=gastos>0?'período seleccionado':'sin datos';
+
+  const resultado=neto-gastos;
+  document.getElementById('r-resultado').innerHTML=resultado!==0?fmtPnl(resultado,true):'—';
+  document.getElementById('r-resultado').className='metric-value '+(resultado>=0?'green':'red');
+  document.getElementById('r-resultado-sub').textContent=gastos>0?'neto mesa − gastos':'sin datos de gastos';
 
   // Alerta posiciones abiertas
   const map={};
