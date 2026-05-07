@@ -332,9 +332,13 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- GASTOS -->
   <div id="view-gastos" style="display:none">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#4a5568">Mes:</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="g-mes-btns"></div>
+    </div>
     <div class="metrics3">
-      <div class="metric"><div class="metric-label">Total gastos período</div><div class="metric-value red" id="g-total">—</div><div class="metric-sub" id="g-total-sub">—</div></div>
-      <div class="metric"><div class="metric-label">Neto mesa</div><div class="metric-value green" id="g-neto-mesa-ref">—</div><div class="metric-sub">referencia rueda</div></div>
+      <div class="metric"><div class="metric-label">Total gastos</div><div class="metric-value red" id="g-total">—</div><div class="metric-sub" id="g-total-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Neto mesa (rueda)</div><div class="metric-value green" id="g-neto-mesa-ref">—</div><div class="metric-sub">referencia período seleccionado</div></div>
       <div class="metric tt-right"><div class="metric-label">Resultado</div><div class="metric-value" id="g-resultado-ref">—</div><div class="metric-sub">neto − gastos</div></div>
     </div>
     <div class="section-label">Detalle de gastos</div>
@@ -1213,71 +1217,102 @@ function showTab(t){
 }
 
 // ── GASTOS TAB ───────────────────────────────────────────────────────────────
-function renderGastos(){
-  const gastos=getGastosInRange();
-  const dates=getDatesInRange();
-  const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
+let gastosMesSeleccionado=null; // null = todos los del rango
 
-  // Cards de resumen
-  document.getElementById('g-total').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
-  document.getElementById('g-total-sub').textContent=gastos>0?'período seleccionado':'sin datos';
+function renderGastosMesBtns(){
+  const btnsEl=document.getElementById('g-mes-btns');
+  if(!btnsEl)return;
+  const mesesDisponibles=Object.keys(gastosPorMes).sort((a,b)=>
+    MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
+  );
+  let html='<span class="drp-preset'+(gastosMesSeleccionado===null?' sel':'')+'" onclick="setGastosMes(null)">Todo</span>';
+  mesesDisponibles.forEach(m=>{
+    const label=m.charAt(0).toUpperCase()+m.slice(1);
+    html+=`<span class="drp-preset${gastosMesSeleccionado===m?' sel':''}" onclick="setGastosMes('${m}')">${label}</span>`;
+  });
+  btnsEl.innerHTML=html;
+}
+
+function setGastosMes(mes){
+  gastosMesSeleccionado=mes;
+  renderGastos();
+}
+
+function renderGastos(){
+  if(!Object.keys(gastosPorMes).length){
+    document.getElementById('g-total').textContent='—';
+    document.getElementById('g-total-sub').textContent='sin datos';
+    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos</div>';
+    renderGastosMesBtns();
+    return;
+  }
+
+  renderGastosMesBtns();
+
+  // Determinar qué meses mostrar
+  let mesesMostrar;
+  if(gastosMesSeleccionado){
+    mesesMostrar=[gastosMesSeleccionado];
+  } else {
+    const dates=getDatesInRange();
+    const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
+    mesesMostrar=[...mesesEnRango].filter(m=>gastosPorMes[m]).sort((a,b)=>
+      MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
+    );
+    if(!mesesMostrar.length) mesesMostrar=Object.keys(gastosPorMes).sort((a,b)=>
+      MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
+    );
+  }
+
+  // Total gastos del período/mes seleccionado
+  const totalGastos=mesesMostrar.reduce((s,m)=>s+(gastosPorMes[m]||0),0);
+  document.getElementById('g-total').innerHTML=fmtPnl(-totalGastos,true,'pnl-neg')||'—';
+  document.getElementById('g-total-sub').textContent=mesesMostrar.map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ');
+
+  // Neto mesa y resultado: referenciar desde Rueda
   const netoEl=document.getElementById('r-neto');
   document.getElementById('g-neto-mesa-ref').innerHTML=netoEl?netoEl.innerHTML:'—';
   const resultadoEl=document.getElementById('r-resultado');
   const gResultado=document.getElementById('g-resultado-ref');
   if(resultadoEl){gResultado.innerHTML=resultadoEl.innerHTML;gResultado.className=resultadoEl.className;}
 
-  // Desglose por concepto
-  if(!Object.keys(gastosPorMes).length){
-    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos para el período</div>';
-    return;
-  }
-
-  // Obtener meses del rango en orden
-  const mesesOrdenados=[...mesesEnRango].sort((a,b)=>
-    MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
-  );
-
-  // Armar tabla: filas = conceptos, columnas = meses
-  // Recopilar todos los conceptos del primer mes disponible
-  const primerMes=mesesOrdenados.find(m=>gastosDetalle[m]);
+  // Tabla de desglose
+  const primerMes=mesesMostrar.find(m=>gastosDetalle[m]);
   if(!primerMes){
-    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos para el período</div>';
+    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin detalle disponible</div>';
     return;
   }
   const conceptos=(gastosDetalle[primerMes]||[]).map(d=>d.label);
 
   let html='<div class="table-wrap"><table><thead><tr><th>Concepto</th>';
-  mesesOrdenados.forEach(m=>{
-    html+=`<th class="tr" style="text-transform:capitalize">${m}</th>`;
-  });
-  if(mesesOrdenados.length>1)html+=`<th class="tr">Total</th>`;
+  mesesMostrar.forEach(m=>{html+=`<th class="tr" style="text-transform:capitalize">${m}</th>`;});
+  if(mesesMostrar.length>1)html+=`<th class="tr">Total</th>`;
   html+='</tr></thead><tbody>';
 
   conceptos.forEach(label=>{
-    html+=`<tr><td style="color:#e2e8f0">${label}</td>`;
     let totalConcepto=0;
-    mesesOrdenados.forEach(m=>{
-      const det=gastosDetalle[m]||[];
-      const item=det.find(d=>d.label===label);
+    let rowHtml=`<tr><td style="color:#e2e8f0">${label}</td>`;
+    mesesMostrar.forEach(m=>{
+      const item=(gastosDetalle[m]||[]).find(d=>d.label===label);
       const val=item?item.val:0;
       totalConcepto+=val;
-      html+=`<td class="tr" style="color:#f87171;font-family:monospace">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
+      rowHtml+=`<td class="tr" style="color:#f87171;font-family:monospace">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
     });
-    if(mesesOrdenados.length>1)html+=`<td class="tr" style="color:#f87171;font-family:monospace;font-weight:500">-$${Math.round(totalConcepto).toLocaleString('es-AR')}</td>`;
-    html+='</tr>';
+    if(mesesMostrar.length>1)rowHtml+=`<td class="tr" style="color:#f87171;font-family:monospace;font-weight:500">-$${Math.round(totalConcepto).toLocaleString('es-AR')}</td>`;
+    rowHtml+='</tr>';
+    html+=rowHtml;
   });
 
   // Fila total
   html+='<tr style="border-top:0.5px solid #378ADD;background:#0c1628">';
   html+=`<td style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Total gastos</td>`;
   let grandTotal=0;
-  mesesOrdenados.forEach(m=>{
+  mesesMostrar.forEach(m=>{
     const val=gastosPorMes[m]||0;
     grandTotal+=val;
     html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(val).toLocaleString('es-AR')}</td>`;
   });
-  if(mesesOrdenados.length>1)html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(grandTotal).toLocaleString('es-AR')}</td>`;
+  if(mesesMostrar.length>1)html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(grandTotal).toLocaleString('es-AR')}</td>`;
   html+='</tr></tbody></table></div>';
 
   document.getElementById('g-detalle').innerHTML=html;
