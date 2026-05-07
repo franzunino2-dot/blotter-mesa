@@ -470,28 +470,39 @@ function parseGastos(text){
     {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
 
-  // Fila 75 = índice 74 (0-based, sin filtrar vacías)
-  const filaTotal=75;
-  // Filas de subtotales: 8=7, 24=23, 29=28, 31=30, 35=34, 44=43, 50=49, 61=60, 65=64, 68=67, 71=70, 74=73
-  const FILAS_DETALLE=[8,24,29,31,35,44,50,61,65,68,71,74];
-
-  if(parsed.length<=filaTotal){
-    console.warn('Gastos: CSV tiene',parsed.length,'filas, necesita al menos 75');
-    return;
+  // Buscar fila TOTAL GENERAL — puede estar en col A o col B
+  let filaTotal=-1;
+  for(let i=parsed.length-1;i>=0;i--){
+    const row=parsed[i];
+    for(let c=0;c<Math.min(row.length,5);c++){
+      const v=(row[c]||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s/g,'');
+      if(v.includes('totalgeneral')||v==='totalgeneral'){filaTotal=i;break;}
+    }
+    if(filaTotal>=0)break;
   }
+  if(filaTotal<0){console.warn('Gastos: no encontré TOTAL GENERAL. Total filas:',parsed.length,'Últimas 3:',parsed.slice(-3).map(r=>r.slice(0,4)));return;}
+  console.log('TOTAL GENERAL idx',filaTotal,'| fila completa cols 0-4:',parsed[filaTotal].slice(0,4),'| vals H-P:',parsed[filaTotal].slice(7,16));
 
-  const rowTotal=parsed[filaTotal];
-  console.log('Gastos fila 75 col A:',(rowTotal[0]||'').trim(),'| col B:',(rowTotal[1]||'').trim());
-  console.log('Gastos fila 75 valores H-P:', rowTotal.slice(7,16));
+  // Buscar filas de subtotales — col A tiene texto tipo "Subtotal X", col B vacía
+  const LABELS_SUBTOTAL=['subtotal','impuesto','extraordinario'];
+  const FILAS_DETALLE=[];
+  for(let i=0;i<filaTotal;i++){
+    const row=parsed[i];
+    const celA=(row[0]||'').trim();
+    const celB=(row[1]||'').trim();
+    const celAn=celA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(celA&&!celB&&LABELS_SUBTOTAL.some(s=>celAn.includes(s))){
+      FILAS_DETALLE.push(i);
+    }
+  }
+  console.log('Subtotales encontrados:',FILAS_DETALLE.map(i=>(parsed[i][0]||'').trim()));
 
   MESES_COL.forEach(({mes,col})=>{
-    const val=parseMonto(rowTotal[col]||'');
+    const val=parseMonto(parsed[filaTotal][col]||'');
     if(val>0)gastosPorMes[mes]=val;
     const detalle=[];
     FILAS_DETALLE.forEach(fi=>{
-      if(!parsed[fi])return;
       const label=(parsed[fi][0]||'').trim();
-      if(!label)return;
       const val2=parseMonto(parsed[fi][col]||'');
       if(val2>0)detalle.push({label,val:val2});
     });
