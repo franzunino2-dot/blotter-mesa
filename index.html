@@ -1291,7 +1291,7 @@ function renderCauciones(){
   let capHtml='';
   caucionCapData.forEach(r=>{
     const pctNum=parseFloat((r.pct||'0').replace('%','').replace(',','.'));
-    const pctColor=pctNum>=100?'#f87171':pctNum>=80?'#fbbf24':'#4ade80';
+    const pctColor=pctNum<=30?'#f87171':pctNum<=50?'#fbbf24':'#4ade80';
     capHtml+=`<tr>
       <td style="color:#e2e8f0;font-weight:500">${r.cuenta}</td>
       <td style="color:#a0aec0">${r.comitente||'—'}</td>
