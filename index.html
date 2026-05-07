@@ -458,7 +458,8 @@ async function loadGastos(){
 function parseGastos(text){
   gastosPorMes={};
   gastosDetalle={};
-  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  // NO filtrar líneas vacías — mantener índices exactos igual que la sheet
+  const lines=text.split('\n').map(l=>l.trim());
   const parsed=lines.map(l=>parseCSVLine(l));
 
   // Columnas fijas: H=abril=7, I=mayo=8, J=junio=9, K=julio=10,
@@ -469,25 +470,23 @@ function parseGastos(text){
     {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
 
-  // Fila 75 = índice 74 → TOTAL GENERAL
+  // Fila 75 = índice 74 (0-based, sin filtrar vacías)
   const filaTotal=74;
-
-  // Filas de subtotales para desglose (índice 0-based)
-  // fila 8=7, 24=23, 29=28, 31=30, 35=34, 44=43, 50=49, 61=60, 65=64, 68=67, 71=70, 74=73
+  // Filas de subtotales: 8=7, 24=23, 29=28, 31=30, 35=34, 44=43, 50=49, 61=60, 65=64, 68=67, 71=70, 74=73
   const FILAS_DETALLE=[7,23,28,30,34,43,49,60,64,67,70,73];
 
   if(parsed.length<=filaTotal){
-    console.warn('Gastos: CSV tiene menos de 75 filas, tiene',parsed.length);
+    console.warn('Gastos: CSV tiene',parsed.length,'filas, necesita al menos 75');
     return;
   }
 
   const rowTotal=parsed[filaTotal];
-  console.log('Gastos fila 75 (idx 74):', rowTotal.slice(7,16));
+  console.log('Gastos fila 75 col A:',(rowTotal[0]||'').trim(),'| col B:',(rowTotal[1]||'').trim());
+  console.log('Gastos fila 75 valores H-P:', rowTotal.slice(7,16));
 
   MESES_COL.forEach(({mes,col})=>{
     const val=parseMonto(rowTotal[col]||'');
     if(val>0)gastosPorMes[mes]=val;
-    // Desglose
     const detalle=[];
     FILAS_DETALLE.forEach(fi=>{
       if(!parsed[fi])return;
