@@ -361,6 +361,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <tbody id="cau-tbody"></tbody>
       </table>
     </div>
+    <div class="section-label" style="margin-top:8px">Capacidad tomadora <span id="cau-cap-fecha" style="color:#4a5568;font-weight:400"></span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Cuenta</th><th>Nombre</th>
+          <th class="tr">Monto caución</th><th class="tr">Margen</th>
+          <th class="tr">%</th><th class="tr">Saldo liquidando</th>
+        </tr></thead>
+        <tbody id="cau-cap-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -369,10 +380,13 @@ const USERS={'gallardeta':'091218'};
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
 const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
 const GASTOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
+const CAUCION_CAP_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMkhA35YTcz24kL9EsL1vLWFLJlnu_PWiFQKlp6nbrBfXnegq3fKaGpq8RlydvcL6217Ql3Oi/pub?gid=12153366&single=true&output=csv';
 
 let sueldosFijos={};
 let gastosPorMes={};
 let gastosDetalle={};
+let caucionCapData=[];
+let caucionCapFecha='';
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},allHB={},allBrutos={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
@@ -529,6 +543,38 @@ function getGastosInRange(){
   return total;
 }
 
+// ── CAUCION CAPACIDAD ────────────────────────────────────────────────────────
+async function loadCaucionCap(){
+  try{
+    const r=await fetch(CAUCION_CAP_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
+    if(!r.ok)return;
+    parseCaucionCap(await r.text());
+  }catch(e){console.warn('CaucionCap no cargó:',e);}
+}
+function parseCaucionCap(text){
+  caucionCapData=[];caucionCapFecha='';
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const parsed=lines.map(l=>parseCSVLine(l));
+  if(!parsed.length)return;
+  // Fila 1 (idx 0) tiene la fecha en A1
+  caucionCapFecha=(parsed[0][0]||'').trim();
+  // Fila 3 (idx 2) = headers: Comitente, Cuenta, Monto Caución, Valorizada Aforada, Margen, %, Saldo Liquidando
+  // Datos desde fila 4 (idx 3)
+  for(let i=3;i<parsed.length;i++){
+    const row=parsed[i];
+    const comitente=(row[0]||'').trim();
+    const cuenta=(row[1]||'').trim();
+    if(!comitente&&!cuenta)continue;
+    const monto=parseMonto(row[2]||'');
+    const valorizada=parseMonto(row[3]||'');
+    const margen=parseMonto(row[4]||'');
+    const pct=(row[5]||'').trim();
+    const saldo=parseMonto(row[6]||'');
+    caucionCapData.push({comitente,cuenta,monto,valorizada,margen,pct,saldo});
+  }
+  console.log('CaucionCap cargado:',caucionCapData.length,'filas, fecha:',caucionCapFecha);
+}
+
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function doLogin(){
   const u=document.getElementById('login-user').value.trim();
@@ -672,7 +718,8 @@ async function loadData(){
     const[r]=await Promise.all([
       fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
       loadSueldos(),
-      loadGastos()
+      loadGastos(),
+      loadCaucionCap()
     ]);
     if(!r.ok)throw new Error('HTTP '+r.status);
     parseCSV(await r.text());
@@ -1231,6 +1278,30 @@ function renderCauciones(){
     <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
   </tr>`;});
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
+
+  // Tabla capacidad tomadora
+  const capEl=document.getElementById('cau-cap-tbody');
+  const capTitleEl=document.getElementById('cau-cap-fecha');
+  if(!capEl)return;
+  if(caucionCapFecha&&capTitleEl)capTitleEl.textContent='Al '+caucionCapFecha;
+  if(!caucionCapData.length){
+    capEl.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    return;
+  }
+  let capHtml='';
+  caucionCapData.forEach(r=>{
+    const pctNum=parseFloat((r.pct||'0').replace('%','').replace(',','.'));
+    const pctColor=pctNum>=100?'#f87171':pctNum>=80?'#fbbf24':'#4ade80';
+    capHtml+=`<tr>
+      <td style="color:#e2e8f0;font-weight:500">${r.cuenta}</td>
+      <td style="color:#a0aec0">${r.comitente||'—'}</td>
+      <td class="tr" style="color:#f87171;font-family:monospace">$${fmtInt(Math.abs(r.monto))}</td>
+      <td class="tr" style="color:#4ade80;font-family:monospace">$${fmtInt(r.margen)}</td>
+      <td class="tr" style="color:${pctColor};font-family:monospace;font-weight:500">${r.pct}</td>
+      <td class="tr" style="color:#60a5fa;font-family:monospace">$${fmtInt(r.saldo)}</td>
+    </tr>`;
+  });
+  capEl.innerHTML=capHtml;
 }
 
 // ── RENDER ALL & TABS ─────────────────────────────────────────────────────────
