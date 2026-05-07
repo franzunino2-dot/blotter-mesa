@@ -217,6 +217,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="tab" id="tab-mes" onclick="showTab('mes')">Mes</div>
     <div class="tab" id="tab-productores" onclick="showTab('productores')">Productores</div>
     <div class="tab" id="tab-cauciones" onclick="showTab('cauciones')">Cauciones</div>
+    <div class="tab" id="tab-gastos" onclick="showTab('gastos')">Gastos</div>
   </div>
 
   <!-- RUEDA -->
@@ -231,7 +232,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric">
         <div class="tt">Lo que cobran los productores: empleados cobran fijo + variable sobre col O; externos cobran col Q directo.</div>
         <div class="metric-label">Com. productores</div>
-        <div class="metric-value purple" id="r-comprod">—</div>
+        <div class="metric-value purple" id="r-comprod" style="cursor:pointer" onclick="showTab('productores')">—</div>
         <div class="metric-sub" id="r-comprod-sub">variable emp. · col Q ext.</div>
       </div>
       <div class="metric">
@@ -243,7 +244,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric tt-right">
         <div class="tt">Gastos operativos del mes (fila TOTAL GENERAL de la sheet Gastos Equanima). Si el período abarca varios meses se suman.</div>
         <div class="metric-label">Gastos del período</div>
-        <div class="metric-value red" id="r-gastos">—</div>
+        <div class="metric-value red" id="r-gastos" style="cursor:pointer" onclick="showTab('gastos')">—</div>
         <div class="metric-sub" id="r-gastos-sub">gastos operativos</div>
       </div>
       <div class="metric tt-right">
@@ -327,6 +328,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <tbody id="prod-tbody"></tbody>
       </table>
     </div>
+  </div>
+
+  <!-- GASTOS -->
+  <div id="view-gastos" style="display:none">
+    <div class="metrics3">
+      <div class="metric"><div class="metric-label">Total gastos período</div><div class="metric-value red" id="g-total">—</div><div class="metric-sub" id="g-total-sub">—</div></div>
+      <div class="metric"><div class="metric-label">Neto mesa</div><div class="metric-value green" id="g-neto-mesa-ref">—</div><div class="metric-sub">referencia rueda</div></div>
+      <div class="metric tt-right"><div class="metric-label">Resultado</div><div class="metric-value" id="g-resultado-ref">—</div><div class="metric-sub">neto − gastos</div></div>
+    </div>
+    <div class="section-label">Detalle de gastos</div>
+    <div id="g-detalle"><div class="empty-state">Cargando gastos...</div></div>
   </div>
 
   <!-- CAUCIONES -->
@@ -441,24 +453,23 @@ async function loadGastos(){
 function parseGastos(text){
   gastosPorMes={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  // Mapeo mes -> columna (H=abril=idx7, I=mayo=idx8, ...)
+  // Columnas: H=abril(idx7), I=mayo(8), J=junio(9), K=julio(10),
+  //           L=agosto(11), M=sep(12), N=oct(13), O=nov(14), P=dic(15)
   const MESES_COL={'abril':7,'mayo':8,'junio':9,'julio':10,'agosto':11,'septiembre':12,'octubre':13,'noviembre':14,'diciembre':15};
-  // Buscar la fila que tenga "TOTAL GENERAL" en col A
-  let filaTotal=-1;
-  for(let i=0;i<lines.length;i++){
-    const cols=parseCSVLine(lines[i]);
-    const celA=(cols[0]||'').trim().toUpperCase();
-    if(celA.includes('TOTAL GENERAL')||celA.includes('TOTAL')){
-      filaTotal=i;
-      // no break — quedarse con la última que coincida (la fila 72)
-    }
-  }
-  if(filaTotal<0){console.warn('Gastos: no se encontro fila TOTAL GENERAL');return;}
-  const row=parseCSVLine(lines[filaTotal]);
-  console.log('Gastos fila TOTAL GENERAL (idx '+filaTotal+'):', row.slice(7,16));
+  // Filas a sumar (índice 0-based): fila 8=idx7, 24=idx23, 29=idx28, 31=idx30,
+  // 35=idx34, 44=idx43, 50=idx49, 61=idx60, 65=idx64, 68=idx67, 71=idx70, 74=idx73
+  const FILAS_IDX=[7,23,28,30,34,43,49,60,64,67,70,73];
+  // Parsear todas las líneas en arrays
+  const parsed=lines.map(l=>parseCSVLine(l));
   Object.entries(MESES_COL).forEach(([mes,colIdx])=>{
-    const val=parseMonto(row[colIdx]||'');
-    if(val>0)gastosPorMes[mes]=val;
+    let total=0;
+    FILAS_IDX.forEach(filaIdx=>{
+      if(parsed[filaIdx]){
+        const val=parseMonto(parsed[filaIdx][colIdx]||'');
+        total+=val;
+      }
+    });
+    if(total>0)gastosPorMes[mes]=total;
   });
   console.log('Gastos por mes:', gastosPorMes);
 }
@@ -1180,13 +1191,42 @@ function renderCauciones(){
 }
 
 // ── RENDER ALL & TABS ─────────────────────────────────────────────────────────
-function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();}
+function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();}
 function showTab(t){
-  ['rueda','mes','productores','cauciones'].forEach(x=>{
+  ['rueda','mes','productores','cauciones','gastos'].forEach(x=>{
     document.getElementById('view-'+x).style.display=x===t?'':'none';
     document.getElementById('tab-'+x).classList.toggle('active',x===t);
   });
   if(t==='mes')renderMes();
+  if(t==='gastos')renderGastos();
+}
+
+// ── GASTOS TAB ───────────────────────────────────────────────────────────────
+function renderGastos(){
+  const gastos=getGastosInRange();
+  const netoMesa=parseFloat((document.getElementById('r-neto').textContent||'0').replace(/[^0-9]/g,''))||0;
+  document.getElementById('g-total').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
+  document.getElementById('g-total-sub').textContent=gastos>0?'período seleccionado':'sin datos';
+  // Ref neto mesa desde el card de rueda
+  const netoEl=document.getElementById('r-neto');
+  document.getElementById('g-neto-mesa-ref').innerHTML=netoEl?netoEl.innerHTML:'—';
+  const resultadoEl=document.getElementById('r-resultado');
+  const gResultado=document.getElementById('g-resultado-ref');
+  if(resultadoEl){gResultado.innerHTML=resultadoEl.innerHTML;gResultado.className=resultadoEl.className;}
+  // Detalle: por ahora mostrar los meses con su gasto
+  let html='<table><thead><tr><th>Mes</th><th class="tr">Gastos</th></tr></thead><tbody>';
+  const meses=Object.entries(gastosPorMes).sort((a,b)=>MESES.indexOf(a[0].charAt(0).toUpperCase()+a[0].slice(1))-MESES.indexOf(b[0].charAt(0).toUpperCase()+b[0].slice(1)));
+  if(meses.length===0){html='<div class="empty-state">Sin datos de gastos para el período</div>';}
+  else{
+    // Solo mostrar los meses en el rango seleccionado
+    const dates=getDatesInRange();
+    const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
+    meses.filter(([mes])=>mesesEnRango.has(mes)).forEach(([mes,val])=>{
+      html+=`<tr><td style="color:#e2e8f0;text-transform:capitalize">${mes}</td><td class="tr" style="color:#f87171;font-family:monospace">-$${Math.round(val).toLocaleString('es-AR')}</td></tr>`;
+    });
+    html+='</tbody></table>';
+  }
+  document.getElementById('g-detalle').innerHTML=html;
 }
 
 // ── RELOJ ─────────────────────────────────────────────────────────────────────
