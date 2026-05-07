@@ -368,6 +368,7 @@ const GASTOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvA
 
 let sueldosFijos={};
 let gastosPorMes={};
+let gastosDetalle={};
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allOps={},allTotals={},allHB={},allBrutos={};
 let rangeStart=null,rangeEnd=null,pickStep=0;
@@ -452,24 +453,34 @@ async function loadGastos(){
 }
 function parseGastos(text){
   gastosPorMes={};
+  gastosDetalle={};
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  // Columnas: H=abril(idx7), I=mayo(8), J=junio(9), K=julio(10),
-  //           L=agosto(11), M=sep(12), N=oct(13), O=nov(14), P=dic(15)
   const MESES_COL={'abril':7,'mayo':8,'junio':9,'julio':10,'agosto':11,'septiembre':12,'octubre':13,'noviembre':14,'diciembre':15};
-  // Filas a sumar (índice 0-based): fila 8=idx7, 24=idx23, 29=idx28, 31=idx30,
-  // 35=idx34, 44=idx43, 50=idx49, 61=idx60, 65=idx64, 68=idx67, 71=idx70, 74=idx73
+  // Fila 75 (idx 74) = TOTAL GENERAL
+  // Filas de conceptos (idx 0-based): 7,23,28,30,34,43,49,60,64,67,70,73
   const FILAS_IDX=[7,23,28,30,34,43,49,60,64,67,70,73];
-  // Parsear todas las líneas en arrays
   const parsed=lines.map(l=>parseCSVLine(l));
   Object.entries(MESES_COL).forEach(([mes,colIdx])=>{
+    // Leer total de fila 75 (idx 74)
     let total=0;
-    FILAS_IDX.forEach(filaIdx=>{
-      if(parsed[filaIdx]){
-        const val=parseMonto(parsed[filaIdx][colIdx]||'');
-        total+=val;
-      }
-    });
+    if(parsed[74]){
+      total=parseMonto(parsed[74][colIdx]||'');
+    }
+    // Fallback: sumar las filas individuales si fila 75 está vacía
+    if(!total){
+      FILAS_IDX.forEach(fi=>{if(parsed[fi])total+=parseMonto(parsed[fi][colIdx]||'');});
+    }
     if(total>0)gastosPorMes[mes]=total;
+    // Desglose: label de col A + valor del mes
+    const detalle=[];
+    FILAS_IDX.forEach(fi=>{
+      if(!parsed[fi])return;
+      const label=(parsed[fi][0]||'').trim();
+      if(!label)return;
+      const val=parseMonto(parsed[fi][colIdx]||'');
+      if(val>0)detalle.push({label,val});
+    });
+    if(detalle.length)gastosDetalle[mes]=detalle;
   });
   console.log('Gastos por mes:', gastosPorMes);
 }
@@ -1204,28 +1215,71 @@ function showTab(t){
 // ── GASTOS TAB ───────────────────────────────────────────────────────────────
 function renderGastos(){
   const gastos=getGastosInRange();
-  const netoMesa=parseFloat((document.getElementById('r-neto').textContent||'0').replace(/[^0-9]/g,''))||0;
+  const dates=getDatesInRange();
+  const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
+
+  // Cards de resumen
   document.getElementById('g-total').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
   document.getElementById('g-total-sub').textContent=gastos>0?'período seleccionado':'sin datos';
-  // Ref neto mesa desde el card de rueda
   const netoEl=document.getElementById('r-neto');
   document.getElementById('g-neto-mesa-ref').innerHTML=netoEl?netoEl.innerHTML:'—';
   const resultadoEl=document.getElementById('r-resultado');
   const gResultado=document.getElementById('g-resultado-ref');
   if(resultadoEl){gResultado.innerHTML=resultadoEl.innerHTML;gResultado.className=resultadoEl.className;}
-  // Detalle: por ahora mostrar los meses con su gasto
-  let html='<table><thead><tr><th>Mes</th><th class="tr">Gastos</th></tr></thead><tbody>';
-  const meses=Object.entries(gastosPorMes).sort((a,b)=>MESES.indexOf(a[0].charAt(0).toUpperCase()+a[0].slice(1))-MESES.indexOf(b[0].charAt(0).toUpperCase()+b[0].slice(1)));
-  if(meses.length===0){html='<div class="empty-state">Sin datos de gastos para el período</div>';}
-  else{
-    // Solo mostrar los meses en el rango seleccionado
-    const dates=getDatesInRange();
-    const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
-    meses.filter(([mes])=>mesesEnRango.has(mes)).forEach(([mes,val])=>{
-      html+=`<tr><td style="color:#e2e8f0;text-transform:capitalize">${mes}</td><td class="tr" style="color:#f87171;font-family:monospace">-$${Math.round(val).toLocaleString('es-AR')}</td></tr>`;
-    });
-    html+='</tbody></table>';
+
+  // Desglose por concepto
+  if(!Object.keys(gastosPorMes).length){
+    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos para el período</div>';
+    return;
   }
+
+  // Obtener meses del rango en orden
+  const mesesOrdenados=[...mesesEnRango].sort((a,b)=>
+    MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
+  );
+
+  // Armar tabla: filas = conceptos, columnas = meses
+  // Recopilar todos los conceptos del primer mes disponible
+  const primerMes=mesesOrdenados.find(m=>gastosDetalle[m]);
+  if(!primerMes){
+    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos para el período</div>';
+    return;
+  }
+  const conceptos=(gastosDetalle[primerMes]||[]).map(d=>d.label);
+
+  let html='<div class="table-wrap"><table><thead><tr><th>Concepto</th>';
+  mesesOrdenados.forEach(m=>{
+    html+=`<th class="tr" style="text-transform:capitalize">${m}</th>`;
+  });
+  if(mesesOrdenados.length>1)html+=`<th class="tr">Total</th>`;
+  html+='</tr></thead><tbody>';
+
+  conceptos.forEach(label=>{
+    html+=`<tr><td style="color:#e2e8f0">${label}</td>`;
+    let totalConcepto=0;
+    mesesOrdenados.forEach(m=>{
+      const det=gastosDetalle[m]||[];
+      const item=det.find(d=>d.label===label);
+      const val=item?item.val:0;
+      totalConcepto+=val;
+      html+=`<td class="tr" style="color:#f87171;font-family:monospace">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
+    });
+    if(mesesOrdenados.length>1)html+=`<td class="tr" style="color:#f87171;font-family:monospace;font-weight:500">-$${Math.round(totalConcepto).toLocaleString('es-AR')}</td>`;
+    html+='</tr>';
+  });
+
+  // Fila total
+  html+='<tr style="border-top:0.5px solid #378ADD;background:#0c1628">';
+  html+=`<td style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Total gastos</td>`;
+  let grandTotal=0;
+  mesesOrdenados.forEach(m=>{
+    const val=gastosPorMes[m]||0;
+    grandTotal+=val;
+    html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(val).toLocaleString('es-AR')}</td>`;
+  });
+  if(mesesOrdenados.length>1)html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(grandTotal).toLocaleString('es-AR')}</td>`;
+  html+='</tr></tbody></table></div>';
+
   document.getElementById('g-detalle').innerHTML=html;
 }
 
