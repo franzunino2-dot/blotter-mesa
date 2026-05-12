@@ -151,6 +151,29 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .liq-mes-total{color:#4ade80;min-width:90px;text-align:right;font-family:monospace;font-weight:500}
 .liq-formula{font-size:10px;color:#2d3748;font-family:monospace;padding:6px 8px;background:#0a0c10;border-radius:4px;border:0.5px solid #1e2330;margin-top:8px}
 .liq-formula span{color:#4a5568}
+/* ── GASTOS ACCORDION ─────────────────────────────── */
+.gasto-grupo{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:5px;overflow:hidden}
+.gasto-grupo-header{display:flex;align-items:center;padding:9px 14px;cursor:pointer;background:#111420;gap:10px;transition:background .15s;user-select:none}
+.gasto-grupo-header:hover{background:#161b28}
+.gasto-grupo-toggle{font-size:10px;color:#4a5568;min-width:14px;transition:transform .2s;flex-shrink:0}
+.gasto-grupo-toggle.open{transform:rotate(90deg)}
+.gasto-grupo-nombre{font-size:12px;font-weight:500;color:#e2e8f0;flex:1}
+.gasto-grupo-meses{display:flex;gap:10px;align-items:center}
+.gasto-grupo-mes-val{font-size:11px;font-family:monospace;color:#f87171}
+.gasto-grupo-mes-label{font-size:9px;color:#4a5568;text-transform:capitalize}
+.gasto-grupo-total{font-size:13px;font-weight:600;font-family:monospace;color:#f87171;min-width:110px;text-align:right}
+.gasto-grupo-body{display:none;background:#0d0f14;border-top:0.5px solid #1e2330}
+.gasto-grupo-body.open{display:block}
+.gasto-items-table{width:100%;border-collapse:collapse}
+.gasto-items-table th{font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;padding:5px 14px;border-bottom:0.5px solid #1e2330;font-weight:400;text-align:left}
+.gasto-items-table th.tr{text-align:right}
+.gasto-items-table td{font-size:11px;color:#a0aec0;padding:5px 14px;border-bottom:0.5px solid #111420}
+.gasto-items-table td.tr{text-align:right;font-family:monospace}
+.gasto-items-table tr:last-child td{border-bottom:none}
+.gasto-items-table tr:hover td{background:#111420}
+.gasto-concepto{color:#e2e8f0}
+.gasto-val-pos{color:#f87171}
+.gasto-val-zero{color:#2d3748}
 </style>
 </head>
 <body>
@@ -368,7 +391,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
       <div class="metric"><div class="metric-label">Neto mesa (rueda)</div><div class="metric-value green" id="g-neto-mesa-ref">—</div><div class="metric-sub">referencia período seleccionado</div></div>
       <div class="metric tt-right"><div class="metric-label">Resultado</div><div class="metric-value" id="g-resultado-ref">—</div><div class="metric-sub">neto − gastos</div></div>
     </div>
-    <div class="section-label">Detalle de gastos</div>
+    <div class="section-label">Detalle de gastos — click para desglosar</div>
     <div id="g-detalle"><div class="empty-state">Cargando gastos...</div></div>
   </div>
 
@@ -413,6 +436,9 @@ const CAUCION_CAP_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMk
 let sueldosFijos={};
 let gastosPorMes={};
 let gastosDetalle={};
+// NUEVO: estructura completa de grupos con items de detalle
+// gastosGrupos = [ { label, items:[{concepto, porMes:{abril:val,...}}], totalPorMes:{abril:val,...} } ]
+let gastosGrupos=[];
 let caucionCapData=[];
 let caucionCapFecha='';
 let posiTradingBook=[];
@@ -499,10 +525,13 @@ async function loadGastos(){
     parseGastos(await r.text());
   }catch(e){console.warn('Gastos no cargaron:',e);}
 }
+
 function parseGastos(text){
   gastosPorMes={};
   gastosDetalle={};
-  // NO filtrar líneas vacías — mantener índices exactos igual que la sheet
+  gastosGrupos=[];
+
+  // Mantener índices exactos — NO filtrar líneas vacías
   const lines=text.split('\n').map(l=>l.trim());
   const parsed=lines.map(l=>parseCSVLine(l));
 
@@ -514,7 +543,7 @@ function parseGastos(text){
     {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
 
-  // Buscar fila TOTAL GENERAL — puede estar en col A o col B
+  // Buscar fila TOTAL GENERAL
   let filaTotal=-1;
   for(let i=parsed.length-1;i>=0;i--){
     const row=parsed[i];
@@ -524,37 +553,161 @@ function parseGastos(text){
     }
     if(filaTotal>=0)break;
   }
-  if(filaTotal<0){console.warn('Gastos: no encontré TOTAL GENERAL. Total filas:',parsed.length,'Últimas 3:',parsed.slice(-3).map(r=>r.slice(0,4)));return;}
-  console.log('TOTAL GENERAL idx',filaTotal,'| fila completa cols 0-4:',parsed[filaTotal].slice(0,4),'| vals H-P:',parsed[filaTotal].slice(7,16));
+  if(filaTotal<0){console.warn('Gastos: no encontré TOTAL GENERAL');return;}
 
-  // Buscar filas de subtotales — col A tiene texto tipo "Subtotal X", col B vacía
-  const LABELS_SUBTOTAL=['subtotal','impuesto','extraordinario'];
-  const FILAS_DETALLE=[];
-  for(let i=0;i<filaTotal;i++){
-    const row=parsed[i];
-    const celA=(row[0]||'').trim();
-    const celB=(row[1]||'').trim();
-    const celAn=celA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if(celA&&!celB&&LABELS_SUBTOTAL.some(s=>celAn.includes(s))){
-      FILAS_DETALLE.push(i);
-    }
-  }
-  console.log('Subtotales encontrados:',FILAS_DETALLE.map(i=>(parsed[i][0]||'').trim()));
-
+  // Leer total por mes desde la fila TOTAL GENERAL
   MESES_COL.forEach(({mes,col})=>{
     const val=parseMonto(parsed[filaTotal][col]||'');
     if(val>0)gastosPorMes[mes]=val;
-    const detalle=[];
-    FILAS_DETALLE.forEach(fi=>{
-      const label=(parsed[fi][0]||'').trim();
-      const val2=parseMonto(parsed[fi][col]||'');
-      if(val2>0)detalle.push({label,val:val2});
-    });
-    if(detalle.length)gastosDetalle[mes]=detalle;
   });
-  console.log('Gastos por mes:',gastosPorMes);
-}
 
+  // ── Construir grupos ──────────────────────────────────────────────────────
+  // Un "grupo" empieza cuando cambia la categoría (col A) y termina cuando
+  // encontramos la fila "Subtotal X" (col A tiene "subtotal", col B vacío o con info).
+  // Filas de detalle: col A = categoría, col B = concepto (puede tener valor o no)
+  // Fila de subtotal: col A contiene "subtotal" o "gastos" y col B está vacía.
+
+  const esSubtotal=(row)=>{
+    const a=(row[0]||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const b=(row[1]||'').trim();
+    // Subtotales: col A tiene "subtotal" o empieza con "subtotal"
+    // También acepta "Gastos extraordinarios" que no tiene col B
+    return (a.includes('subtotal') || a.startsWith('gastos extraordinarios')) && !b;
+  };
+
+  // También tratar filas donde col A tiene contenido y col B está vacía pero NO es subtotal
+  // como filas de detalle sin concepto (ej: fila de "CABSA" que tiene col B = "CABSA")
+  // En realidad col B puede tener concepto o estar vacía en filas normales
+
+  let grupoActual=null;
+  let itemsActual=[];
+
+  const guardarGrupo=()=>{
+    if(grupoActual&&itemsActual.length){
+      // Calcular totalPorMes sumando items
+      const totalPorMes={};
+      MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
+      itemsActual.forEach(item=>{
+        MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
+      });
+      gastosGrupos.push({label:grupoActual,items:itemsActual,totalPorMes});
+    }
+    grupoActual=null;
+    itemsActual=[];
+  };
+
+  for(let i=0;i<filaTotal;i++){
+    const row=parsed[i];
+    const colA=(row[0]||'').trim();
+    const colB=(row[1]||'').trim();
+    const colAN=colA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+    if(!colA)continue; // fila completamente vacía
+
+    if(esSubtotal(row)){
+      // Esta fila es el subtotal — cerrar el grupo con este label
+      guardarGrupo();
+      // Usar el label de esta fila de subtotal como nombre del grupo
+      // (ya guardamos el grupo vacío antes, ahora el label queda seteado para el próximo)
+      // En realidad queremos que el label sea el de la fila de subtotal.
+      // Reestructuramos: al encontrar subtotal, seteamos label del grupo que acabamos de cerrar.
+      // Mejor approach: al encontrar subtotal, el grupo que venía acumulando se cierra con ese label.
+      // Para eso necesitamos guardar el label ANTES de cerrar:
+      continue;
+    }
+
+    // Fila de detalle
+    // Si col A cambia (nueva categoría) podemos agruparlo igual porque el subtotal cierra el grupo
+    // col B puede ser el concepto específico, o estar vacía
+    const concepto=colB||colA; // si no hay col B, usar col A como concepto
+    const porMes={};
+    MESES_COL.forEach(({mes,col})=>{
+      porMes[mes]=parseMonto(row[col]||'');
+    });
+    // Solo agregar si tiene algún valor en algún mes
+    const tieneValor=MESES_COL.some(({mes})=>porMes[mes]>0);
+    if(tieneValor||(colA&&colB)){
+      itemsActual.push({concepto,porMes});
+    }
+  }
+
+  // Ahora el approach anterior tiene un problema: no asociamos el label del subtotal al grupo.
+  // Rehacemos con approach más claro:
+  gastosGrupos=[];
+  itemsActual=[];
+  let pendingItems=[];
+
+  for(let i=0;i<filaTotal;i++){
+    const row=parsed[i];
+    const colA=(row[0]||'').trim();
+    const colB=(row[1]||'').trim();
+    const colAN=colA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+    if(!colA)continue;
+
+    // ¿Es fila de subtotal/cierre de grupo?
+    const isSubLabel=colAN.includes('subtotal')||colAN.startsWith('gastos extraordinarios');
+
+    if(isSubLabel&&!colB){
+      // Cerrar grupo actual con este label
+      if(pendingItems.length){
+        const totalPorMes={};
+        MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
+        pendingItems.forEach(item=>{
+          MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
+        });
+        gastosGrupos.push({label:colA,items:pendingItems,totalPorMes});
+      } else {
+        // Grupo sin items previos (ej: "Subtotal Sist. de gestión" donde solo hay 1 fila)
+        // igual lo guardamos con items vacíos para mostrar el subtotal
+        const totalPorMes={};
+        MESES_COL.forEach(({mes,col})=>{ totalPorMes[mes]=parseMonto(row[col]||''); });
+        gastosGrupos.push({label:colA,items:[],totalPorMes});
+      }
+      pendingItems=[];
+      continue;
+    }
+
+    // También cerrar si col A tiene "gastos" y col B tiene algo (caso "Gastos extraordinarios" con detalle)
+    // pero acumular como item normal si tiene col B
+    if(isSubLabel&&colB){
+      // Es un item de detalle que tiene categoría especial (ej: "Subalquiler / CABSA")
+      const porMes={};
+      MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
+      pendingItems.push({concepto:colB||colA,porMes});
+      continue;
+    }
+
+    // Fila de detalle normal: col A = categoría, col B = concepto
+    const concepto=colB||colA;
+    const porMes={};
+    MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
+    const tieneValor=MESES_COL.some(({mes})=>porMes[mes]!==0);
+    if(tieneValor) pendingItems.push({concepto,porMes});
+  }
+
+  // Si quedaron items sin cerrar (sin fila de subtotal), crearlos igual
+  if(pendingItems.length){
+    const totalPorMes={};
+    MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
+    pendingItems.forEach(item=>{
+      MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
+    });
+    gastosGrupos.push({label:'Otros',items:pendingItems,totalPorMes});
+  }
+
+  // Rebuild gastosDetalle para compatibilidad con el resto del código
+  MESES_COL.forEach(({mes})=>{
+    const detalle=[];
+    gastosGrupos.forEach(g=>{
+      if(g.totalPorMes[mes]>0) detalle.push({label:g.label,val:g.totalPorMes[mes]});
+    });
+    if(detalle.length) gastosDetalle[mes]=detalle;
+  });
+
+  console.log('Gastos por mes:',gastosPorMes);
+  console.log('Gastos grupos:',gastosGrupos.map(g=>({label:g.label,items:g.items.length})));
+}
 
 function normalizar(s){
   return String(s).trim().toLowerCase()
@@ -586,9 +739,6 @@ function parsePosi(text){
   const lines=text.split('\n').map(l=>l.trim());
   const parsed=lines.map(l=>parseCSVLine(l));
   let modo='';
-  // Columnas: A=0(label), B=1(especie), C=2(fechaEnt), D=3(dias), E=4(pxEntrada),
-  //           F=5(VN), G=6(monto), H=7(pxCarry), I=8(caucion), J=9(costoTotal),
-  //           K=10(pxHoy), L=11(posicion), M=12(pnl), N=13(pct)
   for(let i=0;i<parsed.length;i++){
     const row=parsed[i];
     const joined=row.join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -597,10 +747,9 @@ function parsePosi(text){
     if(!modo)continue;
     const label=(row[0]||'').trim();
     const especie=(row[1]||'').trim();
-    // Solo procesar filas TOTAL (tienen "TOTAL" en col C o D) o filas con especie
     const esTotal=normalizar(label+row[2]+row[3]).includes('total');
     if(!especie&&!esTotal)continue;
-    if(especie.toLowerCase()==='especie')continue; // header
+    if(especie.toLowerCase()==='especie')continue;
     const precioEntrada=(row[4]||'').trim();
     const vn=parseMonto(row[5]||'');
     const monto=parseMonto(row[6]||'');
@@ -616,7 +765,6 @@ function parsePosi(text){
     if(modo==='trading')posiTradingBook.push(obj);
     else posiPropietary.push(obj);
   }
-  console.log('Posi Trading:',posiTradingBook,'Propietary:',posiPropietary);
 }
 
 // ── CAUCION CAPACIDAD ────────────────────────────────────────────────────────
@@ -632,10 +780,7 @@ function parseCaucionCap(text){
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   const parsed=lines.map(l=>parseCSVLine(l));
   if(!parsed.length)return;
-  // Fila 1 (idx 0) tiene la fecha en A1
   caucionCapFecha=(parsed[0][0]||'').trim();
-  // Fila 3 (idx 2) = headers: Comitente, Cuenta, Monto Caución, Valorizada Aforada, Margen, %, Saldo Liquidando
-  // Datos desde fila 4 (idx 3)
   for(let i=3;i<parsed.length;i++){
     const row=parsed[i];
     const comitente=(row[0]||'').trim();
@@ -648,7 +793,6 @@ function parseCaucionCap(text){
     const saldo=parseMonto(row[6]||'');
     caucionCapData.push({comitente,cuenta,monto,valorizada,margen,pct,saldo});
   }
-  console.log('CaucionCap cargado:',caucionCapData.length,'filas, fecha:',caucionCapFecha);
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -830,7 +974,6 @@ function parseCSV(text){
         const rows=JSON.parse(jsonStr);
         if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
       }catch(e){}
-      // HB: puede ser [[...]] o []
       const hbJ1=rest.lastIndexOf('[['),hbJ2=rest.lastIndexOf(']]');
       if(hbJ1>j2&&hbJ2>hbJ1){
         const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
@@ -838,13 +981,10 @@ function parseCSV(text){
           const hbRows=JSON.parse(hbStr);
           if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
         }catch(e){}
-        // Col F viene después del último ]]
         const afterHB=rest.slice(hbJ2+2);
         const brutoMatch=afterHB.match(/([\d]+\.?[\d]*)/);
         if(brutoMatch){const bv=parseFloat(brutoMatch[1]);if(bv>0)allBrutos[fechaNorm]=bv;}
       } else {
-        // Sin HB doble: col F viene después del [] vacío
-        // Buscar el último ] y leer lo que sigue
         const lastBracket=rest.lastIndexOf(']');
         if(lastBracket>j2){
           const afterLast=rest.slice(lastBracket+1);
@@ -899,10 +1039,8 @@ function getPares(ops){
   return pares;
 }
 
-// ── CÁLCULO COM. PRODUCTORES (lo que cobran) ──────────────────────────────────
-// Empleados: fijo + variable = MAX(0,(colO-sueldo)*pct)
-// Externos:  col Q
-function calcComProductores(pares, hb){
+// ── CÁLCULO COM. PRODUCTORES ──────────────────────────────────────────────────
+function calcComProductores(pares,hb){
   const porProd={};
   pares.filter(p=>p.productor).forEach(p=>{
     const key=p.productor;
@@ -932,7 +1070,7 @@ function calcComProductores(pares, hb){
         const ds=sueldosFijos[nombre.toLowerCase()];
         const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
         const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
-        total+=variable; // solo el variable, el fijo va por RRHH aparte
+        total+=variable;
       });
     }
   });
@@ -944,9 +1082,7 @@ function renderRueda(){
   const ops=getOpsInRange();
   const pares=getPares(ops);
   const hb=getHBInRange();
-  // Facturado bruto: O3 de la sheet (suma real de toda la col O por día)
   const brutoSheet=getBrutoInRange();
-  // Fallback: si la col F aún no está en el CSV, calcular desde las ops
   const brutoCalc=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
   const bruto=brutoSheet>0?brutoSheet:brutoCalc;
   const comProd=calcComProductores(pares,hb);
@@ -969,7 +1105,6 @@ function renderRueda(){
   document.getElementById('r-resultado').className='metric-value '+(resultado>=0?'green':'red');
   document.getElementById('r-resultado-sub').textContent=gastos>0?'neto mesa − gastos':'sin datos de gastos';
 
-  // Alerta posiciones abiertas
   const map={};
   (allOps[todayStr()]||[]).forEach(o=>{
     const k=o.especie+'|'+(o.plazo||'0');
@@ -1059,7 +1194,7 @@ function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
     }
   });
   const totalCobra=totalFijo+totalVariable;
-  const totalMesa=comTotal-totalVariable; // fijo va por recibo aparte, no se descuenta del col O
+  const totalMesa=comTotal-totalVariable;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
     <div class="prod-breakdown-item">
       <div class="tt">Suma de col O de todas las operaciones del período. Es el total generado antes de pagar al productor. Col O = col P + col Q.</div>
@@ -1095,7 +1230,6 @@ function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
     </div>
   </div>`;
 }
-
 
 function buildBreakdownExterno(p,comTotal){
   const comProdTotal=p.mesaComProd+p.hbComProd;
@@ -1164,11 +1298,8 @@ function renderProductores(){
   document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   const comPagadaProductores=calcComProductores(pares,hb);
   document.getElementById('prod-compagada').innerHTML=fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
-  // Neto mesa = total facturado - comisiones pagadas a productores
-  // Es exactamente la suma del "Total mesa" de cada productor
   const netoMesaTotal=totalGlobal-comPagadaProductores;
   document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
-  // prod-top eliminado
   document.getElementById('prod-unicos').textContent=lista.length||'—';
 
   let html='';
@@ -1179,7 +1310,6 @@ function renderProductores(){
     const mesesInvolucrados=Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
     const datosProd=getDatosProductor(p.nombre,mesesInvolucrados);
 
-    // Desglose por mes (empleados con más de 1 mes)
     let liqHtml='';
     if(datosProd&&mesesInvolucrados.length>1){
       const{porcentaje}=datosProd;
@@ -1191,7 +1321,7 @@ function renderProductores(){
         const sueldoFijoMes=ds?(ds[mesNombre.toLowerCase()]||0):0;
         const tieneSueldoMes=sueldoFijoMes>0;
         const variableMes=tieneSueldoMes?Math.max(0,(mesData.comTotal-sueldoFijoMes)*porcentaje):0;
-        const totalMesaMes=mesData.comTotal-variableMes; // fijo va por recibo aparte
+        const totalMesaMes=mesData.comTotal-variableMes;
         mesRowsHtml+=`<div class="liq-mes-row">
           <span class="liq-mes-name">${mesNombre}</span>
           <span class="liq-mes-fijo">${tieneSueldoMes?fmtPesos(sueldoFijoMes):'<span style="color:#4a5568">—</span>'}</span>
@@ -1216,7 +1346,6 @@ function renderProductores(){
       </div>`;
     }
 
-    // Separar ops en SENEBI vs Mesa normal
     const opsSENEBI=p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
     const opsMesa=p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
     const senebiComProd=opsSENEBI.reduce((s,op)=>s+op.comProductor,0);
@@ -1356,7 +1485,6 @@ function renderCauciones(){
   </tr>`;});
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 
-  // Tabla capacidad tomadora
   const capEl=document.getElementById('cau-cap-tbody');
   const capTitleEl=document.getElementById('cau-cap-fecha');
   if(!capEl)return;
@@ -1423,7 +1551,9 @@ function renderPosi(){
 }
 
 // ── GASTOS TAB ───────────────────────────────────────────────────────────────
-let gastosMesSeleccionado=null; // null = todos los del rango
+let gastosMesSeleccionado=null;
+// Trackear qué grupos están abiertos para mantener el estado al re-render
+const gastosGruposAbiertos=new Set();
 
 function renderGastosMesBtns(){
   const btnsEl=document.getElementById('g-mes-btns');
@@ -1442,6 +1572,17 @@ function renderGastosMesBtns(){
 function setGastosMes(mes){
   gastosMesSeleccionado=mes;
   renderGastos();
+}
+
+function toggleGastoGrupo(idx){
+  const body=document.getElementById('gg-body-'+idx);
+  const arrow=document.getElementById('gg-arrow-'+idx);
+  if(!body)return;
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.classList.toggle('open',!isOpen);
+  if(!isOpen) gastosGruposAbiertos.add(idx);
+  else gastosGruposAbiertos.delete(idx);
 }
 
 function renderGastos(){
@@ -1470,58 +1611,122 @@ function renderGastos(){
     );
   }
 
-  // Total gastos del período/mes seleccionado
   const totalGastos=mesesMostrar.reduce((s,m)=>s+(gastosPorMes[m]||0),0);
   document.getElementById('g-total').innerHTML=fmtPnl(-totalGastos,true,'pnl-neg')||'—';
   document.getElementById('g-total-sub').textContent=mesesMostrar.map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ');
 
-  // Neto mesa y resultado: referenciar desde Rueda
   const netoEl=document.getElementById('r-neto');
   document.getElementById('g-neto-mesa-ref').innerHTML=netoEl?netoEl.innerHTML:'—';
   const resultadoEl=document.getElementById('r-resultado');
   const gResultado=document.getElementById('g-resultado-ref');
   if(resultadoEl){gResultado.innerHTML=resultadoEl.innerHTML;gResultado.className=resultadoEl.className;}
 
-  // Tabla de desglose
-  const primerMes=mesesMostrar.find(m=>gastosDetalle[m]);
-  if(!primerMes){
+  if(!gastosGrupos.length){
     document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin detalle disponible</div>';
     return;
   }
-  const conceptos=(gastosDetalle[primerMes]||[]).map(d=>d.label);
 
-  let html='<div class="table-wrap"><table><thead><tr><th>Concepto</th>';
-  mesesMostrar.forEach(m=>{html+=`<th class="tr" style="text-transform:capitalize">${m}</th>`;});
-  if(mesesMostrar.length>1)html+=`<th class="tr">Total</th>`;
-  html+='</tr></thead><tbody>';
+  // Construir acordeones por grupo
+  // Columnas a mostrar: solo los meses que tienen algún valor en ese grupo
+  const mostrarTotal=mesesMostrar.length>1;
 
-  conceptos.forEach(label=>{
-    let totalConcepto=0;
-    let rowHtml=`<tr><td style="color:#e2e8f0">${label}</td>`;
+  let html='';
+  gastosGrupos.forEach((grupo,idx)=>{
+    // Calcular total del grupo para los meses mostrados
+    const totalGrupoMeses=mesesMostrar.reduce((s,m)=>s+(grupo.totalPorMes[m]||0),0);
+    if(!totalGrupoMeses&&!grupo.items.some(item=>mesesMostrar.some(m=>item.porMes[m]!==0)))return;
+
+    // Columnas de valores del grupo en el header (una por mes si hay más de 1)
+    let headerMesesHtml='';
+    if(mesesMostrar.length===1){
+      const m=mesesMostrar[0];
+      headerMesesHtml=`<span class="gasto-grupo-total">-$${Math.round(grupo.totalPorMes[m]||0).toLocaleString('es-AR')}</span>`;
+    } else {
+      headerMesesHtml='<div class="gasto-grupo-meses">';
+      mesesMostrar.forEach(m=>{
+        const val=grupo.totalPorMes[m]||0;
+        if(val){
+          const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);
+          headerMesesHtml+=`<div style="text-align:right">
+            <div class="gasto-grupo-mes-label">${label}</div>
+            <div class="gasto-grupo-mes-val">-$${Math.round(val).toLocaleString('es-AR')}</div>
+          </div>`;
+        }
+      });
+      headerMesesHtml+=`</div><span class="gasto-grupo-total">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</span>`;
+    }
+
+    // ¿Estaba abierto antes?
+    const estabaAbierto=gastosGruposAbiertos.has(idx);
+
+    // Tabla de items
+    let itemsHtml='';
+    if(grupo.items.length){
+      // Headers de la tabla
+      itemsHtml+='<table class="gasto-items-table"><thead><tr><th>Concepto</th>';
+      mesesMostrar.forEach(m=>{ itemsHtml+=`<th class="tr" style="text-transform:capitalize">${m}</th>`; });
+      if(mostrarTotal) itemsHtml+='<th class="tr">Total</th>';
+      itemsHtml+='</tr></thead><tbody>';
+
+      grupo.items.forEach(item=>{
+        const totalItem=mesesMostrar.reduce((s,m)=>s+(item.porMes[m]||0),0);
+        if(!totalItem&&!mesesMostrar.some(m=>item.porMes[m]!==0))return;
+        itemsHtml+=`<tr><td class="gasto-concepto">${item.concepto}</td>`;
+        mesesMostrar.forEach(m=>{
+          const val=item.porMes[m]||0;
+          itemsHtml+=`<td class="tr ${val?'gasto-val-pos':'gasto-val-zero'}">${val?'-$'+Math.round(Math.abs(val)).toLocaleString('es-AR'):'—'}</td>`;
+        });
+        if(mostrarTotal) itemsHtml+=`<td class="tr gasto-val-pos" style="font-weight:500">-$${Math.round(totalItem).toLocaleString('es-AR')}</td>`;
+        itemsHtml+='</tr>';
+      });
+
+      // Fila subtotal dentro del detalle
+      itemsHtml+=`<tr style="border-top:0.5px solid #1e2330;background:#111420">
+        <td style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Subtotal</td>`;
+      mesesMostrar.forEach(m=>{
+        const val=grupo.totalPorMes[m]||0;
+        itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
+      });
+      if(mostrarTotal) itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</td>`;
+      itemsHtml+='</tr></tbody></table>';
+    } else {
+      itemsHtml='<div style="padding:10px 14px;font-size:11px;color:#4a5568">Sin detalle disponible para este grupo</div>';
+    }
+
+    html+=`<div class="gasto-grupo">
+      <div class="gasto-grupo-header" onclick="toggleGastoGrupo(${idx})">
+        <span class="gasto-grupo-toggle${estabaAbierto?' open':''}" id="gg-arrow-${idx}">▶</span>
+        <span class="gasto-grupo-nombre">${grupo.label}</span>
+        ${headerMesesHtml}
+      </div>
+      <div class="gasto-grupo-body${estabaAbierto?' open':''}" id="gg-body-${idx}">
+        ${itemsHtml}
+      </div>
+    </div>`;
+  });
+
+  // Fila TOTAL GENERAL al final
+  let totalHtml='<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:6px">';
+  totalHtml+=`<span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general</span>`;
+  if(mesesMostrar.length>1){
+    totalHtml+='<div class="gasto-grupo-meses">';
     mesesMostrar.forEach(m=>{
-      const item=(gastosDetalle[m]||[]).find(d=>d.label===label);
-      const val=item?item.val:0;
-      totalConcepto+=val;
-      rowHtml+=`<td class="tr" style="color:#f87171;font-family:monospace">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
+      const val=gastosPorMes[m]||0;
+      if(val){
+        const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);
+        totalHtml+=`<div style="text-align:right">
+          <div class="gasto-grupo-mes-label">${label}</div>
+          <div style="font-size:12px;font-family:monospace;color:#f87171;font-weight:600">-$${Math.round(val).toLocaleString('es-AR')}</div>
+        </div>`;
+      }
     });
-    if(mesesMostrar.length>1)rowHtml+=`<td class="tr" style="color:#f87171;font-family:monospace;font-weight:500">-$${Math.round(totalConcepto).toLocaleString('es-AR')}</td>`;
-    rowHtml+='</tr>';
-    html+=rowHtml;
-  });
+    totalHtml+=`</div><span style="min-width:110px;text-align:right;font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
+  } else {
+    totalHtml+=`<span style="font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
+  }
+  totalHtml+='</div>';
 
-  // Fila total
-  html+='<tr style="border-top:0.5px solid #378ADD;background:#0c1628">';
-  html+=`<td style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Total gastos</td>`;
-  let grandTotal=0;
-  mesesMostrar.forEach(m=>{
-    const val=gastosPorMes[m]||0;
-    grandTotal+=val;
-    html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(val).toLocaleString('es-AR')}</td>`;
-  });
-  if(mesesMostrar.length>1)html+=`<td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(grandTotal).toLocaleString('es-AR')}</td>`;
-  html+='</tr></tbody></table></div>';
-
-  document.getElementById('g-detalle').innerHTML=html;
+  document.getElementById('g-detalle').innerHTML=html+totalHtml;
 }
 
 // ── RELOJ ─────────────────────────────────────────────────────────────────────
