@@ -531,12 +531,9 @@ function parseGastos(text){
   gastosDetalle={};
   gastosGrupos=[];
 
-  // Mantener índices exactos — NO filtrar líneas vacías
   const lines=text.split('\n').map(l=>l.trim());
   const parsed=lines.map(l=>parseCSVLine(l));
 
-  // Columnas fijas: H=abril=7, I=mayo=8, J=junio=9, K=julio=10,
-  // L=agosto=11, M=sep=12, N=oct=13, O=nov=14, P=dic=15
   const MESES_COL=[
     {mes:'abril',col:7},{mes:'mayo',col:8},{mes:'junio',col:9},
     {mes:'julio',col:10},{mes:'agosto',col:11},{mes:'septiembre',col:12},
@@ -553,150 +550,78 @@ function parseGastos(text){
     }
     if(filaTotal>=0)break;
   }
-  if(filaTotal<0){console.warn('Gastos: no encontré TOTAL GENERAL');return;}
+  if(filaTotal<0){console.warn('Gastos: no encontre TOTAL GENERAL');return;}
 
-  // Leer total por mes desde la fila TOTAL GENERAL
+  // Total por mes desde la fila TOTAL GENERAL
   MESES_COL.forEach(({mes,col})=>{
     const val=parseMonto(parsed[filaTotal][col]||'');
     if(val>0)gastosPorMes[mes]=val;
   });
 
   // ── Construir grupos ──────────────────────────────────────────────────────
-  // Un "grupo" empieza cuando cambia la categoría (col A) y termina cuando
-  // encontramos la fila "Subtotal X" (col A tiene "subtotal", col B vacío o con info).
-  // Filas de detalle: col A = categoría, col B = concepto (puede tener valor o no)
-  // Fila de subtotal: col A contiene "subtotal" o "gastos" y col B está vacía.
+  // Regla:
+  //   - Fila de DETALLE:  col B tiene texto  → concepto = col B
+  //   - Fila de CIERRE:   col B vacía, col A tiene texto y tiene valores numéricos
+  //                       → cierra el grupo acumulado con ese label
+  // Así captura: "Subtotal X", "Impuestos", "Gastos extraordinarios", etc.
 
-  const esSubtotal=(row)=>{
-    const a=(row[0]||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    const b=(row[1]||'').trim();
-    // Subtotales: col A tiene "subtotal" o empieza con "subtotal"
-    // También acepta "Gastos extraordinarios" que no tiene col B
-    return (a.includes('subtotal') || a.startsWith('gastos extraordinarios')) && !b;
-  };
-
-  // También tratar filas donde col A tiene contenido y col B está vacía pero NO es subtotal
-  // como filas de detalle sin concepto (ej: fila de "CABSA" que tiene col B = "CABSA")
-  // En realidad col B puede tener concepto o estar vacía en filas normales
-
-  let grupoActual=null;
-  let itemsActual=[];
-
-  const guardarGrupo=()=>{
-    if(grupoActual&&itemsActual.length){
-      // Calcular totalPorMes sumando items
-      const totalPorMes={};
-      MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
-      itemsActual.forEach(item=>{
-        MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
-      });
-      gastosGrupos.push({label:grupoActual,items:itemsActual,totalPorMes});
-    }
-    grupoActual=null;
-    itemsActual=[];
-  };
-
-  for(let i=0;i<filaTotal;i++){
-    const row=parsed[i];
-    const colA=(row[0]||'').trim();
-    const colB=(row[1]||'').trim();
-    const colAN=colA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-
-    if(!colA)continue; // fila completamente vacía
-
-    if(esSubtotal(row)){
-      // Esta fila es el subtotal — cerrar el grupo con este label
-      guardarGrupo();
-      // Usar el label de esta fila de subtotal como nombre del grupo
-      // (ya guardamos el grupo vacío antes, ahora el label queda seteado para el próximo)
-      // En realidad queremos que el label sea el de la fila de subtotal.
-      // Reestructuramos: al encontrar subtotal, seteamos label del grupo que acabamos de cerrar.
-      // Mejor approach: al encontrar subtotal, el grupo que venía acumulando se cierra con ese label.
-      // Para eso necesitamos guardar el label ANTES de cerrar:
-      continue;
-    }
-
-    // Fila de detalle
-    // Si col A cambia (nueva categoría) podemos agruparlo igual porque el subtotal cierra el grupo
-    // col B puede ser el concepto específico, o estar vacía
-    const concepto=colB||colA; // si no hay col B, usar col A como concepto
-    const porMes={};
-    MESES_COL.forEach(({mes,col})=>{
-      porMes[mes]=parseMonto(row[col]||'');
-    });
-    // Solo agregar si tiene algún valor en algún mes
-    const tieneValor=MESES_COL.some(({mes})=>porMes[mes]>0);
-    if(tieneValor||(colA&&colB)){
-      itemsActual.push({concepto,porMes});
-    }
-  }
-
-  // Ahora el approach anterior tiene un problema: no asociamos el label del subtotal al grupo.
-  // Rehacemos con approach más claro:
-  gastosGrupos=[];
-  itemsActual=[];
   let pendingItems=[];
 
+  const cerrarGrupo=(labelFila,rowCierre)=>{
+    // Usar los valores de la fila cierre como totales (son los subtotales reales de la sheet)
+    const totalPorMes={};
+    MESES_COL.forEach(({mes,col})=>{
+      totalPorMes[mes]=parseMonto(rowCierre[col]||'');
+    });
+    // Si la fila cierre no tiene valores, calcularlos sumando items
+    const tieneValoresCierre=MESES_COL.some(({mes})=>totalPorMes[mes]!==0);
+    if(!tieneValoresCierre){
+      MESES_COL.forEach(({mes})=>{
+        totalPorMes[mes]=pendingItems.reduce((s,item)=>s+(item.porMes[mes]||0),0);
+      });
+    }
+    const tieneAlgo=MESES_COL.some(({mes})=>totalPorMes[mes]!==0)||pendingItems.length>0;
+    if(tieneAlgo){
+      gastosGrupos.push({label:labelFila,items:[...pendingItems],totalPorMes});
+    }
+    pendingItems=[];
+  };
+
   for(let i=0;i<filaTotal;i++){
     const row=parsed[i];
     const colA=(row[0]||'').trim();
     const colB=(row[1]||'').trim();
-    const colAN=colA.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
-    if(!colA)continue;
+    if(!colA)continue; // fila vacía — ignorar
 
-    // ¿Es fila de subtotal/cierre de grupo?
-    const isSubLabel=colAN.includes('subtotal')||colAN.startsWith('gastos extraordinarios');
-
-    if(isSubLabel&&!colB){
-      // Cerrar grupo actual con este label
-      if(pendingItems.length){
-        const totalPorMes={};
-        MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
-        pendingItems.forEach(item=>{
-          MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
-        });
-        gastosGrupos.push({label:colA,items:pendingItems,totalPorMes});
-      } else {
-        // Grupo sin items previos (ej: "Subtotal Sist. de gestión" donde solo hay 1 fila)
-        // igual lo guardamos con items vacíos para mostrar el subtotal
-        const totalPorMes={};
-        MESES_COL.forEach(({mes,col})=>{ totalPorMes[mes]=parseMonto(row[col]||''); });
-        gastosGrupos.push({label:colA,items:[],totalPorMes});
+    if(!colB){
+      // Col B vacía → posible fila de cierre
+      // Es cierre si tiene valores numéricos en los meses O si hay items pendientes
+      const tieneValores=MESES_COL.some(({col})=>parseMonto(row[col]||'')!==0);
+      if(tieneValores||pendingItems.length){
+        cerrarGrupo(colA,row);
       }
-      pendingItems=[];
+      // Si no tiene valores ni items pendientes, es un header/título — ignorar
       continue;
     }
 
-    // También cerrar si col A tiene "gastos" y col B tiene algo (caso "Gastos extraordinarios" con detalle)
-    // pero acumular como item normal si tiene col B
-    if(isSubLabel&&colB){
-      // Es un item de detalle que tiene categoría especial (ej: "Subalquiler / CABSA")
-      const porMes={};
-      MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
-      pendingItems.push({concepto:colB||colA,porMes});
-      continue;
-    }
-
-    // Fila de detalle normal: col A = categoría, col B = concepto
-    const concepto=colB||colA;
+    // Col B tiene texto → fila de detalle
     const porMes={};
     MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
     const tieneValor=MESES_COL.some(({mes})=>porMes[mes]!==0);
-    if(tieneValor) pendingItems.push({concepto,porMes});
+    if(tieneValor) pendingItems.push({concepto:colB,porMes});
   }
 
-  // Si quedaron items sin cerrar (sin fila de subtotal), crearlos igual
+  // Items sin cerrar
   if(pendingItems.length){
     const totalPorMes={};
-    MESES_COL.forEach(({mes})=>{ totalPorMes[mes]=0; });
-    pendingItems.forEach(item=>{
-      MESES_COL.forEach(({mes})=>{ totalPorMes[mes]+=(item.porMes[mes]||0); });
+    MESES_COL.forEach(({mes})=>{
+      totalPorMes[mes]=pendingItems.reduce((s,item)=>s+(item.porMes[mes]||0),0);
     });
     gastosGrupos.push({label:'Otros',items:pendingItems,totalPorMes});
   }
 
-  // Rebuild gastosDetalle para compatibilidad con el resto del código
+  // Rebuild gastosDetalle para compatibilidad
   MESES_COL.forEach(({mes})=>{
     const detalle=[];
     gastosGrupos.forEach(g=>{
@@ -706,7 +631,7 @@ function parseGastos(text){
   });
 
   console.log('Gastos por mes:',gastosPorMes);
-  console.log('Gastos grupos:',gastosGrupos.map(g=>({label:g.label,items:g.items.length})));
+  console.log('Gastos grupos:',gastosGrupos.map(g=>g.label+'('+g.items.length+'items)'));
 }
 
 function normalizar(s){
@@ -1015,15 +940,17 @@ function getPares(ops){
       usados.add(ai);usados.add(mi);
       const b=ops[mi];
       const compra=a.op==='C'?a:b;const venta=a.op==='V'?a:b;
+      // El cliente y productor vienen de la punta NO-PHAROS (comitente !== '1000')
+      const puntaCliente=(a.comitente!=='1000')?a:(b.comitente!=='1000'?b:a);
       pares.push({
         fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo||'0',
         vn:parseFloat(a.vn)||0,precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,
         monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),
-        cliente:(a.cliente||b.cliente||'—').trim(),comitente:(a.comitente||b.comitente||'—').trim(),
-        productor:(a.productor||b.productor||'').trim(),
+        cliente:(puntaCliente.cliente||'—').trim(),comitente:(puntaCliente.comitente||'—').trim(),
+        productor:(puntaCliente.productor||'').trim(),
         pylMesa:(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0),
         comProductor:(parseFloat(a.comProductor)||0)+(parseFloat(b.comProductor)||0),
-        cerrado:true,tipo:tipoOp({...a,productor:a.productor||b.productor||''}),
+        cerrado:true,tipo:tipoOp({...puntaCliente,productor:puntaCliente.productor||''}),
       });
     }else{
       usados.add(ai);
