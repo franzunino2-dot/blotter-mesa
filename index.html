@@ -397,15 +397,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- CAUCIONES -->
   <div id="view-cauciones" style="display:none">
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Fecha</th><th>Cliente / Tomador</th><th>Comit.</th><th>Mercado</th><th>Op</th>
-          <th class="tr">VN</th><th class="tr">Tasa</th><th class="tr">Monto</th><th class="tr">P&L</th>
-        </tr></thead>
-        <tbody id="cau-tbody"></tbody>
-      </table>
-    </div>
     <!-- Capacidad tomadora -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px">
       <div>
@@ -1379,12 +1370,15 @@ function renderCauciones(){
     return;
   }
 
-  // Ordenar de mayor a menor apalancamiento
-  const sorted=[...caucionCapData].sort((a,b)=>{
+  // Separar cuenta 1000 (PHAROS) del resto y ordenar por apalancamiento desc
+  const pharos=caucionCapData.filter(r=>r.cuenta==='1000');
+  const otros=caucionCapData.filter(r=>r.cuenta!=='1000');
+  otros.sort((a,b)=>{
     const aA=parseFloat((a.pct||'0').replace(',','.'));
     const aB=parseFloat((b.pct||'0').replace(',','.'));
     return aB-aA;
   });
+  const sorted=[...pharos,...otros];
 
   // Header
   let capHtml=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:5px 12px;border-bottom:0.5px solid #1e2330">
@@ -1396,18 +1390,30 @@ function renderCauciones(){
   </div>`;
 
   sorted.forEach(r=>{
+    const esPharos=r.cuenta==='1000';
     const apalNum=parseFloat((r.pct||'0').replace(',','.'));
     // Verde < 1.5x | Naranja 1.5–3x | Rojo > 3x
     const apalColor=apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
-    const apalBg  =apalNum<1.5?'#052e16':apalNum<=3?'#431407':'#2d0a0a';
+    const apalBg   =apalNum<1.5?'#052e16':apalNum<=3?'#431407':'#2d0a0a';
     const apalBorder=apalNum<1.5?'#4ade8040':apalNum<=3?'#f9731640':'#f8717140';
     // Barra de progreso sobre 5x máximo
     const barPct=Math.min(apalNum/5*100,100).toFixed(1);
 
-    capHtml+=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:9px 12px;border-bottom:0.5px solid #0d0f14;align-items:center;transition:background .15s" onmouseover="this.style.background='#161b28'" onmouseout="this.style.background=''">
+    // Separador visual antes del primer cliente (después de PHAROS)
+    if(!esPharos&&sorted.indexOf(r)===pharos.length&&pharos.length>0){
+      capHtml+=`<div style="height:1px;background:linear-gradient(90deg,#1e2330,#378ADD44,#1e2330);margin:0 12px"></div>`;
+    }
+
+    const rowBg   =esPharos?'background:#0c1628;border-left:2px solid #378ADD':'';
+    const namColor=esPharos?'#60a5fa':'#e2e8f0';
+    const cuentaColor=esPharos?'#378ADD':'#4a5568';
+    const pharosTag=esPharos?'<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a4a;color:#60a5fa;border:0.5px solid #378ADD40;margin-left:6px">PHAROS</span>':'';
+
+    capHtml+=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:9px 12px;border-bottom:0.5px solid #0d0f14;align-items:center;transition:background .15s;${rowBg}" onmouseover="this.style.background='#161b28'" onmouseout="this.style.background='${esPharos?'#0c1628':''}'">
       <div>
-        <span style="color:#e2e8f0;font-weight:500;font-size:12px">${r.comitente||'—'}</span>
-        <span style="color:#4a5568;font-size:10px;margin-left:6px">${r.cuenta}</span>
+        <span style="color:${namColor};font-weight:${esPharos?700:500};font-size:12px">${r.comitente||'—'}</span>
+        <span style="color:${cuentaColor};font-size:10px;margin-left:6px">${r.cuenta}</span>
+        ${pharosTag}
       </div>
       <div style="text-align:right;font-family:monospace;font-size:11px;color:#f87171">$${fmtInt(Math.abs(r.monto))}</div>
       <div style="text-align:right;font-family:monospace;font-size:11px;color:#4ade80">$${fmtInt(r.margen)}</div>
