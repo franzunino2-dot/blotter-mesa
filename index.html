@@ -417,7 +417,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <thead><tr>
           <th>Cuenta</th><th>Nombre</th>
           <th class="tr">Monto caución</th><th class="tr">Margen</th>
-          <th class="tr">%</th><th class="tr">Saldo liquidando</th>
+          <th class="tr">Apalancamiento</th><th class="tr">Saldo liquidando</th>
         </tr></thead>
         <tbody id="cau-cap-tbody"></tbody>
       </table>
@@ -436,8 +436,6 @@ const CAUCION_CAP_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMk
 let sueldosFijos={};
 let gastosPorMes={};
 let gastosDetalle={};
-// NUEVO: estructura completa de grupos con items de detalle
-// gastosGrupos = [ { label, items:[{concepto, porMes:{abril:val,...}}], totalPorMes:{abril:val,...} } ]
 let gastosGrupos=[];
 let caucionCapData=[];
 let caucionCapFecha='';
@@ -459,7 +457,6 @@ function rowToObj(r,fecha){
   };
 }
 
-// ── SUELDOS ───────────────────────────────────────────────────────────────────
 async function loadSueldos(){
   try{
     const r=await fetch(SUELDOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
@@ -517,7 +514,6 @@ function getDatosProductor(nombre,mesesArr){
   return{porcentaje,sueldoTotal:hayAlgunSueldo?sueldoTotal:0,hayAlgunSueldo};
 }
 
-// ── GASTOS ───────────────────────────────────────────────────────────────────
 async function loadGastos(){
   try{
     const r=await fetch(GASTOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
@@ -540,7 +536,6 @@ function parseGastos(text){
     {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
 
-  // Buscar fila TOTAL GENERAL
   let filaTotal=-1;
   for(let i=parsed.length-1;i>=0;i--){
     const row=parsed[i];
@@ -552,28 +547,18 @@ function parseGastos(text){
   }
   if(filaTotal<0){console.warn('Gastos: no encontre TOTAL GENERAL');return;}
 
-  // Total por mes desde la fila TOTAL GENERAL
   MESES_COL.forEach(({mes,col})=>{
     const val=parseMonto(parsed[filaTotal][col]||'');
     if(val>0)gastosPorMes[mes]=val;
   });
 
-  // ── Construir grupos ──────────────────────────────────────────────────────
-  // Regla:
-  //   - Fila de DETALLE:  col B tiene texto  → concepto = col B
-  //   - Fila de CIERRE:   col B vacía, col A tiene texto y tiene valores numéricos
-  //                       → cierra el grupo acumulado con ese label
-  // Así captura: "Subtotal X", "Impuestos", "Gastos extraordinarios", etc.
-
   let pendingItems=[];
 
   const cerrarGrupo=(labelFila,rowCierre)=>{
-    // Usar los valores de la fila cierre como totales (son los subtotales reales de la sheet)
     const totalPorMes={};
     MESES_COL.forEach(({mes,col})=>{
       totalPorMes[mes]=parseMonto(rowCierre[col]||'');
     });
-    // Si la fila cierre no tiene valores, calcularlos sumando items
     const tieneValoresCierre=MESES_COL.some(({mes})=>totalPorMes[mes]!==0);
     if(!tieneValoresCierre){
       MESES_COL.forEach(({mes})=>{
@@ -592,27 +577,22 @@ function parseGastos(text){
     const colA=(row[0]||'').trim();
     const colB=(row[1]||'').trim();
 
-    if(!colA)continue; // fila vacía — ignorar
+    if(!colA)continue;
 
     if(!colB){
-      // Col B vacía → posible fila de cierre
-      // Es cierre si tiene valores numéricos en los meses O si hay items pendientes
       const tieneValores=MESES_COL.some(({col})=>parseMonto(row[col]||'')!==0);
       if(tieneValores||pendingItems.length){
         cerrarGrupo(colA,row);
       }
-      // Si no tiene valores ni items pendientes, es un header/título — ignorar
       continue;
     }
 
-    // Col B tiene texto → fila de detalle
     const porMes={};
     MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
     const tieneValor=MESES_COL.some(({mes})=>porMes[mes]!==0);
     if(tieneValor) pendingItems.push({concepto:colB,porMes});
   }
 
-  // Items sin cerrar
   if(pendingItems.length){
     const totalPorMes={};
     MESES_COL.forEach(({mes})=>{
@@ -621,7 +601,6 @@ function parseGastos(text){
     gastosGrupos.push({label:'Otros',items:pendingItems,totalPorMes});
   }
 
-  // Rebuild gastosDetalle para compatibilidad
   MESES_COL.forEach(({mes})=>{
     const detalle=[];
     gastosGrupos.forEach(g=>{
@@ -629,9 +608,6 @@ function parseGastos(text){
     });
     if(detalle.length) gastosDetalle[mes]=detalle;
   });
-
-  console.log('Gastos por mes:',gastosPorMes);
-  console.log('Gastos grupos:',gastosGrupos.map(g=>g.label+'('+g.items.length+'items)'));
 }
 
 function normalizar(s){
@@ -651,7 +627,6 @@ function getGastosInRange(){
   return total;
 }
 
-// ── POSICION ────────────────────────────────────────────────────────────────
 async function loadPosi(){
   try{
     const r=await fetch(POSI_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
@@ -692,7 +667,6 @@ function parsePosi(text){
   }
 }
 
-// ── CAUCION CAPACIDAD ────────────────────────────────────────────────────────
 async function loadCaucionCap(){
   try{
     const r=await fetch(CAUCION_CAP_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
@@ -720,7 +694,6 @@ function parseCaucionCap(text){
   }
 }
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
 function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
@@ -744,7 +717,6 @@ function checkAuth(){
   }
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
 function pad2(n){return String(n).padStart(2,'0');}
 function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function strToTs(s){const[d,m,y]=s.split('/');return new Date(+y,+m-1,+d).getTime();}
@@ -766,7 +738,6 @@ function fmtK(n){
 function fmtPesos(n){return'$'+Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
 function fmtPct(p){return Math.round(p*100)+'%';}
 
-// ── CALENDARIO ────────────────────────────────────────────────────────────────
 function toggleCal(){
   const popup=document.getElementById('cal-popup');
   if(popup.classList.contains('open')){popup.classList.remove('open');pickStep=0;return;}
@@ -856,7 +827,6 @@ function getHBInRange(){
 function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
 function getBrutoInRange(){return getDatesInRange().reduce((s,d)=>s+(allBrutos[d]||0),0);}
 
-// ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function loadData(){
   setSyncState('loading','Actualizando...');
   try{
@@ -940,7 +910,6 @@ function getPares(ops){
       usados.add(ai);usados.add(mi);
       const b=ops[mi];
       const compra=a.op==='C'?a:b;const venta=a.op==='V'?a:b;
-      // El cliente y productor vienen de la punta NO-PHAROS (comitente !== '1000')
       const puntaCliente=(a.comitente!=='1000')?a:(b.comitente!=='1000'?b:a);
       pares.push({
         fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo||'0',
@@ -966,7 +935,6 @@ function getPares(ops){
   return pares;
 }
 
-// ── CÁLCULO COM. PRODUCTORES ──────────────────────────────────────────────────
 function calcComProductores(pares,hb){
   const porProd={};
   pares.filter(p=>p.productor).forEach(p=>{
@@ -1004,7 +972,6 @@ function calcComProductores(pares,hb){
   return total;
 }
 
-// ── RUEDA ─────────────────────────────────────────────────────────────────────
 function renderRueda(){
   const ops=getOpsInRange();
   const pares=getPares(ops);
@@ -1067,7 +1034,6 @@ function renderRueda(){
   document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
-// ── MES ───────────────────────────────────────────────────────────────────────
 function renderMes(){
   const now=new Date();
   if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
@@ -1105,7 +1071,6 @@ function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay()
 function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
 function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
 
-// ── PRODUCTORES ───────────────────────────────────────────────────────────────
 function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
   const{porcentaje}=datosProd;
   const pctLabel=fmtPct(porcentaje);
@@ -1417,26 +1382,27 @@ function renderCauciones(){
   if(!capEl)return;
   if(caucionCapFecha&&capTitleEl)capTitleEl.textContent='Al '+caucionCapFecha;
   if(!caucionCapData.length){
-    capEl.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    capEl.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
     return;
   }
   let capHtml='';
   caucionCapData.forEach(r=>{
-    const pctNum=parseFloat((r.pct||'0').replace('%','').replace(',','.'));
-    const pctColor=pctNum<=30?'#f87171':pctNum<=50?'#fbbf24':'#4ade80';
+    // El % es el nivel de apalancamiento (ej: 1.17x, 1.39x, 3.2x)
+    // Verde < 1.5x | Naranja 1.5x a 3x | Rojo > 3x
+    const apalNum=parseFloat((r.pct||'0').replace(',','.'));
+    const apalColor=apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
     capHtml+=`<tr>
       <td style="color:#e2e8f0;font-weight:500">${r.cuenta}</td>
       <td style="color:#a0aec0">${r.comitente||'—'}</td>
       <td class="tr" style="color:#f87171;font-family:monospace">$${fmtInt(Math.abs(r.monto))}</td>
       <td class="tr" style="color:#4ade80;font-family:monospace">$${fmtInt(r.margen)}</td>
-      <td class="tr" style="color:${pctColor};font-family:monospace;font-weight:500">${r.pct}</td>
+      <td class="tr" style="color:${apalColor};font-family:monospace;font-weight:600">${apalNum.toFixed(2)}x</td>
       <td class="tr" style="color:#60a5fa;font-family:monospace">$${fmtInt(r.saldo)}</td>
     </tr>`;
   });
   capEl.innerHTML=capHtml;
 }
 
-// ── RENDER ALL & TABS ─────────────────────────────────────────────────────────
 function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();renderPosi();}
 function showTab(t){
   ['rueda','mes','productores','cauciones','gastos','posi'].forEach(x=>{
@@ -1448,10 +1414,9 @@ function showTab(t){
   if(t==='posi')renderPosi();
 }
 
-// ── POSICION TAB ─────────────────────────────────────────────────────────────
 function renderPosi(){
   function buildRows(data){
-    if(!data.length)return'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    if(!data.length)return'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
     let html='';
     data.forEach(r=>{
       const pnlColor=r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
@@ -1477,9 +1442,7 @@ function renderPosi(){
   document.getElementById('posi-prop-tbody').innerHTML=buildRows(posiPropietary);
 }
 
-// ── GASTOS TAB ───────────────────────────────────────────────────────────────
 let gastosMesSeleccionado=null;
-// Trackear qué grupos están abiertos para mantener el estado al re-render
 const gastosGruposAbiertos=new Set();
 
 function renderGastosMesBtns(){
@@ -1523,7 +1486,6 @@ function renderGastos(){
 
   renderGastosMesBtns();
 
-  // Determinar qué meses mostrar
   let mesesMostrar;
   if(gastosMesSeleccionado){
     mesesMostrar=[gastosMesSeleccionado];
@@ -1553,17 +1515,13 @@ function renderGastos(){
     return;
   }
 
-  // Construir acordeones por grupo
-  // Columnas a mostrar: solo los meses que tienen algún valor en ese grupo
   const mostrarTotal=mesesMostrar.length>1;
 
   let html='';
   gastosGrupos.forEach((grupo,idx)=>{
-    // Calcular total del grupo para los meses mostrados
     const totalGrupoMeses=mesesMostrar.reduce((s,m)=>s+(grupo.totalPorMes[m]||0),0);
     if(!totalGrupoMeses&&!grupo.items.some(item=>mesesMostrar.some(m=>item.porMes[m]!==0)))return;
 
-    // Columnas de valores del grupo en el header (una por mes si hay más de 1)
     let headerMesesHtml='';
     if(mesesMostrar.length===1){
       const m=mesesMostrar[0];
@@ -1583,13 +1541,10 @@ function renderGastos(){
       headerMesesHtml+=`</div><span class="gasto-grupo-total">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</span>`;
     }
 
-    // ¿Estaba abierto antes?
     const estabaAbierto=gastosGruposAbiertos.has(idx);
 
-    // Tabla de items
     let itemsHtml='';
     if(grupo.items.length){
-      // Headers de la tabla
       itemsHtml+='<table class="gasto-items-table"><thead><tr><th>Concepto</th>';
       mesesMostrar.forEach(m=>{ itemsHtml+=`<th class="tr" style="text-transform:capitalize">${m}</th>`; });
       if(mostrarTotal) itemsHtml+='<th class="tr">Total</th>';
@@ -1607,7 +1562,6 @@ function renderGastos(){
         itemsHtml+='</tr>';
       });
 
-      // Fila subtotal dentro del detalle
       itemsHtml+=`<tr style="border-top:0.5px solid #1e2330;background:#111420">
         <td style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Subtotal</td>`;
       mesesMostrar.forEach(m=>{
@@ -1632,7 +1586,6 @@ function renderGastos(){
     </div>`;
   });
 
-  // Fila TOTAL GENERAL al final
   let totalHtml='<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:6px">';
   totalHtml+=`<span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general</span>`;
   if(mesesMostrar.length>1){
@@ -1656,7 +1609,6 @@ function renderGastos(){
   document.getElementById('g-detalle').innerHTML=html+totalHtml;
 }
 
-// ── RELOJ ─────────────────────────────────────────────────────────────────────
 function updateClock(){
   const now=new Date();
   const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
