@@ -397,11 +397,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- CAUCIONES -->
   <div id="view-cauciones" style="display:none">
-    <div class="metrics3">
-      <div class="metric"><div class="metric-label">Cauciones</div><div class="metric-value blue" id="cau-count">—</div><div class="metric-sub">del período</div></div>
-      <div class="metric"><div class="metric-label">Monto total</div><div class="metric-value white" id="cau-monto">—</div><div class="metric-sub">—</div></div>
-      <div class="metric tt-right"><div class="metric-label">P&L cauciones</div><div class="metric-value green" id="cau-pnl">—</div><div class="metric-sub">—</div></div>
-    </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -411,17 +406,18 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <tbody id="cau-tbody"></tbody>
       </table>
     </div>
-    <div class="section-label" style="margin-top:8px">Capacidad tomadora <span id="cau-cap-fecha" style="color:#4a5568;font-weight:400"></span></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Cuenta</th><th>Nombre</th>
-          <th class="tr">Monto caución</th><th class="tr">Margen</th>
-          <th class="tr">Apalancamiento</th><th class="tr">Saldo liquidando</th>
-        </tr></thead>
-        <tbody id="cau-cap-tbody"></tbody>
-      </table>
+    <!-- Capacidad tomadora -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#e2e8f0;text-transform:uppercase;letter-spacing:.06em">Capacidad tomadora</div>
+        <div style="font-size:10px;color:#4a5568;margin-top:2px">Ordenado por apalancamiento · máx. 5x</div>
+      </div>
+      <div id="cau-cap-fecha-wrap" style="background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:6px 14px;text-align:right">
+        <div style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Actualizado al</div>
+        <div id="cau-cap-fecha" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa">—</div>
+      </div>
     </div>
+    <div id="cau-cap-list"></div>
   </div>
 </div>
 
@@ -1360,9 +1356,6 @@ function toggleProdCard(id){
 // ── CAUCIONES ─────────────────────────────────────────────────────────────────
 function renderCauciones(){
   const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
-  document.getElementById('cau-count').textContent=ops.length||'—';
-  document.getElementById('cau-monto').textContent=fmtK(ops.reduce((s,o)=>s+(parseFloat(o.monto)||0),0));
-  document.getElementById('cau-pnl').innerHTML=fmtPnl(ops.reduce((s,o)=>s+(parseFloat(o.pylMesa)||0),0),true)||'—';
   let html='';
   ops.forEach(o=>{html+=`<tr>
     <td style="color:#4a5568;font-family:monospace">${o._fecha}</td>
@@ -1377,30 +1370,58 @@ function renderCauciones(){
   </tr>`;});
   document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 
-  const capEl=document.getElementById('cau-cap-tbody');
-  const capTitleEl=document.getElementById('cau-cap-fecha');
-  if(!capEl)return;
-  if(caucionCapFecha&&capTitleEl)capTitleEl.textContent='Al '+caucionCapFecha;
+  const listEl=document.getElementById('cau-cap-list');
+  const fechaEl=document.getElementById('cau-cap-fecha');
+  if(!listEl)return;
+  if(caucionCapFecha&&fechaEl)fechaEl.textContent=caucionCapFecha;
   if(!caucionCapData.length){
-    capEl.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    listEl.innerHTML='<div class="empty-state">Sin datos de capacidad tomadora</div>';
     return;
   }
-  let capHtml='';
-  caucionCapData.forEach(r=>{
-    // El % es el nivel de apalancamiento (ej: 1.17x, 1.39x, 3.2x)
-    // Verde < 1.5x | Naranja 1.5x a 3x | Rojo > 3x
-    const apalNum=parseFloat((r.pct||'0').replace(',','.'));
-    const apalColor=apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
-    capHtml+=`<tr>
-      <td style="color:#e2e8f0;font-weight:500">${r.cuenta}</td>
-      <td style="color:#a0aec0">${r.comitente||'—'}</td>
-      <td class="tr" style="color:#f87171;font-family:monospace">$${fmtInt(Math.abs(r.monto))}</td>
-      <td class="tr" style="color:#4ade80;font-family:monospace">$${fmtInt(r.margen)}</td>
-      <td class="tr" style="color:${apalColor};font-family:monospace;font-weight:600">${apalNum.toFixed(2)}x</td>
-      <td class="tr" style="color:#60a5fa;font-family:monospace">$${fmtInt(r.saldo)}</td>
-    </tr>`;
+
+  // Ordenar de mayor a menor apalancamiento
+  const sorted=[...caucionCapData].sort((a,b)=>{
+    const aA=parseFloat((a.pct||'0').replace(',','.'));
+    const aB=parseFloat((b.pct||'0').replace(',','.'));
+    return aB-aA;
   });
-  capEl.innerHTML=capHtml;
+
+  // Header
+  let capHtml=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:5px 12px;border-bottom:0.5px solid #1e2330">
+    <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em">Nombre</div>
+    <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Monto caución</div>
+    <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Margen</div>
+    <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:center">Apalancamiento</div>
+    <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Saldo liquidando</div>
+  </div>`;
+
+  sorted.forEach(r=>{
+    const apalNum=parseFloat((r.pct||'0').replace(',','.'));
+    // Verde < 1.5x | Naranja 1.5–3x | Rojo > 3x
+    const apalColor=apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
+    const apalBg  =apalNum<1.5?'#052e16':apalNum<=3?'#431407':'#2d0a0a';
+    const apalBorder=apalNum<1.5?'#4ade8040':apalNum<=3?'#f9731640':'#f8717140';
+    // Barra de progreso sobre 5x máximo
+    const barPct=Math.min(apalNum/5*100,100).toFixed(1);
+
+    capHtml+=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:9px 12px;border-bottom:0.5px solid #0d0f14;align-items:center;transition:background .15s" onmouseover="this.style.background='#161b28'" onmouseout="this.style.background=''">
+      <div>
+        <span style="color:#e2e8f0;font-weight:500;font-size:12px">${r.comitente||'—'}</span>
+        <span style="color:#4a5568;font-size:10px;margin-left:6px">${r.cuenta}</span>
+      </div>
+      <div style="text-align:right;font-family:monospace;font-size:11px;color:#f87171">$${fmtInt(Math.abs(r.monto))}</div>
+      <div style="text-align:right;font-family:monospace;font-size:11px;color:#4ade80">$${fmtInt(r.margen)}</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 8px">
+        <span style="background:${apalBg};color:${apalColor};border:0.5px solid ${apalBorder};padding:2px 12px;border-radius:99px;font-family:monospace;font-weight:700;font-size:13px">${apalNum.toFixed(2)}x</span>
+        <div style="width:100%;height:3px;background:#1e2330;border-radius:2px;overflow:hidden">
+          <div style="width:${barPct}%;height:100%;background:${apalColor};border-radius:2px;opacity:.7"></div>
+        </div>
+      </div>
+      <div style="text-align:right;font-family:monospace;font-size:11px;color:#60a5fa">$${fmtInt(r.saldo)}</div>
+    </div>`;
+  });
+
+  listEl.innerHTML=`<div style="border:0.5px solid #1e2330;border-radius:6px;overflow:hidden;background:#111420">${capHtml}</div>`;
 }
 
 function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();renderPosi();}
