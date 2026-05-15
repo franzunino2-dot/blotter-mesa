@@ -1346,20 +1346,6 @@ function toggleProdCard(id){
 
 // ── CAUCIONES ─────────────────────────────────────────────────────────────────
 function renderCauciones(){
-  const ops=getOpsInRange().filter(o=>o.especie&&o.especie.toUpperCase().includes('CAUCION'));
-  let html='';
-  ops.forEach(o=>{html+=`<tr>
-    <td style="color:#4a5568;font-family:monospace">${o._fecha}</td>
-    <td style="color:#e2e8f0;font-weight:500">${o.cliente||'—'}</td>
-    <td style="color:#4a5568">${o.comitente||'—'}</td>
-    <td style="color:#4a5568">${o.mercado||'—'}</td>
-    <td><span class="${o.op==='C'?'badge-c':'badge-v'}">${o.op}</span></td>
-    <td class="tr">${fmtInt(o.vn)}</td>
-    <td class="tr">${fmtDec(o.precio)}%</td>
-    <td class="tr">$${fmtInt(o.monto)}</td>
-    <td class="tr">${fmtPnl(o.pylMesa,true)||'—'}</td>
-  </tr>`;});
-  document.getElementById('cau-tbody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin cauciones</td></tr>';
 
   const listEl=document.getElementById('cau-cap-list');
   const fechaEl=document.getElementById('cau-cap-fecha');
