@@ -235,11 +235,12 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="tab" id="tab-cauciones" onclick="showTab('cauciones')">Cauciones</div>
     <div class="tab" id="tab-gastos" onclick="showTab('gastos')">Gastos</div>
     <div class="tab" id="tab-posi" onclick="showTab('posi')">Posición</div>
+    <div class="tab" id="tab-facturacion" onclick="showTab('facturacion')">Facturación</div>
   </div>
 
   <!-- RUEDA -->
   <div id="view-rueda">
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px">
       <div class="metric">
         <div class="tt">Suma de col O (P&L mesa + com. productor) de todas las operaciones del período.</div>
         <div class="metric-label">Facturado bruto</div>
@@ -258,6 +259,12 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-value green" id="r-neto">—</div>
         <div class="metric-sub" id="r-neto-sub">bruto - com. productores</div>
       </div>
+      <div class="metric">
+        <div class="tt">Facturación externa: FCI, fees colocación y otros ingresos de la sheet de facturación.</div>
+        <div class="metric-label">Facturación</div>
+        <div class="metric-value blue" id="r-facturacion" style="cursor:pointer" onclick="showTab('facturacion')">—</div>
+        <div class="metric-sub" id="r-facturacion-sub">ingresos externos</div>
+      </div>
       <div class="metric tt-right">
         <div class="tt">Gastos operativos del mes.</div>
         <div class="metric-label">Gastos del período</div>
@@ -265,10 +272,10 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
         <div class="metric-sub" id="r-gastos-sub">gastos operativos</div>
       </div>
       <div class="metric tt-right">
-        <div class="tt">Neto mesa menos los gastos operativos del período.</div>
+        <div class="tt">Neto mesa + facturación − gastos operativos del período.</div>
         <div class="metric-label">Resultado neto</div>
         <div class="metric-value" id="r-resultado">—</div>
-        <div class="metric-sub" id="r-resultado-sub">neto mesa − gastos</div>
+        <div class="metric-sub" id="r-resultado-sub">neto + facturación − gastos</div>
       </div>
     </div>
     <div class="section-label">Operaciones del período</div>
@@ -374,6 +381,17 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     </div>
     <div id="cau-cap-list"></div>
   </div>
+  <!-- FACTURACION -->
+  <div id="view-facturacion" style="display:none">
+    <div class="metrics3" style="margin-bottom:16px">
+      <div class="metric"><div class="metric-label">Total facturación</div><div class="metric-value blue" id="fac-total">—</div><div class="metric-sub" id="fac-total-sub">todos los períodos</div></div>
+      <div class="metric"><div class="metric-label">Último mes</div><div class="metric-value blue" id="fac-ultimo-mes">—</div><div class="metric-sub" id="fac-ultimo-mes-sub">—</div></div>
+      <div class="metric tt-right"><div class="metric-label">Cantidad registros</div><div class="metric-value white" id="fac-count">—</div><div class="metric-sub">filas cargadas</div></div>
+    </div>
+    <div class="section-label">Detalle por mes</div>
+    <div id="fac-detalle"><div class="empty-state">Cargando facturación...</div></div>
+  </div>
+
 </div>
 
 <script>
@@ -387,6 +405,7 @@ const SUELDOS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7
 const GASTOS_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
 const POSI_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1670934243&single=true&output=csv';
 const CAUCION_CAP_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMkhA35YTcz24kL9EsL1vLWFLJlnu_PWiFQKlp6nbrBfXnegq3fKaGpq8RlydvcL6217Ql3Oi/pub?gid=12153366&single=true&output=csv';
+const FACTURACION_URL = 'https://docs.google.com/spreadsheets/d/1KycVPdGxQQ57CHdMUTqJH_WUhPqAFI58MsIpX4CaLCU/pub?gid=1570448033&single=true&output=csv';
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const I = {sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
@@ -396,6 +415,7 @@ let gastosPorMes = {}, gastosDetalle = {}, gastosGrupos = [];
 let caucionCapData = [], caucionCapFecha = '';
 let posiTradingBook = [], posiPropietary = [];
 let allOps = {}, allTotals = {}, allHB = {}, allBrutos = {};
+let facturacionRows = [];
 let rangeStart = null, rangeEnd = null, pickStep = 0;
 let calY, calM, mesCalY, mesCalM;
 
@@ -667,11 +687,56 @@ function checkAuth() {
   }
 }
 
+// ─── FACTURACIÓN ─────────────────────────────────────────────────────────────
+async function loadFacturacion() {
+  try {
+    const r = await fetch(FACTURACION_URL + '&t=' + Date.now(), {mode:'cors', cache:'no-store'});
+    if (!r.ok) return;
+    parseFacturacion(await r.text());
+  } catch(e) { console.warn('Facturación:', e); }
+}
+function parseFacturacion(text) {
+  facturacionRows = [];
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return;
+  // headers: Fecha, Cliente, Concepto, Descripción, Neto, IVA, Total
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const fechaRaw = (cols[0]||'').trim();
+    if (!fechaRaw) continue;
+    // Parsear fecha dd/mm/yyyy
+    let fecha = '';
+    const parts = fechaRaw.split('/');
+    if (parts.length === 3) {
+      fecha = pad2(parseInt(parts[0]))+'/'+pad2(parseInt(parts[1]))+'/'+parts[2];
+    } else continue;
+    const cliente = (cols[1]||'').trim();
+    const concepto = (cols[2]||'').trim();
+    const descripcion = (cols[3]||'').trim();
+    const neto = parseMonto(cols[4]||'');
+    const iva = parseMonto(cols[5]||'');
+    const total = parseMonto(cols[6]||'');
+    if (!cliente && !total) continue;
+    facturacionRows.push({fecha, cliente, concepto, descripcion, neto, iva, total});
+  }
+}
+function getFacturacionInRange() {
+  if (!facturacionRows.length) return 0;
+  if (!rangeStart) return 0;
+  const end = rangeEnd||rangeStart;
+  const lo = Math.min(strToTs(rangeStart), strToTs(end));
+  const hi = Math.max(strToTs(rangeStart), strToTs(end));
+  return facturacionRows.filter(r => {
+    const ts = strToTs(r.fecha);
+    return ts >= lo && ts <= hi;
+  }).reduce((s, r) => s + r.total, 0);
+}
+
 // ─── LOAD DATA ────────────────────────────────────────────────────────────────
 async function loadData() {
   setSyncState('loading', 'Actualizando...');
   try {
-    await Promise.all([loadBlotter(), loadSueldos(), loadGastos(), loadCaucionCap(), loadPosi()]);
+    await Promise.all([loadBlotter(), loadSueldos(), loadGastos(), loadCaucionCap(), loadPosi(), loadFacturacion()]);
     setSyncState('ok', 'Actualizado · ' + new Date().toLocaleTimeString('es-AR'));
     const todayS = todayStr();
     const dates = Object.keys(allOps).sort((a,b) => strToTs(a)-strToTs(b));
@@ -873,10 +938,13 @@ function renderRueda() {
   const gastos = getGastosInRange();
   document.getElementById('r-gastos').innerHTML = gastos>0 ? fmtPnl(-gastos,true,'pnl-neg') : '—';
   document.getElementById('r-gastos-sub').textContent = gastos>0 ? 'período seleccionado' : 'sin datos';
-  const resultado = neto-gastos;
+  const facturacion = getFacturacionInRange();
+  document.getElementById('r-facturacion').innerHTML = facturacion>0 ? fmtPnl(facturacion,true,'pnl-pos') : '—';
+  document.getElementById('r-facturacion-sub').textContent = facturacion>0 ? 'período seleccionado' : 'sin datos';
+  const resultado = neto + facturacion - gastos;
   document.getElementById('r-resultado').innerHTML = resultado!==0 ? fmtPnl(resultado,true) : '—';
   document.getElementById('r-resultado').className = 'metric-value '+(resultado>=0?'green':'red');
-  document.getElementById('r-resultado-sub').textContent = gastos>0 ? 'neto mesa − gastos' : 'sin datos de gastos';
+  document.getElementById('r-resultado-sub').textContent = 'neto + facturación − gastos';
   const map = {};
   (allOps[todayStr()]||[]).forEach(o => {
     const k = o.especie+'|'+(o.plazo||'0');
@@ -1260,14 +1328,95 @@ function renderGastos() {
   document.getElementById('g-detalle').innerHTML=html+totalHtml;
 }
 
+// ─── RENDER FACTURACIÓN ──────────────────────────────────────────────────────
+function renderFacturacion() {
+  if (!facturacionRows.length) {
+    document.getElementById('fac-total').textContent = '—';
+    document.getElementById('fac-count').textContent = '—';
+    document.getElementById('fac-detalle').innerHTML = '<div class="empty-state">Sin datos de facturación</div>';
+    return;
+  }
+  const totalGeneral = facturacionRows.reduce((s,r) => s+r.total, 0);
+  document.getElementById('fac-total').innerHTML = fmtPnl(totalGeneral,true,'pnl-pos')||'—';
+  document.getElementById('fac-total-sub').textContent = facturacionRows.length+' registros';
+  document.getElementById('fac-count').textContent = facturacionRows.length;
+
+  // Agrupar por mes
+  const porMes = {};
+  facturacionRows.forEach(r => {
+    const parts = r.fecha.split('/');
+    const mesNum = parseInt(parts[1])-1;
+    const anio = parts[2];
+    const key = MESES[mesNum]+' '+anio;
+    if (!porMes[key]) porMes[key] = {label:key, mesNum, anio, rows:[], total:0};
+    porMes[key].rows.push(r);
+    porMes[key].total += r.total;
+  });
+
+  // Ordenar meses cronológicamente
+  const mesesOrdenados = Object.values(porMes).sort((a,b) => {
+    if (a.anio !== b.anio) return parseInt(a.anio)-parseInt(b.anio);
+    return a.mesNum - b.mesNum;
+  });
+
+  // Último mes para card
+  if (mesesOrdenados.length) {
+    const ultimo = mesesOrdenados[mesesOrdenados.length-1];
+    document.getElementById('fac-ultimo-mes').innerHTML = fmtPnl(ultimo.total,true,'pnl-pos')||'—';
+    document.getElementById('fac-ultimo-mes-sub').textContent = ultimo.label;
+  }
+
+  let html = '';
+  mesesOrdenados.forEach(mes => {
+    html += `<div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#111420;border:0.5px solid #1e2330;border-radius:6px 6px 0 0;border-bottom:none">
+        <span style="font-size:12px;font-weight:600;color:#60a5fa">${mes.label}</span>
+        <span style="font-size:14px;font-weight:700;font-family:monospace;color:#60a5fa">+$${Math.round(mes.total).toLocaleString('es-AR')}</span>
+      </div>
+      <div style="border:0.5px solid #1e2330;border-radius:0 0 6px 6px;overflow:hidden">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:0.5px solid #1e2330">
+            <th style="padding:5px 10px;text-align:left;font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;font-weight:400">Fecha</th>
+            <th style="padding:5px 10px;text-align:left;font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;font-weight:400">Cliente</th>
+            <th style="padding:5px 10px;text-align:left;font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;font-weight:400">Concepto</th>
+            <th style="padding:5px 10px;text-align:left;font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;font-weight:400">Descripción</th>
+            <th style="padding:5px 10px;text-align:right;font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;font-weight:400">Total</th>
+          </tr></thead>
+          <tbody>`;
+    mes.rows.forEach(r => {
+      html += `<tr style="border-bottom:0.5px solid #111420" onmouseover="this.style.background='#111420'" onmouseout="this.style.background=''">
+        <td style="padding:5px 10px;font-size:11px;color:#4a5568;font-family:monospace">${r.fecha}</td>
+        <td style="padding:5px 10px;font-size:11px;color:#e2e8f0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.cliente}</td>
+        <td style="padding:5px 10px;font-size:11px"><span style="background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 6px;border-radius:3px">${r.concepto||'—'}</span></td>
+        <td style="padding:5px 10px;font-size:11px;color:#a0aec0;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.descripcion}">${r.descripcion}</td>
+        <td style="padding:5px 10px;font-size:11px;font-family:monospace;color:#4ade80;text-align:right;font-weight:500">+$${Math.round(r.total).toLocaleString('es-AR')}</td>
+      </tr>`;
+    });
+    // Subtotal del mes
+    html += `<tr style="background:#0c1628;border-top:0.5px solid #378ADD40">
+        <td colspan="4" style="padding:6px 10px;font-size:9px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Subtotal ${mes.label}</td>
+        <td style="padding:6px 10px;font-size:13px;font-weight:700;font-family:monospace;color:#60a5fa;text-align:right">+$${Math.round(mes.total).toLocaleString('es-AR')}</td>
+      </tr>`;
+    html += `</tbody></table></div></div>`;
+  });
+
+  // Total general
+  html += `<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:4px">
+    <span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general facturación</span>
+    <span style="font-size:15px;font-weight:700;font-family:monospace;color:#60a5fa">+$${Math.round(totalGeneral).toLocaleString('es-AR')}</span>
+  </div>`;
+
+  document.getElementById('fac-detalle').innerHTML = html;
+}
+
 // ─── TABS / RELOJ ─────────────────────────────────────────────────────────────
-function renderAll() { renderRueda(); renderMes(); renderProductores(); renderCauciones(); renderGastos(); renderPosi(); }
+function renderAll() { renderRueda(); renderMes(); renderProductores(); renderCauciones(); renderGastos(); renderPosi(); renderFacturacion(); }
 function showTab(t) {
-  ['rueda','mes','productores','cauciones','gastos','posi'].forEach(x => {
+  ['rueda','mes','productores','cauciones','gastos','posi','facturacion'].forEach(x => {
     document.getElementById('view-'+x).style.display = x===t?'':'none';
     document.getElementById('tab-'+x).classList.toggle('active', x===t);
   });
-  if(t==='mes')renderMes(); if(t==='gastos')renderGastos(); if(t==='posi')renderPosi();
+  if(t==='mes')renderMes(); if(t==='gastos')renderGastos(); if(t==='posi')renderPosi(); if(t==='facturacion')renderFacturacion();
 }
 function updateClock() {
   const now=new Date(); const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
