@@ -75,7 +75,6 @@ body{background:#0d0f14;color:#a0aec0;font-family:-apple-system,BlinkMacSystemFo
 .alert-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .section-label{font-size:10px;color:#2d3748;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #1e2330}
-.hb-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a3a;color:#0ea5e9;border:0.5px solid #0ea5e940}
 .table-wrap{overflow-x:auto;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;min-width:650px}
 thead th{padding:5px 8px;text-align:left;font-size:10px;color:#2d3748;border-bottom:0.5px solid #1e2330;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
@@ -85,8 +84,6 @@ tbody tr:hover{background:#111420}
 tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .tr{text-align:right}
 .especie{color:#e2e8f0;font-weight:500;font-family:monospace}
-.badge-c{background:#0c2a4a;color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px}
-.badge-v{background:#2d1a00;color:#fbbf24;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-cerrada{background:#052e16;color:#4ade80;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-abierta{background:#2d0a0a;color:#f87171;font-size:9px;padding:1px 5px;border-radius:3px}
 .badge-sec{background:#111420;color:#4a5568;font-size:9px;padding:1px 5px;border-radius:3px;border:0.5px solid #1e2330}
@@ -108,7 +105,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .cal-ops-cnt{font-size:9px;color:#2d3748}
 .empty-state{text-align:center;padding:40px;color:#2d3748;font-size:12px}
 @media(max-width:700px){.metrics3,.metrics4{grid-template-columns:repeat(2,1fr)}.metrics2{grid-template-columns:1fr}}
-/* Accordion productores */
 .prod-card{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:6px;overflow:hidden;background:#111420}
 .prod-card-header{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:10px;transition:background .15s}
 .prod-card-header:hover{background:#161b28}
@@ -137,7 +133,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .prod-detail-table tr:last-child td{border-bottom:none}
 .prod-detail-table tr:hover td{background:#111420}
 .prod-section-divider{font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:6px 6px 3px;margin-bottom:0;display:flex;align-items:center;gap:6px}
-/* Liquidación sueldo */
 .liq-box{background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:12px 14px;margin-bottom:10px}
 .liq-title{font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .liq-title-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:#1a1a00;color:#fbbf24;border:0.5px solid #fbbf2440}
@@ -151,7 +146,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .liq-mes-total{color:#4ade80;min-width:90px;text-align:right;font-family:monospace;font-weight:500}
 .liq-formula{font-size:10px;color:#2d3748;font-family:monospace;padding:6px 8px;background:#0a0c10;border-radius:4px;border:0.5px solid #1e2330;margin-top:8px}
 .liq-formula span{color:#4a5568}
-/* ── GASTOS ACCORDION ─────────────────────────────── */
 .gasto-grupo{border:0.5px solid #1e2330;border-radius:6px;margin-bottom:5px;overflow:hidden}
 .gasto-grupo-header{display:flex;align-items:center;padding:9px 14px;cursor:pointer;background:#111420;gap:10px;transition:background .15s;user-select:none}
 .gasto-grupo-header:hover{background:#161b28}
@@ -207,7 +201,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div class="drp-bar">
     <span class="drp-label">Período:</span>
     <div class="drp-wrap" id="drp-wrap">
-      <div class="drp-btn" id="drp-btn" onclick="toggleCal()">
+      <div class="drp-btn" onclick="toggleCal()">
         <span>&#128197;</span>
         <span id="drp-display">—</span>
       </div>
@@ -234,7 +228,6 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="alert-dot"></div>
     <span id="alert-text"></span>
   </div>
-
   <div class="tabs">
     <div class="tab active" id="tab-rueda" onclick="showTab('rueda')">Rueda</div>
     <div class="tab" id="tab-mes" onclick="showTab('mes')">Mes</div>
@@ -248,31 +241,31 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <div id="view-rueda">
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
       <div class="metric">
-        <div class="tt">Suma de col O (P&L mesa + com. productor) de todas las operaciones del período. Es el total generado antes de pagar a los productores.</div>
+        <div class="tt">Suma de col O (P&L mesa + com. productor) de todas las operaciones del período.</div>
         <div class="metric-label">Facturado bruto</div>
         <div class="metric-value green" id="r-bruto">—</div>
         <div class="metric-sub" id="r-bruto-sub">col O · todas las ops</div>
       </div>
       <div class="metric">
-        <div class="tt">Lo que cobran los productores: empleados cobran fijo + variable sobre col O; externos cobran col Q directo.</div>
+        <div class="tt">Lo que cobran los productores: empleados cobran fijo + variable; externos cobran col Q directo.</div>
         <div class="metric-label">Com. productores</div>
         <div class="metric-value purple" id="r-comprod" style="cursor:pointer" onclick="showTab('productores')">—</div>
         <div class="metric-sub" id="r-comprod-sub">variable emp. · col Q ext.</div>
       </div>
       <div class="metric">
-        <div class="tt">Facturado bruto menos lo que cobran los productores. Es lo que queda neto para la mesa.</div>
+        <div class="tt">Facturado bruto menos lo que cobran los productores.</div>
         <div class="metric-label">Neto mesa</div>
         <div class="metric-value green" id="r-neto">—</div>
         <div class="metric-sub" id="r-neto-sub">bruto - com. productores</div>
       </div>
       <div class="metric tt-right">
-        <div class="tt">Gastos operativos del mes (fila TOTAL GENERAL de la sheet Gastos Equanima). Si el período abarca varios meses se suman.</div>
+        <div class="tt">Gastos operativos del mes.</div>
         <div class="metric-label">Gastos del período</div>
         <div class="metric-value red" id="r-gastos" style="cursor:pointer" onclick="showTab('gastos')">—</div>
         <div class="metric-sub" id="r-gastos-sub">gastos operativos</div>
       </div>
       <div class="metric tt-right">
-        <div class="tt">Neto mesa menos los gastos operativos del período. Verde = ganancia, rojo = pérdida.</div>
+        <div class="tt">Neto mesa menos los gastos operativos del período.</div>
         <div class="metric-label">Resultado neto</div>
         <div class="metric-value" id="r-resultado">—</div>
         <div class="metric-sub" id="r-resultado-sub">neto mesa − gastos</div>
@@ -315,30 +308,10 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
   <!-- PRODUCTORES -->
   <div id="view-productores" style="display:none">
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
-      <div class="metric">
-        <div class="tt">Suma de col O (= col P + col Q) de todos los productores en el período. Es el total generado antes de pagar a los productores.</div>
-        <div class="metric-label">Total facturado productores</div>
-        <div class="metric-value amber" id="prod-total">—</div>
-        <div class="metric-sub">período · col O</div>
-      </div>
-      <div class="metric">
-        <div class="tt">Variable pagado a empleados (MAX(0,(O-fijo)×%)) + col Q de externos. El fijo va por RRHH y se refleja en gastos.</div>
-        <div class="metric-label">Com. pagada productores</div>
-        <div class="metric-value purple" id="prod-compagada">—</div>
-        <div class="metric-sub">variable emp. · col Q ext.</div>
-      </div>
-      <div class="metric">
-        <div class="tt">Lo que retiene la mesa: total facturado − com. pagada a productores.</div>
-        <div class="metric-label">Neto comisiones mesa</div>
-        <div class="metric-value green" id="prod-neto-mesa">—</div>
-        <div class="metric-sub">facturado − com. productores</div>
-      </div>
-      <div class="metric tt-right">
-        <div class="tt">Cantidad de productores distintos con operaciones en el período.</div>
-        <div class="metric-label">Productores únicos</div>
-        <div class="metric-value white" id="prod-unicos">—</div>
-        <div class="metric-sub">en el período</div>
-      </div>
+      <div class="metric"><div class="tt">Suma de col O de todos los productores en el período.</div><div class="metric-label">Total facturado productores</div><div class="metric-value amber" id="prod-total">—</div><div class="metric-sub">período · col O</div></div>
+      <div class="metric"><div class="tt">Variable pagado a empleados + col Q de externos.</div><div class="metric-label">Com. pagada productores</div><div class="metric-value purple" id="prod-compagada">—</div><div class="metric-sub">variable emp. · col Q ext.</div></div>
+      <div class="metric"><div class="tt">Total facturado − com. pagada.</div><div class="metric-label">Neto comisiones mesa</div><div class="metric-value green" id="prod-neto-mesa">—</div><div class="metric-sub">facturado − com. productores</div></div>
+      <div class="metric tt-right"><div class="tt">Productores distintos con operaciones en el período.</div><div class="metric-label">Productores únicos</div><div class="metric-value white" id="prod-unicos">—</div><div class="metric-sub">en el período</div></div>
     </div>
     <div class="section-label">Acumulado por productor — click para desglosar</div>
     <div id="prod-acum-combined" style="margin-bottom:16px"></div>
@@ -359,22 +332,14 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
     <div class="section-label">Trading Book</div>
     <div class="table-wrap">
       <table>
-        <thead><tr>
-          <th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th>
-          <th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th>
-          <th class="tr">P&L</th><th class="tr">%</th>
-        </tr></thead>
+        <thead><tr><th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th><th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th><th class="tr">P&L</th><th class="tr">%</th></tr></thead>
         <tbody id="posi-trading-tbody"></tbody>
       </table>
     </div>
     <div class="section-label" style="margin-top:8px">Propietary Book</div>
     <div class="table-wrap">
       <table>
-        <thead><tr>
-          <th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th>
-          <th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th>
-          <th class="tr">P&L</th><th class="tr">%</th>
-        </tr></thead>
+        <thead><tr><th></th><th>Especie</th><th class="tr">VN</th><th class="tr">Px Entrada</th><th class="tr">Monto</th><th class="tr">Px Hoy</th><th class="tr">Posición</th><th class="tr">P&L</th><th class="tr">%</th></tr></thead>
         <tbody id="posi-prop-tbody"></tbody>
       </table>
     </div>
@@ -397,13 +362,12 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 
   <!-- CAUCIONES -->
   <div id="view-cauciones" style="display:none">
-    <!-- Capacidad tomadora -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px">
       <div>
         <div style="font-size:11px;font-weight:600;color:#e2e8f0;text-transform:uppercase;letter-spacing:.06em">Capacidad tomadora</div>
         <div style="font-size:10px;color:#4a5568;margin-top:2px">Ordenado por apalancamiento · máx. 5x</div>
       </div>
-      <div id="cau-cap-fecha-wrap" style="background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:6px 14px;text-align:right">
+      <div style="background:#111420;border:0.5px solid #1e2330;border-radius:6px;padding:6px 14px;text-align:right">
         <div style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Actualizado al</div>
         <div id="cau-cap-fecha" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa">—</div>
       </div>
@@ -413,595 +377,521 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 </div>
 
 <script>
-const USERS={'gallardeta':'091218'};
-const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1998095739&single=true&output=csv';
-const SUELDOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
-const GASTOS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
-const POSI_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1670934243&single=true&output=csv';
-const CAUCION_CAP_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMkhA35YTcz24kL9EsL1vLWFLJlnu_PWiFQKlp6nbrBfXnegq3fKaGpq8RlydvcL6217Ql3Oi/pub?gid=12153366&single=true&output=csv';
+// ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
+const USERS = {'gallardeta':'091218'};
 
-let sueldosFijos={};
-let gastosPorMes={};
-let gastosDetalle={};
-let gastosGrupos=[];
-let caucionCapData=[];
-let caucionCapFecha='';
-let posiTradingBook=[];
-let posiPropietary=[];
-const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-let allOps={},allTotals={},allHB={},allBrutos={};
-let rangeStart=null,rangeEnd=null,pickStep=0;
-let calY,calM,mesCalY,mesCalM;
-const I={sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
+// *** REEMPLAZÁ ESTA URL con la de tu Web App después de deployar ***
+const WEBAPP_URL = 'TU_WEBAPP_URL_AQUI';
 
-function rowToObj(r,fecha){
-  return{
-    _fecha:fecha,seccion:r[I.sec]||'',mercado:r[I.mer]||'',plazo:r[I.plz]||'0',
-    op:r[I.op]||'',especie:r[I.esp]||'',moneda:r[I.mon]||'',
-    precio:r[I.pre]||0,vn:r[I.vn]||0,monto:r[I.mto]||0,
-    comitente:String(r[I.com]||''),cliente:r[I.cli]||'',
-    productor:r[I.pro]||'',pylMesa:r[I.pyl]||0,comProductor:r[I.cpro]||0,
+const SUELDOS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=103715270&single=true&output=csv';
+const GASTOS_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtlPJY7bvAwTEwCjNArY1fbxaNTlGarL3-pTmWtxgVV5pc9-jvT1WpoReFkMc_tF95UVTus_Uv_/pub?gid=718317066&single=true&output=csv';
+const POSI_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSiH3r_gVOEoDxd-VJ1WsLt9_KTvlJ8KovCJtPgjfk_n3tT4ZptOmv5AO7tXHsM69ki_IqlIWluHCrs/pub?gid=1670934243&single=true&output=csv';
+const CAUCION_CAP_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRACeJLMkhA35YTcz24kL9EsL1vLWFLJlnu_PWiFQKlp6nbrBfXnegq3fKaGpq8RlydvcL6217Ql3Oi/pub?gid=12153366&single=true&output=csv';
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const I = {sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
+
+let sueldosFijos = {};
+let gastosPorMes = {}, gastosDetalle = {}, gastosGrupos = [];
+let caucionCapData = [], caucionCapFecha = '';
+let posiTradingBook = [], posiPropietary = [];
+let allOps = {}, allTotals = {}, allHB = {}, allBrutos = {};
+let rangeStart = null, rangeEnd = null, pickStep = 0;
+let calY, calM, mesCalY, mesCalM;
+
+function rowToObj(r, fecha) {
+  return {
+    _fecha:fecha, seccion:r[I.sec]||'', mercado:r[I.mer]||'', plazo:r[I.plz]||'0',
+    op:r[I.op]||'', especie:r[I.esp]||'', moneda:r[I.mon]||'',
+    precio:r[I.pre]||0, vn:r[I.vn]||0, monto:r[I.mto]||0,
+    comitente:String(r[I.com]||''), cliente:r[I.cli]||'',
+    productor:r[I.pro]||'', pylMesa:r[I.pyl]||0, comProductor:r[I.cpro]||0,
   };
 }
 
-async function loadSueldos(){
-  try{
-    const r=await fetch(SUELDOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
-    if(!r.ok)return;
-    parseSueldos(await r.text());
-  }catch(e){console.warn('Sueldos no cargaron:',e);}
+// ─── CARGA DATOS BLOTTER VÍA WEB APP ─────────────────────────────────────────
+async function loadBlotter() {
+  const r = await fetch(WEBAPP_URL, {mode:'cors', cache:'no-store'});
+  if (!r.ok) throw new Error('WebApp HTTP ' + r.status);
+  const data = await r.json();
+  allOps = {}; allTotals = {}; allHB = {}; allBrutos = {};
+  data.forEach(d => {
+    const fecha = d.fecha;
+    if (d.ops && d.ops.length) allOps[fecha] = d.ops.map(r => rowToObj(r, fecha));
+    if (d.totalDia) allTotals[fecha] = d.totalDia;
+    if (d.hb && d.hb.length) allHB[fecha] = d.hb;
+    if (d.comisionTotalBruta) allBrutos[fecha] = d.comisionTotalBruta;
+  });
 }
-function parseSueldos(text){
-  sueldosFijos={};
-  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  if(lines.length<2)return;
-  const headers=parseCSVLine(lines[0]);
-  for(let i=1;i<lines.length;i++){
-    const cols=parseCSVLine(lines[i]);
-    const pctRaw=(cols[0]||'').trim();
-    const nombre=(cols[1]||'').trim();
-    if(!nombre)continue;
-    let pct=0;
-    if(pctRaw.includes('%')){pct=parseFloat(pctRaw.replace('%','').trim())/100;}
-    else{pct=parseFloat(pctRaw)||0;if(pct>1)pct=pct/100;}
-    const key=nombre.toLowerCase();
-    sueldosFijos[key]={nombre,porcentaje:pct};
-    for(let j=2;j<headers.length;j++){
-      const mes=(headers[j]||'').trim().toLowerCase();
-      if(!mes)continue;
-      sueldosFijos[key][mes]=parseMonto(cols[j]||'');
+
+// ─── SUELDOS ─────────────────────────────────────────────────────────────────
+async function loadSueldos() {
+  try {
+    const r = await fetch(SUELDOS_URL + '&t=' + Date.now(), {mode:'cors', cache:'no-store'});
+    if (!r.ok) return;
+    parseSueldos(await r.text());
+  } catch(e) { console.warn('Sueldos:', e); }
+}
+function parseSueldos(text) {
+  sueldosFijos = {};
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return;
+  const headers = parseCSVLine(lines[0]);
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const pctRaw = (cols[0]||'').trim();
+    const nombre = (cols[1]||'').trim();
+    if (!nombre) continue;
+    let pct = 0;
+    if (pctRaw.includes('%')) { pct = parseFloat(pctRaw.replace('%','').trim()) / 100; }
+    else { pct = parseFloat(pctRaw)||0; if (pct > 1) pct = pct / 100; }
+    const key = nombre.toLowerCase();
+    sueldosFijos[key] = {nombre, porcentaje:pct};
+    for (let j = 2; j < headers.length; j++) {
+      const mes = (headers[j]||'').trim().toLowerCase();
+      if (!mes) continue;
+      sueldosFijos[key][mes] = parseMonto(cols[j]||'');
     }
   }
 }
-function parseCSVLine(line){
-  const res=[];let cur='';let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-    else if(c===','&&!inQ){res.push(cur);cur='';}
-    else cur+=c;
-  }
-  res.push(cur);return res;
-}
-function parseMonto(s){
-  let c=s.replace(/[$\s"]/g,'').trim();if(!c)return 0;
-  const hasComa=c.includes(','),hasPunto=c.includes('.');
-  if(hasComa&&hasPunto){const lC=c.lastIndexOf(','),lP=c.lastIndexOf('.');lP>lC?c=c.replace(/,/g,''):c=c.replace(/\./g,'').replace(',','.');}
-  else if(hasComa){c.split(',').pop().length<=2?c=c.replace(',','.'):c=c.replace(/,/g,'');}
-  else if(hasPunto){if(c.split('.').pop().length>2)c=c.replace(/\./g,'');}
-  return parseFloat(c)||0;
-}
-function getDatosProductor(nombre,mesesArr){
-  const key=nombre.toLowerCase();
-  const data=sueldosFijos[key];
-  if(!data)return null;
-  const porcentaje=data.porcentaje||0;
-  let sueldoTotal=0,hayAlgunSueldo=false;
-  mesesArr.forEach(m=>{const mv=m.toLowerCase();if(data[mv]>0){sueldoTotal+=data[mv];hayAlgunSueldo=true;}});
-  return{porcentaje,sueldoTotal:hayAlgunSueldo?sueldoTotal:0,hayAlgunSueldo};
-}
 
-async function loadGastos(){
-  try{
-    const r=await fetch(GASTOS_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
-    if(!r.ok)return;
+// ─── GASTOS ──────────────────────────────────────────────────────────────────
+async function loadGastos() {
+  try {
+    const r = await fetch(GASTOS_URL + '&t=' + Date.now(), {mode:'cors', cache:'no-store'});
+    if (!r.ok) return;
     parseGastos(await r.text());
-  }catch(e){console.warn('Gastos no cargaron:',e);}
+  } catch(e) { console.warn('Gastos:', e); }
 }
-
-function parseGastos(text){
-  gastosPorMes={};
-  gastosDetalle={};
-  gastosGrupos=[];
-
-  const lines=text.split('\n').map(l=>l.trim());
-  const parsed=lines.map(l=>parseCSVLine(l));
-
-  const MESES_COL=[
+function parseGastos(text) {
+  gastosPorMes = {}; gastosDetalle = {}; gastosGrupos = [];
+  const lines = text.split('\n').map(l => l.trim());
+  const parsed = lines.map(l => parseCSVLine(l));
+  const MESES_COL = [
     {mes:'abril',col:7},{mes:'mayo',col:8},{mes:'junio',col:9},
     {mes:'julio',col:10},{mes:'agosto',col:11},{mes:'septiembre',col:12},
     {mes:'octubre',col:13},{mes:'noviembre',col:14},{mes:'diciembre',col:15}
   ];
-
-  let filaTotal=-1;
-  for(let i=parsed.length-1;i>=0;i--){
-    const row=parsed[i];
-    for(let c=0;c<Math.min(row.length,5);c++){
-      const v=(row[c]||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s/g,'');
-      if(v.includes('totalgeneral')||v==='totalgeneral'){filaTotal=i;break;}
+  let filaTotal = -1;
+  for (let i = parsed.length-1; i >= 0; i--) {
+    const row = parsed[i];
+    for (let c = 0; c < Math.min(row.length,5); c++) {
+      const v = (row[c]||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s/g,'');
+      if (v.includes('totalgeneral') || v === 'totalgeneral') { filaTotal = i; break; }
     }
-    if(filaTotal>=0)break;
+    if (filaTotal >= 0) break;
   }
-  if(filaTotal<0){console.warn('Gastos: no encontre TOTAL GENERAL');return;}
-
-  MESES_COL.forEach(({mes,col})=>{
-    const val=parseMonto(parsed[filaTotal][col]||'');
-    if(val>0)gastosPorMes[mes]=val;
+  if (filaTotal < 0) return;
+  MESES_COL.forEach(({mes,col}) => {
+    const val = parseMonto(parsed[filaTotal][col]||'');
+    if (val > 0) gastosPorMes[mes] = val;
   });
-
-  let pendingItems=[];
-
-  const cerrarGrupo=(labelFila,rowCierre)=>{
-    const totalPorMes={};
-    MESES_COL.forEach(({mes,col})=>{
-      totalPorMes[mes]=parseMonto(rowCierre[col]||'');
-    });
-    const tieneValoresCierre=MESES_COL.some(({mes})=>totalPorMes[mes]!==0);
-    if(!tieneValoresCierre){
-      MESES_COL.forEach(({mes})=>{
-        totalPorMes[mes]=pendingItems.reduce((s,item)=>s+(item.porMes[mes]||0),0);
-      });
+  let pendingItems = [];
+  const cerrarGrupo = (labelFila, rowCierre) => {
+    const totalPorMes = {};
+    MESES_COL.forEach(({mes,col}) => { totalPorMes[mes] = parseMonto(rowCierre[col]||''); });
+    const tieneValoresCierre = MESES_COL.some(({mes}) => totalPorMes[mes] !== 0);
+    if (!tieneValoresCierre) {
+      MESES_COL.forEach(({mes}) => { totalPorMes[mes] = pendingItems.reduce((s,item) => s+(item.porMes[mes]||0), 0); });
     }
-    const tieneAlgo=MESES_COL.some(({mes})=>totalPorMes[mes]!==0)||pendingItems.length>0;
-    if(tieneAlgo){
-      gastosGrupos.push({label:labelFila,items:[...pendingItems],totalPorMes});
+    if (MESES_COL.some(({mes}) => totalPorMes[mes] !== 0) || pendingItems.length > 0) {
+      gastosGrupos.push({label:labelFila, items:[...pendingItems], totalPorMes});
     }
-    pendingItems=[];
+    pendingItems = [];
   };
-
-  for(let i=0;i<filaTotal;i++){
-    const row=parsed[i];
-    const colA=(row[0]||'').trim();
-    const colB=(row[1]||'').trim();
-
-    if(!colA)continue;
-
-    if(!colB){
-      const tieneValores=MESES_COL.some(({col})=>parseMonto(row[col]||'')!==0);
-      if(tieneValores||pendingItems.length){
-        cerrarGrupo(colA,row);
-      }
+  for (let i = 0; i < filaTotal; i++) {
+    const row = parsed[i];
+    const colA = (row[0]||'').trim();
+    const colB = (row[1]||'').trim();
+    if (!colA) continue;
+    if (!colB) {
+      const tieneValores = MESES_COL.some(({col}) => parseMonto(row[col]||'') !== 0);
+      if (tieneValores || pendingItems.length) cerrarGrupo(colA, row);
       continue;
     }
-
-    const porMes={};
-    MESES_COL.forEach(({mes,col})=>{ porMes[mes]=parseMonto(row[col]||''); });
-    const tieneValor=MESES_COL.some(({mes})=>porMes[mes]!==0);
-    if(tieneValor) pendingItems.push({concepto:colB,porMes});
+    const porMes = {};
+    MESES_COL.forEach(({mes,col}) => { porMes[mes] = parseMonto(row[col]||''); });
+    if (MESES_COL.some(({mes}) => porMes[mes] !== 0)) pendingItems.push({concepto:colB, porMes});
   }
-
-  if(pendingItems.length){
-    const totalPorMes={};
-    MESES_COL.forEach(({mes})=>{
-      totalPorMes[mes]=pendingItems.reduce((s,item)=>s+(item.porMes[mes]||0),0);
-    });
-    gastosGrupos.push({label:'Otros',items:pendingItems,totalPorMes});
+  if (pendingItems.length) {
+    const totalPorMes = {};
+    MESES_COL.forEach(({mes}) => { totalPorMes[mes] = pendingItems.reduce((s,item) => s+(item.porMes[mes]||0), 0); });
+    gastosGrupos.push({label:'Otros', items:pendingItems, totalPorMes});
   }
-
-  MESES_COL.forEach(({mes})=>{
-    const detalle=[];
-    gastosGrupos.forEach(g=>{
-      if(g.totalPorMes[mes]>0) detalle.push({label:g.label,val:g.totalPorMes[mes]});
-    });
-    if(detalle.length) gastosDetalle[mes]=detalle;
+  MESES_COL.forEach(({mes}) => {
+    const detalle = [];
+    gastosGrupos.forEach(g => { if (g.totalPorMes[mes] > 0) detalle.push({label:g.label, val:g.totalPorMes[mes]}); });
+    if (detalle.length) gastosDetalle[mes] = detalle;
   });
 }
 
-function normalizar(s){
-  return String(s).trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-}
-function getGastosInRange(){
-  const dates=getDatesInRange();
-  if(!dates.length)return 0;
-  const mesesEnRango=new Set();
-  dates.forEach(d=>{
-    const mes=MESES[parseInt(d.split('/')[1])-1].toLowerCase();
-    mesesEnRango.add(mes);
-  });
-  let total=0;
-  mesesEnRango.forEach(mes=>{if(gastosPorMes[mes])total+=gastosPorMes[mes];});
-  return total;
-}
-
-async function loadPosi(){
-  try{
-    const r=await fetch(POSI_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
-    if(!r.ok)return;
+// ─── POSICION ─────────────────────────────────────────────────────────────────
+async function loadPosi() {
+  try {
+    const r = await fetch(POSI_URL + '&t=' + Date.now(), {mode:'cors', cache:'no-store'});
+    if (!r.ok) return;
     parsePosi(await r.text());
-  }catch(e){console.warn('Posi no cargó:',e);}
+  } catch(e) { console.warn('Posi:', e); }
 }
-function parsePosi(text){
-  posiTradingBook=[];posiPropietary=[];
-  const lines=text.split('\n').map(l=>l.trim());
-  const parsed=lines.map(l=>parseCSVLine(l));
-  let modo='';
-  for(let i=0;i<parsed.length;i++){
-    const row=parsed[i];
-    const joined=row.join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if(joined.includes('trading book')){modo='trading';continue;}
-    if(joined.includes('propietary book')||joined.includes('proprietary book')){modo='propietary';continue;}
-    if(!modo)continue;
-    const label=(row[0]||'').trim();
-    const especie=(row[1]||'').trim();
-    const esTotal=normalizar(label+row[2]+row[3]).includes('total');
-    if(!especie&&!esTotal)continue;
-    if(especie.toLowerCase()==='especie')continue;
-    const precioEntrada=(row[4]||'').trim();
-    const vn=parseMonto(row[5]||'');
-    const monto=parseMonto(row[6]||'');
-    const pxCarry=(row[7]||'').trim();
-    const caucion=(row[8]||'').trim();
-    const costoTotal=parseMonto(row[9]||'');
-    const pxHoy=(row[10]||'').trim();
-    const posicion=parseMonto(row[11]||'');
-    const pnl=parseMonto(row[12]||'');
-    const pct=(row[13]||'').trim();
-    if(!vn&&!posicion&&!pnl&&!monto&&!costoTotal)continue;
-    const obj={label,especie,precioEntrada,vn,monto,pxCarry,caucion,costoTotal,pxHoy,posicion,pnl,pct,esTotal};
-    if(modo==='trading')posiTradingBook.push(obj);
+function parsePosi(text) {
+  posiTradingBook = []; posiPropietary = [];
+  const lines = text.split('\n').map(l => l.trim());
+  const parsed = lines.map(l => parseCSVLine(l));
+  let modo = '';
+  for (let i = 0; i < parsed.length; i++) {
+    const row = parsed[i];
+    const joined = row.join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (joined.includes('trading book')) { modo = 'trading'; continue; }
+    if (joined.includes('propietary book') || joined.includes('proprietary book')) { modo = 'propietary'; continue; }
+    if (!modo) continue;
+    const label = (row[0]||'').trim();
+    const especie = (row[1]||'').trim();
+    const esTotal = normalizar(label+row[2]+row[3]).includes('total');
+    if (!especie && !esTotal) continue;
+    if (especie.toLowerCase() === 'especie') continue;
+    const vn = parseMonto(row[5]||'');
+    const monto = parseMonto(row[6]||'');
+    const costoTotal = parseMonto(row[9]||'');
+    const posicion = parseMonto(row[11]||'');
+    const pnl = parseMonto(row[12]||'');
+    if (!vn && !posicion && !pnl && !monto && !costoTotal) continue;
+    const obj = {label, especie, precioEntrada:(row[4]||'').trim(), vn, monto,
+      pxHoy:(row[10]||'').trim(), posicion, pnl, pct:(row[13]||'').trim(), esTotal};
+    if (modo === 'trading') posiTradingBook.push(obj);
     else posiPropietary.push(obj);
   }
 }
 
-async function loadCaucionCap(){
-  try{
-    const r=await fetch(CAUCION_CAP_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'});
-    if(!r.ok)return;
+// ─── CAUCIONES ────────────────────────────────────────────────────────────────
+async function loadCaucionCap() {
+  try {
+    const r = await fetch(CAUCION_CAP_URL + '&t=' + Date.now(), {mode:'cors', cache:'no-store'});
+    if (!r.ok) return;
     parseCaucionCap(await r.text());
-  }catch(e){console.warn('CaucionCap no cargó:',e);}
+  } catch(e) { console.warn('CaucionCap:', e); }
 }
-function parseCaucionCap(text){
-  caucionCapData=[];caucionCapFecha='';
-  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  const parsed=lines.map(l=>parseCSVLine(l));
-  if(!parsed.length)return;
-  caucionCapFecha=(parsed[0][0]||'').trim();
-  for(let i=3;i<parsed.length;i++){
-    const row=parsed[i];
-    const comitente=(row[0]||'').trim();
-    const cuenta=(row[1]||'').trim();
-    if(!comitente&&!cuenta)continue;
-    const monto=parseMonto(row[2]||'');
-    const valorizada=parseMonto(row[3]||'');
-    const margen=parseMonto(row[4]||'');
-    const pct=(row[5]||'').trim();
-    const saldo=parseMonto(row[6]||'');
-    caucionCapData.push({comitente,cuenta,monto,valorizada,margen,pct,saldo});
+function parseCaucionCap(text) {
+  caucionCapData = []; caucionCapFecha = '';
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const parsed = lines.map(l => parseCSVLine(l));
+  if (!parsed.length) return;
+  caucionCapFecha = (parsed[0][0]||'').trim();
+  for (let i = 3; i < parsed.length; i++) {
+    const row = parsed[i];
+    const comitente = (row[0]||'').trim();
+    const cuenta = (row[1]||'').trim();
+    if (!comitente && !cuenta) continue;
+    caucionCapData.push({
+      comitente, cuenta,
+      monto: parseMonto(row[2]||''),
+      margen: parseMonto(row[4]||''),
+      pct: (row[5]||'').trim(),
+      saldo: parseMonto(row[6]||'')
+    });
   }
 }
 
-function doLogin(){
-  const u=document.getElementById('login-user').value.trim();
-  const p=document.getElementById('login-pass').value;
-  if(USERS[u]&&USERS[u]===p){
-    sessionStorage.setItem('mesa-auth',u);
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    loadData();
-  }else{document.getElementById('login-error').style.display='block';document.getElementById('login-pass').value='';}
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function parseCSVLine(line) {
+  const res = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (c === ',' && !inQ) { res.push(cur); cur = ''; }
+    else cur += c;
+  }
+  res.push(cur); return res;
 }
-function doLogout(){
+function parseMonto(s) {
+  let c = s.replace(/[$\s"]/g,'').trim(); if (!c) return 0;
+  const hasComa = c.includes(','), hasPunto = c.includes('.');
+  if (hasComa && hasPunto) { const lC = c.lastIndexOf(','), lP = c.lastIndexOf('.'); lP > lC ? c = c.replace(/,/g,'') : c = c.replace(/\./g,'').replace(',','.'); }
+  else if (hasComa) { c.split(',').pop().length <= 2 ? c = c.replace(',','.') : c = c.replace(/,/g,''); }
+  else if (hasPunto) { if (c.split('.').pop().length > 2) c = c.replace(/\./g,''); }
+  return parseFloat(c) || 0;
+}
+function normalizar(s) { return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function getDatosProductor(nombre, mesesArr) {
+  const key = nombre.toLowerCase();
+  const data = sueldosFijos[key];
+  if (!data) return null;
+  let sueldoTotal = 0, hayAlgunSueldo = false;
+  mesesArr.forEach(m => { const mv = m.toLowerCase(); if (data[mv] > 0) { sueldoTotal += data[mv]; hayAlgunSueldo = true; } });
+  return {porcentaje: data.porcentaje||0, sueldoTotal: hayAlgunSueldo ? sueldoTotal : 0, hayAlgunSueldo};
+}
+function pad2(n) { return String(n).padStart(2,'0'); }
+function todayStr() { const d = new Date(); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
+function strToTs(s) { const[d,m,y] = s.split('/'); return new Date(+y,+m-1,+d).getTime(); }
+function tsToStr(ts) { const d = new Date(ts); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
+function fmtInt(n) { return Math.round(parseFloat(n)||0).toLocaleString('es-AR'); }
+function fmtDec(n) { return (parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtPnl(n,tag,cls) {
+  const v = Math.round(parseFloat(n)||0); if (!v) return '—';
+  const s = (v>0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
+  const c = cls||(v>0?'pnl-pos':'pnl-neg');
+  return tag ? `<span class="${c}">${s}</span>` : s;
+}
+function fmtK(n) {
+  const v = Math.round(parseFloat(n)||0);
+  if (Math.abs(v) >= 1000000) return '$'+Math.round(v/1000000)+'M';
+  if (Math.abs(v) >= 1000) return '$'+Math.round(v/1000)+'k';
+  return '$'+Math.abs(v).toLocaleString('es-AR');
+}
+function fmtPesos(n) { return '$'+Math.round(parseFloat(n)||0).toLocaleString('es-AR'); }
+function fmtPct(p) { return Math.round(p*100)+'%'; }
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (USERS[u] && USERS[u] === p) {
+    sessionStorage.setItem('mesa-auth', u);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pass').value = '';
+  }
+}
+function doLogout() {
   sessionStorage.removeItem('mesa-auth');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app-screen').style.display='none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
 }
-function checkAuth(){
-  if(sessionStorage.getItem('mesa-auth')){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
+function checkAuth() {
+  if (sessionStorage.getItem('mesa-auth')) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
     loadData();
   }
 }
 
-function pad2(n){return String(n).padStart(2,'0');}
-function todayStr(){const d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
-function strToTs(s){const[d,m,y]=s.split('/');return new Date(+y,+m-1,+d).getTime();}
-function tsToStr(ts){const d=new Date(ts);return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
-function fmtInt(n){return Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
-function fmtDec(n){return(parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtPnl(n,tag,cls){
-  const v=Math.round(parseFloat(n)||0);if(!v)return'—';
-  const s=(v>0?'+':'')+'$'+Math.abs(v).toLocaleString('es-AR');
-  const c=cls||(v>0?'pnl-pos':'pnl-neg');
-  return tag?`<span class="${c}">${s}</span>`:s;
+// ─── LOAD DATA ────────────────────────────────────────────────────────────────
+async function loadData() {
+  setSyncState('loading', 'Actualizando...');
+  try {
+    await Promise.all([loadBlotter(), loadSueldos(), loadGastos(), loadCaucionCap(), loadPosi()]);
+    setSyncState('ok', 'Actualizado · ' + new Date().toLocaleTimeString('es-AR'));
+    const todayS = todayStr();
+    const dates = Object.keys(allOps).sort((a,b) => strToTs(a)-strToTs(b));
+    if (allOps[todayS]) { rangeStart = todayS; rangeEnd = todayS; document.getElementById('pre-hoy').classList.add('sel'); }
+    else if (dates.length) { rangeStart = dates[dates.length-1]; rangeEnd = rangeStart; }
+    updateDisplay(); renderAll();
+  } catch(e) { setSyncState('error', 'Error: ' + e.message); }
 }
-function fmtK(n){
-  const v=Math.round(parseFloat(n)||0);
-  if(Math.abs(v)>=1000000)return'$'+Math.round(v/1000000)+'M';
-  if(Math.abs(v)>=1000)return'$'+Math.round(v/1000)+'k';
-  return'$'+Math.abs(v).toLocaleString('es-AR');
+function setSyncState(s, msg) {
+  document.getElementById('sync-dot').className = 'sync-dot' + (s==='loading'?' loading':s==='error'?' error':'');
+  document.getElementById('sync-label').textContent = msg;
 }
-function fmtPesos(n){return'$'+Math.round(parseFloat(n)||0).toLocaleString('es-AR');}
-function fmtPct(p){return Math.round(p*100)+'%';}
 
-function toggleCal(){
-  const popup=document.getElementById('cal-popup');
-  if(popup.classList.contains('open')){popup.classList.remove('open');pickStep=0;return;}
-  const now=new Date();
-  if(calY===undefined){calY=now.getFullYear();calM=now.getMonth();}
-  pickStep=0;renderCal();popup.classList.add('open');
+// ─── CALENDARIO / RANGE PICKER ────────────────────────────────────────────────
+function toggleCal() {
+  const popup = document.getElementById('cal-popup');
+  if (popup.classList.contains('open')) { popup.classList.remove('open'); pickStep = 0; return; }
+  const now = new Date();
+  if (calY === undefined) { calY = now.getFullYear(); calM = now.getMonth(); }
+  pickStep = 0; renderCal(); popup.classList.add('open');
 }
-document.getElementById('cal-prev').addEventListener('click',function(e){e.stopPropagation();calM--;if(calM<0){calM=11;calY--;}renderCal();});
-document.getElementById('cal-next').addEventListener('click',function(e){e.stopPropagation();calM++;if(calM>11){calM=0;calY++;}renderCal();});
-function renderCal(){
-  document.getElementById('cal-label').textContent=MESES[calM]+' '+calY;
-  const hdrs=document.getElementById('cal-hdrs');hdrs.innerHTML='';
-  ['L','M','X','J','V','S','D'].forEach(h=>{const d=document.createElement('div');d.className='cal-hdr-cell';d.textContent=h;hdrs.appendChild(d);});
-  const grid=document.getElementById('cal-days');grid.innerHTML='';
-  const first=new Date(calY,calM,1);
-  let dow=first.getDay()-1;if(dow<0)dow=6;
-  const dim=new Date(calY,calM+1,0).getDate();
-  const todayS=todayStr();
-  const s=rangeStart?strToTs(rangeStart):null;
-  const e=rangeEnd?strToTs(rangeEnd):null;
-  for(let i=0;i<dow;i++){const el=document.createElement('div');el.className='cal-cell empty';grid.appendChild(el);}
-  for(let d=1;d<=dim;d++){
-    const ds=pad2(d)+'/'+pad2(calM+1)+'/'+calY;
-    const ts=strToTs(ds);
-    const el=document.createElement('div');
-    let cls='cal-cell';
-    if(allOps[ds])cls+=' has';
-    if(ds===todayS)cls+=' today';
-    if(s&&e){const lo=Math.min(s,e),hi=Math.max(s,e);if(ts===lo&&ts===hi)cls+=' start end';else if(ts===lo)cls+=' start';else if(ts===hi)cls+=' end';else if(ts>lo&&ts<hi)cls+=' inrange';}
-    else if(s&&ts===s)cls+=' start end';
-    el.className=cls;el.textContent=d;el.dataset.date=ds;
-    el.addEventListener('click',function(ev){ev.stopPropagation();onPickDay(this.dataset.date);});
+document.getElementById('cal-prev').addEventListener('click', e => { e.stopPropagation(); calM--; if (calM<0){calM=11;calY--;} renderCal(); });
+document.getElementById('cal-next').addEventListener('click', e => { e.stopPropagation(); calM++; if (calM>11){calM=0;calY++;} renderCal(); });
+function renderCal() {
+  document.getElementById('cal-label').textContent = MESES[calM]+' '+calY;
+  const hdrs = document.getElementById('cal-hdrs'); hdrs.innerHTML = '';
+  ['L','M','X','J','V','S','D'].forEach(h => { const d = document.createElement('div'); d.className='cal-hdr-cell'; d.textContent=h; hdrs.appendChild(d); });
+  const grid = document.getElementById('cal-days'); grid.innerHTML = '';
+  const first = new Date(calY, calM, 1);
+  let dow = first.getDay()-1; if (dow<0) dow=6;
+  const dim = new Date(calY, calM+1, 0).getDate();
+  const todayS = todayStr();
+  const s = rangeStart ? strToTs(rangeStart) : null;
+  const e = rangeEnd ? strToTs(rangeEnd) : null;
+  for (let i = 0; i < dow; i++) { const el = document.createElement('div'); el.className='cal-cell empty'; grid.appendChild(el); }
+  for (let d = 1; d <= dim; d++) {
+    const ds = pad2(d)+'/'+pad2(calM+1)+'/'+calY;
+    const ts = strToTs(ds);
+    const el = document.createElement('div');
+    let cls = 'cal-cell';
+    if (allOps[ds]) cls += ' has';
+    if (ds === todayS) cls += ' today';
+    if (s&&e) { const lo=Math.min(s,e),hi=Math.max(s,e); if(ts===lo&&ts===hi)cls+=' start end'; else if(ts===lo)cls+=' start'; else if(ts===hi)cls+=' end'; else if(ts>lo&&ts<hi)cls+=' inrange'; }
+    else if (s&&ts===s) cls += ' start end';
+    el.className = cls; el.textContent = d; el.dataset.date = ds;
+    el.addEventListener('click', function(ev) { ev.stopPropagation(); onPickDay(this.dataset.date); });
     grid.appendChild(el);
   }
-  document.getElementById('cal-hint').textContent=pickStep===0?'Elegí la fecha inicio':'Ahora elegí la fecha fin';
+  document.getElementById('cal-hint').textContent = pickStep===0 ? 'Elegí la fecha inicio' : 'Ahora elegí la fecha fin';
 }
-function onPickDay(ds){
-  if(pickStep===0){rangeStart=ds;rangeEnd=null;pickStep=1;}
-  else{
-    rangeEnd=ds;pickStep=0;
-    if(strToTs(rangeStart)>strToTs(rangeEnd)){const tmp=rangeStart;rangeStart=rangeEnd;rangeEnd=tmp;}
+function onPickDay(ds) {
+  if (pickStep===0) { rangeStart=ds; rangeEnd=null; pickStep=1; }
+  else {
+    rangeEnd=ds; pickStep=0;
+    if (strToTs(rangeStart)>strToTs(rangeEnd)) { const tmp=rangeStart; rangeStart=rangeEnd; rangeEnd=tmp; }
     document.getElementById('cal-popup').classList.remove('open');
-    updateDisplay();clearPresets();renderAll();
+    updateDisplay(); clearPresets(); renderAll();
   }
   renderCal();
 }
-document.addEventListener('click',function(e){
-  const popup=document.getElementById('cal-popup');
-  const wrap=document.getElementById('drp-wrap');
-  if(popup.classList.contains('open')&&!wrap.contains(e.target)){popup.classList.remove('open');pickStep=0;}
+document.addEventListener('click', e => {
+  const popup = document.getElementById('cal-popup');
+  const wrap = document.getElementById('drp-wrap');
+  if (popup.classList.contains('open') && !wrap.contains(e.target)) { popup.classList.remove('open'); pickStep=0; }
 });
-function updateDisplay(){
-  const el=document.getElementById('drp-display');
-  if(!rangeStart){el.textContent='—';return;}
-  el.textContent=(!rangeEnd||rangeEnd===rangeStart)?rangeStart:rangeStart+' → '+rangeEnd;
+function updateDisplay() {
+  const el = document.getElementById('drp-display');
+  if (!rangeStart) { el.textContent='—'; return; }
+  el.textContent = (!rangeEnd||rangeEnd===rangeStart) ? rangeStart : rangeStart+' → '+rangeEnd;
 }
-function clearPresets(){document.querySelectorAll('.drp-preset').forEach(p=>p.classList.remove('sel'));}
-function setPreset(p){
-  const now=new Date();const todayS=todayStr();
-  clearPresets();document.getElementById('pre-'+p).classList.add('sel');
-  if(p==='hoy'){rangeStart=todayS;rangeEnd=todayS;}
-  else if(p==='ayer'){const y=new Date(now);y.setDate(y.getDate()-1);rangeStart=tsToStr(y.getTime());rangeEnd=rangeStart;}
-  else if(p==='semana'){const dow=now.getDay()||7;const mon=new Date(now);mon.setDate(now.getDate()-dow+1);rangeStart=tsToStr(mon.getTime());rangeEnd=todayS;}
-  else if(p==='mes'){rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear();rangeEnd=todayS;}
-  else if(p==='todo'){const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];}}
-  pickStep=0;updateDisplay();renderAll();
+function clearPresets() { document.querySelectorAll('.drp-preset').forEach(p => p.classList.remove('sel')); }
+function setPreset(p) {
+  const now = new Date(); const todayS = todayStr();
+  clearPresets(); document.getElementById('pre-'+p).classList.add('sel');
+  if (p==='hoy') { rangeStart=todayS; rangeEnd=todayS; }
+  else if (p==='ayer') { const y=new Date(now); y.setDate(y.getDate()-1); rangeStart=tsToStr(y.getTime()); rangeEnd=rangeStart; }
+  else if (p==='semana') { const dow=now.getDay()||7; const mon=new Date(now); mon.setDate(now.getDate()-dow+1); rangeStart=tsToStr(mon.getTime()); rangeEnd=todayS; }
+  else if (p==='mes') { rangeStart=pad2(1)+'/'+pad2(now.getMonth()+1)+'/'+now.getFullYear(); rangeEnd=todayS; }
+  else if (p==='todo') { const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b)); if(dates.length){rangeStart=dates[0];rangeEnd=dates[dates.length-1];} }
+  pickStep=0; updateDisplay(); renderAll();
 }
-function getDatesInRange(){
-  if(!rangeStart)return[];
-  const end=rangeEnd||rangeStart;
-  const lo=Math.min(strToTs(rangeStart),strToTs(end));
-  const hi=Math.max(strToTs(rangeStart),strToTs(end));
-  const dates=[];let cur=lo;
-  while(cur<=hi){const ds=tsToStr(cur);if(allOps[ds])dates.push(ds);cur+=86400000;}
+function getDatesInRange() {
+  if (!rangeStart) return [];
+  const end = rangeEnd||rangeStart;
+  const lo = Math.min(strToTs(rangeStart),strToTs(end));
+  const hi = Math.max(strToTs(rangeStart),strToTs(end));
+  const dates = []; let cur = lo;
+  while (cur <= hi) { const ds = tsToStr(cur); if (allOps[ds]) dates.push(ds); cur += 86400000; }
   return dates;
 }
-function getOpsInRange(){
-  const ops=[];getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o)));return ops;
-}
-function getHBInRange(){
-  const hb=[];
-  getDatesInRange().forEach(d=>{
-    (allHB[d]||[]).forEach(r=>hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]}));
-  });
+function getOpsInRange() { const ops=[]; getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o))); return ops; }
+function getHBInRange() {
+  const hb = [];
+  getDatesInRange().forEach(d => { (allHB[d]||[]).forEach(r => hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]})); });
   return hb;
 }
-function getTotalInRange(){return getDatesInRange().reduce((s,d)=>s+(allTotals[d]||0),0);}
-function getBrutoInRange(){return getDatesInRange().reduce((s,d)=>s+(allBrutos[d]||0),0);}
-
-async function loadData(){
-  setSyncState('loading','Actualizando...');
-  try{
-    const[r]=await Promise.all([
-      fetch(CSV_URL+'&t='+Date.now(),{mode:'cors',cache:'no-store'}),
-      loadSueldos(),
-      loadGastos(),
-      loadCaucionCap(),
-      loadPosi()
-    ]);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    parseCSV(await r.text());
-    setSyncState('ok','Actualizado · '+new Date().toLocaleTimeString('es-AR'));
-    const todayS=todayStr();
-    const dates=Object.keys(allOps).sort((a,b)=>strToTs(a)-strToTs(b));
-    if(allOps[todayS]){rangeStart=todayS;rangeEnd=todayS;document.getElementById('pre-hoy').classList.add('sel');}
-    else if(dates.length){rangeStart=dates[dates.length-1];rangeEnd=rangeStart;}
-    updateDisplay();renderAll();
-  }catch(e){setSyncState('error','Error: '+e.message);}
-}
-function parseCSV(text){
-  allOps={};allTotals={};allHB={};allBrutos={};
-  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  for(let i=1;i<lines.length;i++){
-    const line=lines[i];
-    const fc=line.indexOf(',');if(fc<0)continue;
-    const fecha=line.slice(0,fc).replace(/"/g,'').trim();
-    if(!fecha.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/))continue;
-    const fp=fecha.split('/');
-    const fechaNorm=pad2(parseInt(fp[0]))+'/'+pad2(parseInt(fp[1]))+'/'+fp[2];
-    const rest=line.slice(fc+1);
-    const j1=rest.indexOf('[['),j2=rest.indexOf(']]',j1);
-    if(j1>=0&&j2>j1){
-      const jsonStr=rest.slice(j1,j2+2).replace(/""/g,'"');
-      const afterJson=rest.slice(j2+2);
-      const totalMatch=afterJson.match(/[\d.]+/);
-      const total=totalMatch?parseFloat(totalMatch[0]):0;
-      if(total!==0)allTotals[fechaNorm]=total;
-      try{
-        const rows=JSON.parse(jsonStr);
-        if(Array.isArray(rows)&&rows.length)allOps[fechaNorm]=rows.map(r=>rowToObj(r,fechaNorm));
-      }catch(e){}
-      const hbJ1=rest.lastIndexOf('[['),hbJ2=rest.lastIndexOf(']]');
-      if(hbJ1>j2&&hbJ2>hbJ1){
-        const hbStr=rest.slice(hbJ1,hbJ2+2).replace(/""/g,'"');
-        try{
-          const hbRows=JSON.parse(hbStr);
-          if(Array.isArray(hbRows)&&hbRows.length)allHB[fechaNorm]=hbRows;
-        }catch(e){}
-        const afterHB=rest.slice(hbJ2+2);
-        const brutoMatch=afterHB.match(/([\d]+\.?[\d]*)/);
-        if(brutoMatch){const bv=parseFloat(brutoMatch[1]);if(bv>0)allBrutos[fechaNorm]=bv;}
-      } else {
-        const lastBracket=rest.lastIndexOf(']');
-        if(lastBracket>j2){
-          const afterLast=rest.slice(lastBracket+1);
-          const brutoMatch=afterLast.match(/([\d]+\.?[\d]*)/);
-          if(brutoMatch){const bv=parseFloat(brutoMatch[1]);if(bv>0)allBrutos[fechaNorm]=bv;}
-        }
-      }
-    }
-  }
+function getBrutoInRange() { return getDatesInRange().reduce((s,d)=>s+(allBrutos[d]||0),0); }
+function getGastosInRange() {
+  const dates = getDatesInRange(); if (!dates.length) return 0;
+  const mesesEnRango = new Set();
+  dates.forEach(d => { const mes = MESES[parseInt(d.split('/')[1])-1].toLowerCase(); mesesEnRango.add(mes); });
+  let total = 0;
+  mesesEnRango.forEach(mes => { if (gastosPorMes[mes]) total += gastosPorMes[mes]; });
+  return total;
 }
 
-function setSyncState(s,msg){
-  document.getElementById('sync-dot').className='sync-dot'+(s==='loading'?' loading':s==='error'?' error':'');
-  document.getElementById('sync-label').textContent=msg;
+// ─── LÓGICA OPERACIONES ───────────────────────────────────────────────────────
+function tipoOp(o) {
+  if (o.especie && o.especie.toUpperCase().includes('CAUCION')) return 'caucion';
+  if (o.productor && o.productor.trim() !== '') return 'productor';
+  if (o.comitente === '1000') return 'propio';
+  return 'directo';
 }
-function tipoOp(o){
-  if(o.especie&&o.especie.toUpperCase().includes('CAUCION'))return'caucion';
-  if(o.productor&&o.productor.trim()!=='')return'productor';
-  if(o.comitente==='1000')return'propio';
-  return'directo';
-}
-function getPares(ops){
-  const pares=[];const usados=new Set();
-  ops.forEach((a,ai)=>{
-    if(usados.has(ai))return;
-    const mi=ops.findIndex((b,bi)=>bi!==ai&&!usados.has(bi)&&b.especie===a.especie&&Math.abs((parseFloat(b.vn)||0)-(parseFloat(a.vn)||0))<1&&b.op!==a.op&&a._fecha===b._fecha);
-    if(mi>=0){
-      usados.add(ai);usados.add(mi);
-      const b=ops[mi];
-      const compra=a.op==='C'?a:b;const venta=a.op==='V'?a:b;
-      const puntaCliente=(a.comitente!=='1000')?a:(b.comitente!=='1000'?b:a);
+function getPares(ops) {
+  const pares = []; const usados = new Set();
+  ops.forEach((a, ai) => {
+    if (usados.has(ai)) return;
+    const mi = ops.findIndex((b,bi) => bi!==ai && !usados.has(bi) && b.especie===a.especie && Math.abs((parseFloat(b.vn)||0)-(parseFloat(a.vn)||0))<1 && b.op!==a.op && a._fecha===b._fecha);
+    if (mi >= 0) {
+      usados.add(ai); usados.add(mi);
+      const b = ops[mi];
+      const compra = a.op==='C'?a:b; const venta = a.op==='V'?a:b;
+      const puntaCliente = (a.comitente!=='1000')?a:(b.comitente!=='1000'?b:a);
       pares.push({
-        fecha:a._fecha,especie:a.especie,seccion:a.seccion||b.seccion,plazo:a.plazo||b.plazo||'0',
-        vn:parseFloat(a.vn)||0,precioC:parseFloat(compra.precio)||0,precioV:parseFloat(venta.precio)||0,
+        fecha:a._fecha, especie:a.especie, seccion:a.seccion||b.seccion, plazo:a.plazo||b.plazo||'0',
+        vn:parseFloat(a.vn)||0, precioC:parseFloat(compra.precio)||0, precioV:parseFloat(venta.precio)||0,
         monto:Math.max(parseFloat(a.monto)||0,parseFloat(b.monto)||0),
-        cliente:(puntaCliente.cliente||'—').trim(),comitente:(puntaCliente.comitente||'—').trim(),
+        cliente:(puntaCliente.cliente||'—').trim(), comitente:(puntaCliente.comitente||'—').trim(),
         productor:(puntaCliente.productor||'').trim(),
         pylMesa:(parseFloat(a.pylMesa)||0)+(parseFloat(b.pylMesa)||0),
         comProductor:(parseFloat(a.comProductor)||0)+(parseFloat(b.comProductor)||0),
-        cerrado:true,tipo:tipoOp({...puntaCliente,productor:puntaCliente.productor||''}),
+        cerrado:true, tipo:tipoOp({...puntaCliente,productor:puntaCliente.productor||''})
       });
-    }else{
+    } else {
       usados.add(ai);
       pares.push({
-        fecha:a._fecha,especie:a.especie,seccion:a.seccion,plazo:a.plazo||'0',
-        vn:parseFloat(a.vn)||0,precioC:a.op==='C'?parseFloat(a.precio)||0:0,precioV:a.op==='V'?parseFloat(a.precio)||0:0,
-        monto:parseFloat(a.monto)||0,cliente:(a.cliente||'—').trim(),comitente:(a.comitente||'—').trim(),
-        productor:(a.productor||'').trim(),pylMesa:parseFloat(a.pylMesa)||0,comProductor:parseFloat(a.comProductor)||0,
-        cerrado:false,tipo:tipoOp(a),
+        fecha:a._fecha, especie:a.especie, seccion:a.seccion, plazo:a.plazo||'0',
+        vn:parseFloat(a.vn)||0, precioC:a.op==='C'?parseFloat(a.precio)||0:0, precioV:a.op==='V'?parseFloat(a.precio)||0:0,
+        monto:parseFloat(a.monto)||0, cliente:(a.cliente||'—').trim(), comitente:(a.comitente||'—').trim(),
+        productor:(a.productor||'').trim(), pylMesa:parseFloat(a.pylMesa)||0, comProductor:parseFloat(a.comProductor)||0,
+        cerrado:false, tipo:tipoOp(a)
       });
     }
   });
   return pares;
 }
-
-function calcComProductores(pares,hb){
-  const porProd={};
-  pares.filter(p=>p.productor).forEach(p=>{
-    const key=p.productor;
-    if(!porProd[key])porProd[key]={porMes:{}};
-    const mes=MESES[parseInt(p.fecha.split('/')[1])-1];
-    if(!porProd[key].porMes[mes])porProd[key].porMes[mes]={comTotal:0,comProd:0};
-    porProd[key].porMes[mes].comTotal+=p.pylMesa+p.comProductor;
-    porProd[key].porMes[mes].comProd+=p.comProductor;
+function calcComProductores(pares, hb) {
+  const porProd = {};
+  pares.filter(p=>p.productor).forEach(p => {
+    const key = p.productor;
+    if (!porProd[key]) porProd[key] = {porMes:{}};
+    const mes = MESES[parseInt(p.fecha.split('/')[1])-1];
+    if (!porProd[key].porMes[mes]) porProd[key].porMes[mes] = {comTotal:0,comProd:0};
+    porProd[key].porMes[mes].comTotal += p.pylMesa+p.comProductor;
+    porProd[key].porMes[mes].comProd += p.comProductor;
   });
-  hb.forEach(r=>{
-    let key=Object.keys(porProd).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
-    if(!porProd[key])porProd[key]={porMes:{}};
-    const mes=MESES[parseInt(r.fecha.split('/')[1])-1];
-    if(!porProd[key].porMes[mes])porProd[key].porMes[mes]={comTotal:0,comProd:0};
-    porProd[key].porMes[mes].comTotal+=r.comTotal;
-    porProd[key].porMes[mes].comProd+=r.comProd;
+  hb.forEach(r => {
+    let key = Object.keys(porProd).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
+    if (!porProd[key]) porProd[key] = {porMes:{}};
+    const mes = MESES[parseInt(r.fecha.split('/')[1])-1];
+    if (!porProd[key].porMes[mes]) porProd[key].porMes[mes] = {comTotal:0,comProd:0};
+    porProd[key].porMes[mes].comTotal += r.comTotal;
+    porProd[key].porMes[mes].comProd += r.comProd;
   });
-  let total=0;
-  Object.entries(porProd).forEach(([nombre,data])=>{
-    const meses=Object.keys(data.porMes);
-    const dp=getDatosProductor(nombre,meses);
-    if(!dp){
-      Object.values(data.porMes).forEach(m=>{total+=m.comProd;});
-    }else{
-      const{porcentaje}=dp;
-      Object.entries(data.porMes).forEach(([mes,m])=>{
-        const ds=sueldosFijos[nombre.toLowerCase()];
-        const sueldoMes=ds?(ds[mes.toLowerCase()]||0):0;
-        const variable=Math.max(0,(m.comTotal-sueldoMes)*porcentaje);
-        total+=variable;
+  let total = 0;
+  Object.entries(porProd).forEach(([nombre, data]) => {
+    const meses = Object.keys(data.porMes);
+    const dp = getDatosProductor(nombre, meses);
+    if (!dp) { Object.values(data.porMes).forEach(m => { total += m.comProd; }); }
+    else {
+      const {porcentaje} = dp;
+      Object.entries(data.porMes).forEach(([mes, m]) => {
+        const ds = sueldosFijos[nombre.toLowerCase()];
+        const sueldoMes = ds ? (ds[mes.toLowerCase()]||0) : 0;
+        total += Math.max(0, (m.comTotal-sueldoMes)*porcentaje);
       });
     }
   });
   return total;
 }
 
-function renderRueda(){
-  const ops=getOpsInRange();
-  const pares=getPares(ops);
-  const hb=getHBInRange();
-  const brutoSheet=getBrutoInRange();
-  const brutoCalc=pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
-  const bruto=brutoSheet>0?brutoSheet:brutoCalc;
-  const comProd=calcComProductores(pares,hb);
-  const neto=bruto-comProd;
-
-  document.getElementById('r-bruto').innerHTML=fmtPnl(bruto,true,'pnl-pos')||'—';
-  document.getElementById('r-bruto-sub').textContent=pares.length+' operaciones · col O';
-  document.getElementById('r-comprod').innerHTML=fmtPnl(comProd,true,'pnl-pos')||'—';
-  document.getElementById('r-comprod-sub').textContent='empleados: fijo+var · externos: col Q';
-  document.getElementById('r-neto').innerHTML=fmtPnl(neto,true)||'—';
-  document.getElementById('r-neto').className='metric-value '+(neto>=0?'green':'red');
-  document.getElementById('r-neto-sub').textContent='bruto - com. productores';
-
-  const gastos=getGastosInRange();
-  document.getElementById('r-gastos').innerHTML=gastos>0?fmtPnl(-gastos,true,'pnl-neg'):'—';
-  document.getElementById('r-gastos-sub').textContent=gastos>0?'período seleccionado':'sin datos';
-
-  const resultado=neto-gastos;
-  document.getElementById('r-resultado').innerHTML=resultado!==0?fmtPnl(resultado,true):'—';
-  document.getElementById('r-resultado').className='metric-value '+(resultado>=0?'green':'red');
-  document.getElementById('r-resultado-sub').textContent=gastos>0?'neto mesa − gastos':'sin datos de gastos';
-
-  const map={};
-  (allOps[todayStr()]||[]).forEach(o=>{
-    const k=o.especie+'|'+(o.plazo||'0');
-    if(!map[k])map[k]={especie:o.especie,vnC:0,vnV:0};
-    if(o.op==='C')map[k].vnC+=parseFloat(o.vn)||0;
-    else map[k].vnV+=parseFloat(o.vn)||0;
+// ─── RENDER RUEDA ─────────────────────────────────────────────────────────────
+function renderRueda() {
+  const ops = getOpsInRange();
+  const pares = getPares(ops);
+  const hb = getHBInRange();
+  const brutoSheet = getBrutoInRange();
+  const brutoCalc = pares.reduce((s,p)=>s+p.pylMesa+p.comProductor,0);
+  const bruto = brutoSheet>0 ? brutoSheet : brutoCalc;
+  const comProd = calcComProductores(pares, hb);
+  const neto = bruto - comProd;
+  document.getElementById('r-bruto').innerHTML = fmtPnl(bruto,true,'pnl-pos')||'—';
+  document.getElementById('r-bruto-sub').textContent = pares.length+' operaciones · col O';
+  document.getElementById('r-comprod').innerHTML = fmtPnl(comProd,true,'pnl-pos')||'—';
+  document.getElementById('r-comprod-sub').textContent = 'empleados: fijo+var · externos: col Q';
+  document.getElementById('r-neto').innerHTML = fmtPnl(neto,true)||'—';
+  document.getElementById('r-neto').className = 'metric-value '+(neto>=0?'green':'red');
+  document.getElementById('r-neto-sub').textContent = 'bruto - com. productores';
+  const gastos = getGastosInRange();
+  document.getElementById('r-gastos').innerHTML = gastos>0 ? fmtPnl(-gastos,true,'pnl-neg') : '—';
+  document.getElementById('r-gastos-sub').textContent = gastos>0 ? 'período seleccionado' : 'sin datos';
+  const resultado = neto-gastos;
+  document.getElementById('r-resultado').innerHTML = resultado!==0 ? fmtPnl(resultado,true) : '—';
+  document.getElementById('r-resultado').className = 'metric-value '+(resultado>=0?'green':'red');
+  document.getElementById('r-resultado-sub').textContent = gastos>0 ? 'neto mesa − gastos' : 'sin datos de gastos';
+  const map = {};
+  (allOps[todayStr()]||[]).forEach(o => {
+    const k = o.especie+'|'+(o.plazo||'0');
+    if (!map[k]) map[k] = {especie:o.especie,vnC:0,vnV:0};
+    if (o.op==='C') map[k].vnC += parseFloat(o.vn)||0;
+    else map[k].vnV += parseFloat(o.vn)||0;
   });
-  const openPos=Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
-  const banner=document.getElementById('alert-banner');
-  if(openPos.length>0){banner.style.display='flex';document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', ');}
-  else banner.style.display='none';
-
-  let html='';
-  pares.forEach(p=>{
-    const tipoBadge=p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
-    html+=`<tr>
+  const openPos = Object.values(map).filter(x=>Math.round(x.vnC-x.vnV)>0);
+  const banner = document.getElementById('alert-banner');
+  if (openPos.length>0) { banner.style.display='flex'; document.getElementById('alert-text').textContent='Posición abierta hoy: '+openPos.map(p=>p.especie).join(', '); }
+  else banner.style.display = 'none';
+  let html = '';
+  pares.forEach(p => {
+    const tipoBadge = p.tipo==='productor'?'<span class="badge-prod">productor</span>':p.tipo==='directo'?'<span class="badge-directo">directo</span>':p.tipo==='propio'?'<span class="badge-propio">propio</span>':'<span class="badge-sec">caución</span>';
+    html += `<tr>
       <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
       <td><span class="especie">${p.especie}</span></td>
       <td><span class="badge-sec">${p.seccion||'—'}</span></td>
@@ -1018,198 +908,144 @@ function renderRueda(){
       <td class="tr">${p.pylMesa?fmtPnl(p.pylMesa,true):'—'}</td>
     </tr>`;
   });
-  document.getElementById('rueda-tbody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
+  document.getElementById('rueda-tbody').innerHTML = html||'<tr><td colspan="14" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones</td></tr>';
 }
 
-function renderMes(){
-  const now=new Date();
-  if(mesCalY===undefined){mesCalY=now.getFullYear();mesCalM=now.getMonth();}
-  document.getElementById('mes-label').textContent=MESES[mesCalM]+' '+mesCalY;
-  const grid=document.getElementById('mes-cal-grid');grid.innerHTML='';
-  const first=new Date(mesCalY,mesCalM,1);
-  let dow=first.getDay()-1;if(dow<0)dow=6;
-  const dim=new Date(mesCalY,mesCalM+1,0).getDate();
-  const todayS=todayStr();
+// ─── RENDER MES ───────────────────────────────────────────────────────────────
+function renderMes() {
+  const now = new Date();
+  if (mesCalY===undefined) { mesCalY=now.getFullYear(); mesCalM=now.getMonth(); }
+  document.getElementById('mes-label').textContent = MESES[mesCalM]+' '+mesCalY;
+  const grid = document.getElementById('mes-cal-grid'); grid.innerHTML='';
+  const first = new Date(mesCalY,mesCalM,1);
+  let dow = first.getDay()-1; if (dow<0) dow=6;
+  const dim = new Date(mesCalY,mesCalM+1,0).getDate();
+  const todayS = todayStr();
   let diasOp=0,pnlMes=0,bestPnl=-Infinity,worstPnl=Infinity,bestDay='',worstDay='';
-  for(let i=0;i<dow;i++)grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
-    const hasData=!!allOps[ds];const pnl=allTotals[ds]||0;
-    if(hasData){diasOp++;pnlMes+=pnl;if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;}if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;}}
-    const pnlR=Math.round(pnl);let cls='mes-cal-day';
-    if(hasData)cls+=' has-data';if(ds===todayS)cls+=' today';
-    grid.innerHTML+=`<div class="${cls}" onclick="selectFromMes('${ds}')">
+  for (let i=0;i<dow;i++) grid.innerHTML+=`<div class="mes-cal-day empty"></div>`;
+  for (let d=1;d<=dim;d++) {
+    const ds = pad2(d)+'/'+pad2(mesCalM+1)+'/'+mesCalY;
+    const hasData = !!allOps[ds]; const pnl = allTotals[ds]||0;
+    if (hasData) { diasOp++; pnlMes+=pnl; if(pnl>bestPnl){bestPnl=pnl;bestDay=ds;} if(pnl<worstPnl){worstPnl=pnl;worstDay=ds;} }
+    const pnlR = Math.round(pnl); let cls = 'mes-cal-day';
+    if (hasData) cls+=' has-data'; if (ds===todayS) cls+=' today';
+    grid.innerHTML += `<div class="${cls}" onclick="selectFromMes('${ds}')">
       <span class="mes-cal-num">${d}</span>
       ${hasData&&pnlR?`<span class="cal-pnl ${pnlR>0?'pos':'neg'}">${pnlR>0?'+':''}${fmtK(pnlR)}</span>`:''}
       ${hasData?`<span class="cal-ops-cnt">${(allOps[ds]||[]).length}op</span>`:''}
     </div>`;
   }
-  if(diasOp>0){
-    document.getElementById('mes-pnl').innerHTML=fmtPnl(pnlMes,true);
-    document.getElementById('mes-pnl').className='metric-value '+(pnlMes>=0?'green':'red');
-    document.getElementById('mes-pnl-sub').textContent=diasOp+' días operados';
-    document.getElementById('mes-best').innerHTML=fmtPnl(bestPnl,true);
-    document.getElementById('mes-best-sub').textContent=bestDay.slice(0,5);
-    document.getElementById('mes-worst').innerHTML=fmtPnl(worstPnl,true);
-    document.getElementById('mes-worst-sub').textContent=worstDay.slice(0,5);
-  }else{['mes-pnl','mes-best','mes-worst'].forEach(id=>{document.getElementById(id).textContent='—';});}
+  if (diasOp>0) {
+    document.getElementById('mes-pnl').innerHTML = fmtPnl(pnlMes,true);
+    document.getElementById('mes-pnl').className = 'metric-value '+(pnlMes>=0?'green':'red');
+    document.getElementById('mes-pnl-sub').textContent = diasOp+' días operados';
+    document.getElementById('mes-best').innerHTML = fmtPnl(bestPnl,true);
+    document.getElementById('mes-best-sub').textContent = bestDay.slice(0,5);
+    document.getElementById('mes-worst').innerHTML = fmtPnl(worstPnl,true);
+    document.getElementById('mes-worst-sub').textContent = worstDay.slice(0,5);
+  } else { ['mes-pnl','mes-best','mes-worst'].forEach(id=>{document.getElementById(id).textContent='—';}); }
 }
-function selectFromMes(d){rangeStart=d;rangeEnd=d;clearPresets();updateDisplay();renderAll();showTab('rueda');}
-function prevMonth(){mesCalM--;if(mesCalM<0){mesCalM=11;mesCalY--;}renderMes();}
-function nextMonth(){mesCalM++;if(mesCalM>11){mesCalM=0;mesCalY++;}renderMes();}
+function selectFromMes(d) { rangeStart=d; rangeEnd=d; clearPresets(); updateDisplay(); renderAll(); showTab('rueda'); }
+function prevMonth() { mesCalM--; if(mesCalM<0){mesCalM=11;mesCalY--;} renderMes(); }
+function nextMonth() { mesCalM++; if(mesCalM>11){mesCalM=0;mesCalY++;} renderMes(); }
 
-function buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados){
-  const{porcentaje}=datosProd;
-  const pctLabel=fmtPct(porcentaje);
-  let totalFijo=0,totalVariable=0,hayAlgunSueldo=false;
-  mesesInvolucrados.forEach(mesNombre=>{
-    const ds=sueldosFijos[p.nombre.toLowerCase()];
-    const sueldoMes=ds?(ds[mesNombre.toLowerCase()]||0):0;
-    if(sueldoMes>0){
-      hayAlgunSueldo=true;
-      const mesData=p.porMes[mesNombre];
-      totalFijo+=sueldoMes;
-      totalVariable+=Math.max(0,(mesData.comTotal-sueldoMes)*porcentaje);
+// ─── RENDER PRODUCTORES ───────────────────────────────────────────────────────
+function buildBreakdownEmpleado(p, comTotal, datosProd, mesesInvolucrados) {
+  const {porcentaje} = datosProd;
+  const pctLabel = fmtPct(porcentaje);
+  let totalFijo=0, totalVariable=0, hayAlgunSueldo=false;
+  mesesInvolucrados.forEach(mesNombre => {
+    const ds = sueldosFijos[p.nombre.toLowerCase()];
+    const sueldoMes = ds ? (ds[mesNombre.toLowerCase()]||0) : 0;
+    if (sueldoMes > 0) {
+      hayAlgunSueldo = true;
+      const mesData = p.porMes[mesNombre];
+      totalFijo += sueldoMes;
+      totalVariable += Math.max(0, (mesData.comTotal-sueldoMes)*porcentaje);
     }
   });
-  const totalCobra=totalFijo+totalVariable;
-  const totalMesa=comTotal-totalVariable;
+  const totalCobra = totalFijo+totalVariable;
+  const totalMesa = comTotal-totalVariable;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
-    <div class="prod-breakdown-item">
-      <div class="tt">Suma de col O de todas las operaciones del período. Es el total generado antes de pagar al productor. Col O = col P + col Q.</div>
-      <div class="prod-breakdown-label">Total generado (O)</div>
-      <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
-      <div class="prod-breakdown-sub">col O = col P + col Q</div>
-    </div>
-    <div class="prod-breakdown-item">
-      <div class="tt">Sueldo fijo mensual del productor, tomado de la sheet de sueldos. Se paga por recibo separado y no se descuenta del col O — es un costo de RRHH aparte.</div>
-      <div class="prod-breakdown-label">Sueldo fijo</div>
-      <div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div>
-      <div class="prod-breakdown-sub">por recibo · fijo mensual</div>
-    </div>
-    <div class="prod-breakdown-item tt-right">
-      <div class="tt">Variable = MAX(0, (col O − sueldo fijo) × ${pctLabel}). Es lo que factura el productor aparte del sueldo fijo, calculado sobre el excedente generado.</div>
-      <div class="prod-breakdown-label">Variable (${pctLabel})</div>
-      <div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div>
-      <div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div>
-    </div>
+    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q</div></div>
+    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Sueldo fijo</div><div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">por recibo · fijo mensual</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Variable (${pctLabel})</div><div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div><div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-    <div class="prod-breakdown-item">
-      <div class="tt">Total que cobra el productor: sueldo fijo (por recibo de sueldo) + variable (lo factura aparte). El fijo lo paga Equanima por RRHH.</div>
-      <div class="prod-breakdown-label">Total cobra el productor</div>
-      <div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div>
-      <div class="prod-breakdown-sub">fijo $${hayAlgunSueldo?Math.round(totalFijo).toLocaleString('es-AR'):'—'} · var $${hayAlgunSueldo?Math.round(totalVariable).toLocaleString('es-AR'):'—'}</div>
-    </div>
-    <div class="prod-breakdown-item tt-right">
-      <div class="tt">Lo que retiene la mesa de este productor: col O − variable. El fijo no se descuenta acá porque Equanima lo paga por RRHH separado.</div>
-      <div class="prod-breakdown-label">Total mesa</div>
-      <div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O (sin sueldo cargado)'}</div>
-      <div class="prod-breakdown-sub">col O − variable · facturado real</div>
-    </div>
+    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total cobra el productor</div><div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">fijo + variable</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Total mesa</div><div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O'}</div><div class="prod-breakdown-sub">col O − variable</div></div>
   </div>`;
 }
-
-function buildBreakdownExterno(p,comTotal){
-  const comProdTotal=p.mesaComProd+p.hbComProd;
-  const pylTotal=p.mesaPylMesa+p.hbPylMesa;
+function buildBreakdownExterno(p, comTotal) {
+  const comProdTotal = p.mesaComProd+p.hbComProd;
+  const pylTotal = p.mesaPylMesa+p.hbPylMesa;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-    <div class="prod-breakdown-item">
-      <div class="tt">Suma de col O de todas las operaciones del período. Col O = col P + col Q.</div>
-      <div class="prod-breakdown-label">Total generado (O)</div>
-      <div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div>
-      <div class="prod-breakdown-sub">col O = col P + col Q</div>
-    </div>
-    <div class="prod-breakdown-item">
-      <div class="tt">Comisión del productor externo (col Q). Cobra directo sin fijo ni variable.</div>
-      <div class="prod-breakdown-label">Cobra el productor (Q)</div>
-      <div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(comProdTotal).toLocaleString('es-AR')}</div>
-      <div class="prod-breakdown-sub">col Q · cobra directo</div>
-    </div>
-    <div class="prod-breakdown-item tt-right">
-      <div class="tt">Lo que queda en la mesa: col P = col O - col Q.</div>
-      <div class="prod-breakdown-label">Neto mesa (P)</div>
-      <div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div>
-      <div class="prod-breakdown-sub">col P · facturado real mesa</div>
-    </div>
+    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q</div></div>
+    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Cobra el productor (Q)</div><div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(comProdTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col Q · cobra directo</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Neto mesa (P)</div><div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col P · facturado real mesa</div></div>
   </div>`;
 }
-
-function renderProductores(){
-  const ops=getOpsInRange();
-  const pares=getPares(ops).filter(p=>p.productor&&p.productor!=='');
-  const hb=getHBInRange();
-  const combined={};
-
-  pares.forEach(p=>{
-    const key=p.productor;
-    if(!combined[key])combined[key]={nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
-    const mes=MESES[parseInt(p.fecha.split('/')[1])-1];
-    if(!combined[key].porMes[mes])combined[key].porMes[mes]={comTotal:0,comProd:0};
-    combined[key].porMes[mes].comTotal+=p.pylMesa+p.comProductor;
-    combined[key].porMes[mes].comProd+=p.comProductor;
-    combined[key].mesaComProd+=p.comProductor;
-    combined[key].mesaPylMesa+=p.pylMesa;
-    combined[key].mesaPares.push(p);
-    combined[key].hasMesa=true;
+function renderProductores() {
+  const ops = getOpsInRange();
+  const pares = getPares(ops).filter(p=>p.productor&&p.productor!=='');
+  const hb = getHBInRange();
+  const combined = {};
+  pares.forEach(p => {
+    const key = p.productor;
+    if (!combined[key]) combined[key]={nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
+    const mes = MESES[parseInt(p.fecha.split('/')[1])-1];
+    if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
+    combined[key].porMes[mes].comTotal += p.pylMesa+p.comProductor;
+    combined[key].porMes[mes].comProd += p.comProductor;
+    combined[key].mesaComProd+=p.comProductor; combined[key].mesaPylMesa+=p.pylMesa;
+    combined[key].mesaPares.push(p); combined[key].hasMesa=true;
   });
-  hb.forEach(r=>{
-    let key=Object.keys(combined).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
-    if(!combined[key])combined[key]={nombre:r.productor,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
-    combined[key].hbComProd+=r.comProd;
-    combined[key].hbPylMesa+=r.pylMesa;
-    combined[key].hasHB=true;
-    const mes=MESES[parseInt(r.fecha.split('/')[1])-1];
-    if(!combined[key].porMes[mes])combined[key].porMes[mes]={comTotal:0,comProd:0};
-    combined[key].porMes[mes].comTotal+=r.comTotal;
-    combined[key].porMes[mes].comProd+=r.comProd;
+  hb.forEach(r => {
+    let key = Object.keys(combined).find(k=>k.toLowerCase()===r.productor.toLowerCase())||r.productor;
+    if (!combined[key]) combined[key]={nombre:r.productor,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
+    combined[key].hbComProd+=r.comProd; combined[key].hbPylMesa+=r.pylMesa; combined[key].hasHB=true;
+    const mes = MESES[parseInt(r.fecha.split('/')[1])-1];
+    if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
+    combined[key].porMes[mes].comTotal+=r.comTotal; combined[key].porMes[mes].comProd+=r.comProd;
   });
-
-  const lista=Object.values(combined).sort((a,b)=>{
+  const lista = Object.values(combined).sort((a,b)=>{
     const tA=Object.values(a.porMes).reduce((s,m)=>s+m.comTotal,0);
     const tB=Object.values(b.porMes).reduce((s,m)=>s+m.comTotal,0);
     return tB-tA;
   });
-
-  const maxTotal=Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
-  const totalGlobal=lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
-
-  document.getElementById('prod-total').innerHTML=fmtPnl(totalGlobal,true,'pnl-pos')||'—';
-  const comPagadaProductores=calcComProductores(pares,hb);
-  document.getElementById('prod-compagada').innerHTML=fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
-  const netoMesaTotal=totalGlobal-comPagadaProductores;
-  document.getElementById('prod-neto-mesa').innerHTML=fmtPnl(netoMesaTotal,true,'pnl-pos')||'—';
-  document.getElementById('prod-unicos').textContent=lista.length||'—';
-
-  let html='';
-  lista.forEach((p,idx)=>{
-    const comTotal=Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
-    const barPct=Math.round(comTotal/maxTotal*100);
-    const tags=(p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
-    const mesesInvolucrados=Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
-    const datosProd=getDatosProductor(p.nombre,mesesInvolucrados);
-
-    let liqHtml='';
-    if(datosProd&&mesesInvolucrados.length>1){
-      const{porcentaje}=datosProd;
-      const pctLabel=fmtPct(porcentaje);
-      let mesRowsHtml='';
-      mesesInvolucrados.forEach(mesNombre=>{
-        const mesData=p.porMes[mesNombre];
-        const ds=sueldosFijos[p.nombre.toLowerCase()];
-        const sueldoFijoMes=ds?(ds[mesNombre.toLowerCase()]||0):0;
-        const tieneSueldoMes=sueldoFijoMes>0;
-        const variableMes=tieneSueldoMes?Math.max(0,(mesData.comTotal-sueldoFijoMes)*porcentaje):0;
-        const totalMesaMes=mesData.comTotal-variableMes;
-        mesRowsHtml+=`<div class="liq-mes-row">
+  const maxTotal = Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
+  const totalGlobal = lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
+  document.getElementById('prod-total').innerHTML = fmtPnl(totalGlobal,true,'pnl-pos')||'—';
+  const comPagadaProductores = calcComProductores(pares,hb);
+  document.getElementById('prod-compagada').innerHTML = fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
+  document.getElementById('prod-neto-mesa').innerHTML = fmtPnl(totalGlobal-comPagadaProductores,true,'pnl-pos')||'—';
+  document.getElementById('prod-unicos').textContent = lista.length||'—';
+  let html = '';
+  lista.forEach((p,idx) => {
+    const comTotal = Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
+    const barPct = Math.round(comTotal/maxTotal*100);
+    const tags = (p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
+    const mesesInvolucrados = Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+    const datosProd = getDatosProductor(p.nombre,mesesInvolucrados);
+    let liqHtml = '';
+    if (datosProd && mesesInvolucrados.length>1) {
+      const pctLabel = fmtPct(datosProd.porcentaje);
+      let mesRowsHtml = '';
+      mesesInvolucrados.forEach(mesNombre => {
+        const mesData = p.porMes[mesNombre];
+        const ds = sueldosFijos[p.nombre.toLowerCase()];
+        const sueldoFijoMes = ds?(ds[mesNombre.toLowerCase()]||0):0;
+        const tieneSueldoMes = sueldoFijoMes>0;
+        const variableMes = tieneSueldoMes?Math.max(0,(mesData.comTotal-sueldoFijoMes)*datosProd.porcentaje):0;
+        mesRowsHtml += `<div class="liq-mes-row">
           <span class="liq-mes-name">${mesNombre}</span>
           <span class="liq-mes-fijo">${tieneSueldoMes?fmtPesos(sueldoFijoMes):'<span style="color:#4a5568">—</span>'}</span>
           <span class="liq-mes-comtotal">${fmtPesos(mesData.comTotal)}</span>
           <span class="liq-mes-variable">${tieneSueldoMes&&variableMes>0?fmtPesos(variableMes):'—'}</span>
-          <span class="liq-mes-total">${tieneSueldoMes?fmtPesos(totalMesaMes):'<span style="color:#4a5568">—</span>'}</span>
+          <span class="liq-mes-total">${tieneSueldoMes?fmtPesos(mesData.comTotal-variableMes):'<span style="color:#4a5568">—</span>'}</span>
         </div>`;
       });
-      liqHtml=`<div class="liq-box" style="margin-bottom:10px">
+      liqHtml = `<div class="liq-box" style="margin-bottom:10px">
         <div class="liq-title">Desglose por mes <span class="liq-title-badge">${pctLabel} variable</span></div>
         <div class="liq-mes-breakdown">
           <div class="liq-mes-row" style="margin-bottom:4px">
@@ -1218,58 +1054,20 @@ function renderProductores(){
             <span class="liq-mes-comtotal" style="color:#2d3748;font-size:9px;text-transform:uppercase">Com. total (O)</span>
             <span class="liq-mes-variable" style="color:#2d3748;font-size:9px;text-transform:uppercase">Variable</span>
             <span class="liq-mes-total" style="color:#2d3748;font-size:9px;text-transform:uppercase">Mesa</span>
-          </div>
-          ${mesRowsHtml}
+          </div>${mesRowsHtml}
         </div>
-        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel}) · Mesa = O - Variable (fijo va por recibo aparte)</div>
+        <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel})</div>
       </div>`;
     }
-
-    const opsSENEBI=p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
-    const opsMesa=p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
-    const senebiComProd=opsSENEBI.reduce((s,op)=>s+op.comProductor,0);
-    const senebiPylMesa=opsSENEBI.reduce((s,op)=>s+op.pylMesa,0);
-    const senebiTotal=senebiComProd+senebiPylMesa;
-    const mesaComProd2=opsMesa.reduce((s,op)=>s+op.comProductor,0);
-    const mesaPylMesa2=opsMesa.reduce((s,op)=>s+op.pylMesa,0);
-    const mesaTotal2=mesaComProd2+mesaPylMesa2;
-    const hbRows=p.hasHB?hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()):[];
-    const hbComProdSum=hbRows.reduce((s,r)=>s+r.comProd,0);
-    const hbPylMesaSum=hbRows.reduce((s,r)=>s+r.pylMesa,0);
-    const hbTotalSum=hbComProdSum+hbPylMesaSum;
-    const grandComProd=p.mesaComProd+p.hbComProd;
-    const grandPylMesa=p.mesaPylMesa+p.hbPylMesa;
-    const grandTotal=grandComProd+grandPylMesa;
-
-    function rowOp(op){
-      return `<tr>
-        <td style="color:#4a5568;font-family:monospace">${op.fecha}</td>
-        <td><span class="especie">${op.especie}</span></td>
-        <td style="color:#a0aec0">${op.cliente}</td>
-        <td><span class="badge-sec">${op.seccion||'—'}</span></td>
-        <td class="tr">${fmtInt(op.vn)}</td>
-        <td class="tr" style="color:#a78bfa">${fmtPnl(op.comProductor,true,'pnl-pos')||'—'}</td>
-        <td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td>
-        <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td>
-      </tr>`;
-    }
-    function secDiv(label,color,badge){
-      return `<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:${color};border-bottom:0.5px solid ${color}30">
-        ${badge?`<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${color}15;border:0.5px solid ${color}40">${badge}</span>`:''}${label}
-      </div></td></tr>`;
-    }
-    function subtRow(label,color,cp,pyl,tot){
-      return `<tr style="background:#111420;border-top:0.5px solid #1e2330">
-        <td colspan="4" style="font-size:9px;color:${color};text-transform:uppercase;letter-spacing:.04em;padding:5px 6px;font-weight:500">${label}</td>
-        <td class="tr" style="padding:5px 6px"></td>
-        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#a78bfa;padding:5px 6px">${cp?fmtPnl(cp,true,'pnl-pos'):'—'}</td>
-        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#4ade80;padding:5px 6px">${pyl?fmtPnl(pyl,true,'pnl-pos'):'—'}</td>
-        <td class="tr" style="font-size:11px;font-weight:500;font-family:monospace;color:#60a5fa;padding:5px 6px">${tot?fmtPnl(tot,true,'pnl-pos'):'—'}</td>
-      </tr>`;
-    }
-
-    const hasOps=opsMesa.length||opsSENEBI.length||hbRows.length;
-    html+=`<div class="prod-card">
+    const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
+    const opsMesa = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
+    const hbRows = p.hasHB?hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()):[];
+    const grandComProd = p.mesaComProd+p.hbComProd;
+    const grandPylMesa = p.mesaPylMesa+p.hbPylMesa;
+    const grandTotal = grandComProd+grandPylMesa;
+    function rowOp(op){return`<tr><td style="color:#4a5568;font-family:monospace">${op.fecha}</td><td><span class="especie">${op.especie}</span></td><td style="color:#a0aec0">${op.cliente}</td><td><span class="badge-sec">${op.seccion||'—'}</span></td><td class="tr">${fmtInt(op.vn)}</td><td class="tr" style="color:#a78bfa">${fmtPnl(op.comProductor,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td><td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td></tr>`;}
+    const hasOps = opsMesa.length||opsSENEBI.length||hbRows.length;
+    html += `<div class="prod-card">
       <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
         <span class="prod-card-toggle" id="arrow-pc-${idx}">▶</span>
         <span class="prod-card-name">${p.nombre}</span>
@@ -1280,165 +1078,84 @@ function renderProductores(){
       <div class="prod-card-body" id="pc-${idx}">
         ${datosProd?buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados):buildBreakdownExterno(p,comTotal)}
         ${liqHtml}
-        ${hasOps?`<table class="prod-detail-table">
-          <thead><tr>
-            <th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th>
-            <th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th>
-          </tr></thead>
-          <tbody>
-            ${opsMesa.length?secDiv('Mesa','#a0aec0',''):''}
-            ${opsMesa.map(rowOp).join('')}
-            ${opsMesa.length?subtRow('Subtotal Mesa','#a0aec0',mesaComProd2,mesaPylMesa2,mesaTotal2):''}
-            ${opsSENEBI.length?secDiv('SENEBI','#f59e0b','SENEBI'):''}
-            ${opsSENEBI.map(rowOp).join('')}
-            ${opsSENEBI.length?subtRow('Subtotal SENEBI','#f59e0b',senebiComProd,senebiPylMesa,senebiTotal):''}
-            ${hbRows.length?secDiv('Homebroker','#0ea5e9','HB'):''}
-            ${hbRows.map(r=>`<tr>
-              <td style="color:#4a5568;font-family:monospace">${r.fecha}</td>
-              <td style="color:#0ea5e9">Homebroker</td>
-              <td style="color:#4a5568">—</td><td style="color:#4a5568">—</td>
-              <td class="tr">—</td>
-              <td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td>
-              <td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td>
-              <td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td>
-            </tr>`).join('')}
-            ${hbRows.length?subtRow('Subtotal HB','#0ea5e9',hbComProdSum,hbPylMesaSum,hbTotalSum):''}
-            <tr style="border-top:0.5px solid #378ADD;background:#0c1628">
-              <td colspan="4" style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;padding:6px;font-weight:600">Total período</td>
-              <td class="tr" style="padding:6px"></td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#a78bfa;padding:6px">+$${Math.round(grandComProd).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#4ade80;padding:6px">+$${Math.round(grandPylMesa).toLocaleString('es-AR')}</td>
-              <td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa;padding:6px">+$${Math.round(grandTotal).toLocaleString('es-AR')}</td>
-            </tr>
-          </tbody>
-        </table>`:''}
+        ${hasOps?`<table class="prod-detail-table"><thead><tr><th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th><th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th></tr></thead><tbody>
+          ${opsMesa.length?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:#a0aec0;border-bottom:0.5px solid #a0aec030">Mesa</div></td></tr>`:''} ${opsMesa.map(rowOp).join('')}
+          ${opsSENEBI.length?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:#f59e0b;border-bottom:0.5px solid #f59e0b30"><span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#f59e0b15;border:0.5px solid #f59e0b40">SENEBI</span></div></td></tr>`:''} ${opsSENEBI.map(rowOp).join('')}
+          ${hbRows.length?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:#0ea5e9;border-bottom:0.5px solid #0ea5e930"><span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#0ea5e915;border:0.5px solid #0ea5e940">HB</span></div></td></tr>`:''} ${hbRows.map(r=>`<tr><td style="color:#4a5568;font-family:monospace">${r.fecha}</td><td style="color:#0ea5e9">Homebroker</td><td style="color:#4a5568">—</td><td style="color:#4a5568">—</td><td class="tr">—</td><td class="tr" style="color:#0ea5e9">${fmtPnl(r.comProd,true,'pnl-pos')||'—'}</td><td class="tr" style="color:#0ea5e9">${fmtPnl(r.pylMesa,true,'pnl-pos')||'—'}</td><td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(r.comProd+r.pylMesa,true,'pnl-pos')||'—'}</td></tr>`).join('')}
+          <tr style="border-top:0.5px solid #378ADD;background:#0c1628"><td colspan="4" style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em;padding:6px;font-weight:600">Total período</td><td class="tr" style="padding:6px"></td><td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#a78bfa;padding:6px">+$${Math.round(grandComProd).toLocaleString('es-AR')}</td><td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#4ade80;padding:6px">+$${Math.round(grandPylMesa).toLocaleString('es-AR')}</td><td class="tr" style="font-size:13px;font-weight:600;font-family:monospace;color:#60a5fa;padding:6px">+$${Math.round(grandTotal).toLocaleString('es-AR')}</td></tr>
+        </tbody></table>`:''}
       </div>
     </div>`;
   });
-
-  document.getElementById('prod-acum-combined').innerHTML=lista.length?html:'<div class="empty-state">Sin productores en el período</div>';
-
-  let detHtml='';
-  lista.forEach(prod=>{
-    prod.mesaPares.forEach((p,i)=>{
-      detHtml+=`<tr>
-        <td style="color:#4a5568;font-family:monospace">${p.fecha}</td>
-        <td style="color:#a78bfa;font-weight:500">${i===0?prod.nombre:''}</td>
-        <td style="color:#a0aec0">${p.cliente}</td>
-        <td><span class="especie">${p.especie}</span></td>
-        <td><span class="badge-sec">${p.seccion||'—'}</span></td>
-        <td class="tr">${fmtInt(p.vn)}</td>
-        <td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td>
-        <td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td>
-      </tr>`;
+  document.getElementById('prod-acum-combined').innerHTML = lista.length?html:'<div class="empty-state">Sin productores en el período</div>';
+  let detHtml = '';
+  lista.forEach(prod => {
+    prod.mesaPares.forEach((p,i) => {
+      detHtml += `<tr><td style="color:#4a5568;font-family:monospace">${p.fecha}</td><td style="color:#a78bfa;font-weight:500">${i===0?prod.nombre:''}</td><td style="color:#a0aec0">${p.cliente}</td><td><span class="especie">${p.especie}</span></td><td><span class="badge-sec">${p.seccion||'—'}</span></td><td class="tr">${fmtInt(p.vn)}</td><td class="tr" style="color:#a78bfa">${fmtPnl(p.comProductor,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(p.pylMesa,true)||'—'}</td></tr>`;
     });
-    detHtml+=`<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
+    detHtml += `<tr><td colspan="8" style="padding:2px;background:#0d0f14"></td></tr>`;
   });
-  document.getElementById('prod-tbody').innerHTML=detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
+  document.getElementById('prod-tbody').innerHTML = detHtml||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#2d3748">Sin operaciones con productor</td></tr>';
 }
-
-function toggleProdCard(id){
-  const body=document.getElementById(id);
-  const arrow=document.getElementById('arrow-'+id);
+function toggleProdCard(id) {
+  const body=document.getElementById(id); const arrow=document.getElementById('arrow-'+id);
   body.classList.toggle('open',!body.classList.contains('open'));
   arrow.classList.toggle('open',!arrow.classList.contains('open'));
 }
 
-// ── CAUCIONES ─────────────────────────────────────────────────────────────────
-function renderCauciones(){
-
-  const listEl=document.getElementById('cau-cap-list');
-  const fechaEl=document.getElementById('cau-cap-fecha');
-  if(!listEl)return;
-  if(caucionCapFecha&&fechaEl)fechaEl.textContent=caucionCapFecha;
-  if(!caucionCapData.length){
-    listEl.innerHTML='<div class="empty-state">Sin datos de capacidad tomadora</div>';
-    return;
-  }
-
-  // Separar cuenta 1000 (PHAROS) del resto y ordenar por apalancamiento desc
-  const pharos=caucionCapData.filter(r=>r.cuenta==='1000');
-  const otros=caucionCapData.filter(r=>r.cuenta!=='1000');
-  otros.sort((a,b)=>{
-    const aA=parseFloat((a.pct||'0').replace(',','.'));
-    const aB=parseFloat((b.pct||'0').replace(',','.'));
-    return aB-aA;
-  });
-  const sorted=[...pharos,...otros];
-
-  // Header
-  let capHtml=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:5px 12px;border-bottom:0.5px solid #1e2330">
+// ─── RENDER CAUCIONES ─────────────────────────────────────────────────────────
+function renderCauciones() {
+  const listEl = document.getElementById('cau-cap-list');
+  const fechaEl = document.getElementById('cau-cap-fecha');
+  if (!listEl) return;
+  if (caucionCapFecha && fechaEl) fechaEl.textContent = caucionCapFecha;
+  if (!caucionCapData.length) { listEl.innerHTML='<div class="empty-state">Sin datos de capacidad tomadora</div>'; return; }
+  const pharos = caucionCapData.filter(r=>r.cuenta==='1000');
+  const otros = caucionCapData.filter(r=>r.cuenta!=='1000');
+  otros.sort((a,b)=>parseFloat((b.pct||'0').replace(',','.'))-parseFloat((a.pct||'0').replace(',','.')));
+  const sorted = [...pharos,...otros];
+  let capHtml = `<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:5px 12px;border-bottom:0.5px solid #1e2330">
     <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em">Nombre</div>
     <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Monto caución</div>
     <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Margen</div>
     <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:center">Apalancamiento</div>
     <div style="font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em;text-align:right">Saldo liquidando</div>
   </div>`;
-
-  sorted.forEach(r=>{
-    const esPharos=r.cuenta==='1000';
-    const apalNum=parseFloat((r.pct||'0').replace(',','.'));
-    // Verde < 1.5x | Naranja 1.5–3x | Rojo > 3x
-    const apalColor=apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
-    const apalBg   =apalNum<1.5?'#052e16':apalNum<=3?'#431407':'#2d0a0a';
-    const apalBorder=apalNum<1.5?'#4ade8040':apalNum<=3?'#f9731640':'#f8717140';
-    // Barra de progreso sobre 5x máximo
-    const barPct=Math.min(apalNum/5*100,100).toFixed(1);
-
-    // Separador visual antes del primer cliente (después de PHAROS)
-    if(!esPharos&&sorted.indexOf(r)===pharos.length&&pharos.length>0){
-      capHtml+=`<div style="height:1px;background:linear-gradient(90deg,#1e2330,#378ADD44,#1e2330);margin:0 12px"></div>`;
-    }
-
-    const rowBg   =esPharos?'background:#0c1628;border-left:2px solid #378ADD':'';
-    const namColor=esPharos?'#60a5fa':'#e2e8f0';
-    const cuentaColor=esPharos?'#378ADD':'#4a5568';
-    const pharosTag=esPharos?'<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a4a;color:#60a5fa;border:0.5px solid #378ADD40;margin-left:6px">PHAROS</span>':'';
-
-    capHtml+=`<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:9px 12px;border-bottom:0.5px solid #0d0f14;align-items:center;transition:background .15s;${rowBg}" onmouseover="this.style.background='#161b28'" onmouseout="this.style.background='${esPharos?'#0c1628':''}'">
-      <div>
-        <span style="color:${namColor};font-weight:${esPharos?700:500};font-size:12px">${r.comitente||'—'}</span>
-        <span style="color:${cuentaColor};font-size:10px;margin-left:6px">${r.cuenta}</span>
-        ${pharosTag}
-      </div>
+  sorted.forEach(r => {
+    const esPharos = r.cuenta==='1000';
+    const apalNum = parseFloat((r.pct||'0').replace(',','.'));
+    const apalColor = apalNum<1.5?'#4ade80':apalNum<=3?'#f97316':'#f87171';
+    const apalBg = apalNum<1.5?'#052e16':apalNum<=3?'#431407':'#2d0a0a';
+    const apalBorder = apalNum<1.5?'#4ade8040':apalNum<=3?'#f9731640':'#f8717140';
+    const barPct = Math.min(apalNum/5*100,100).toFixed(1);
+    if (!esPharos && sorted.indexOf(r)===pharos.length && pharos.length>0)
+      capHtml += `<div style="height:1px;background:linear-gradient(90deg,#1e2330,#378ADD44,#1e2330);margin:0 12px"></div>`;
+    const rowBg = esPharos?'background:#0c1628;border-left:2px solid #378ADD':'';
+    const pharosTag = esPharos?'<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#0c2a4a;color:#60a5fa;border:0.5px solid #378ADD40;margin-left:6px">PHAROS</span>':'';
+    capHtml += `<div style="display:grid;grid-template-columns:2fr 1.3fr 1.3fr 140px 1.3fr;padding:9px 12px;border-bottom:0.5px solid #0d0f14;align-items:center;${rowBg}" onmouseover="this.style.background='#161b28'" onmouseout="this.style.background='${esPharos?'#0c1628':''}'">
+      <div><span style="color:${esPharos?'#60a5fa':'#e2e8f0'};font-weight:${esPharos?700:500};font-size:12px">${r.comitente||'—'}</span><span style="color:${esPharos?'#378ADD':'#4a5568'};font-size:10px;margin-left:6px">${r.cuenta}</span>${pharosTag}</div>
       <div style="text-align:right;font-family:monospace;font-size:11px;color:#f87171">$${fmtInt(Math.abs(r.monto))}</div>
       <div style="text-align:right;font-family:monospace;font-size:11px;color:#4ade80">$${fmtInt(r.margen)}</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 8px">
         <span style="background:${apalBg};color:${apalColor};border:0.5px solid ${apalBorder};padding:2px 12px;border-radius:99px;font-family:monospace;font-weight:700;font-size:13px">${apalNum.toFixed(2)}x</span>
-        <div style="width:100%;height:3px;background:#1e2330;border-radius:2px;overflow:hidden">
-          <div style="width:${barPct}%;height:100%;background:${apalColor};border-radius:2px;opacity:.7"></div>
-        </div>
+        <div style="width:100%;height:3px;background:#1e2330;border-radius:2px;overflow:hidden"><div style="width:${barPct}%;height:100%;background:${apalColor};border-radius:2px;opacity:.7"></div></div>
       </div>
       <div style="text-align:right;font-family:monospace;font-size:11px;color:#60a5fa">$${fmtInt(r.saldo)}</div>
     </div>`;
   });
-
-  listEl.innerHTML=`<div style="border:0.5px solid #1e2330;border-radius:6px;overflow:hidden;background:#111420">${capHtml}</div>`;
+  listEl.innerHTML = `<div style="border:0.5px solid #1e2330;border-radius:6px;overflow:hidden;background:#111420">${capHtml}</div>`;
 }
 
-function renderAll(){renderRueda();renderMes();renderProductores();renderCauciones();renderGastos();renderPosi();}
-function showTab(t){
-  ['rueda','mes','productores','cauciones','gastos','posi'].forEach(x=>{
-    document.getElementById('view-'+x).style.display=x===t?'':'none';
-    document.getElementById('tab-'+x).classList.toggle('active',x===t);
-  });
-  if(t==='mes')renderMes();
-  if(t==='gastos')renderGastos();
-  if(t==='posi')renderPosi();
-}
-
-function renderPosi(){
-  function buildRows(data){
-    if(!data.length)return'<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
-    let html='';
-    data.forEach(r=>{
-      const pnlColor=r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
-      const pctColor=r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
-      const isTotal=r.esTotal;
-      const rowStyle=isTotal?'background:#111420;border-top:0.5px solid #2d3748':'';
-      const labelStyle=isTotal?'font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em':'color:#4a5568;font-size:10px';
-      html+=`<tr style="${rowStyle}">
-        <td style="${labelStyle}">${isTotal?'TOTAL':r.label||''}</td>
+// ─── RENDER POSICION ──────────────────────────────────────────────────────────
+function renderPosi() {
+  function buildRows(data) {
+    if (!data.length) return '<tr><td colspan="9" style="text-align:center;padding:24px;color:#2d3748">Sin datos</td></tr>';
+    let html = '';
+    data.forEach(r => {
+      const pnlColor = r.pnl>0?'#4ade80':r.pnl<0?'#f87171':'#4a5568';
+      const isTotal = r.esTotal;
+      html += `<tr style="${isTotal?'background:#111420;border-top:0.5px solid #2d3748':''}">
+        <td style="${isTotal?'font-size:9px;color:#2d3748;text-transform:uppercase;letter-spacing:.04em':'color:#4a5568;font-size:10px'}">${isTotal?'TOTAL':r.label||''}</td>
         <td>${r.especie?'<span class="especie">'+r.especie+'</span>':''}</td>
         <td class="tr" style="color:#a0aec0;font-family:monospace">${r.vn?fmtInt(r.vn):'—'}</td>
         <td class="tr" style="color:#4a5568">${r.precioEntrada||'—'}</td>
@@ -1446,185 +1163,114 @@ function renderPosi(){
         <td class="tr" style="color:#60a5fa">${r.pxHoy||'—'}</td>
         <td class="tr" style="color:#e2e8f0;font-family:monospace;font-weight:${isTotal?600:400}">${r.posicion?'$'+fmtInt(r.posicion):'—'}</td>
         <td class="tr" style="color:${pnlColor};font-family:monospace;font-weight:${isTotal?600:400}">${r.pnl?(r.pnl>0?'+':'')+fmtPnl(r.pnl,true):'—'}</td>
-        <td class="tr" style="color:${pctColor};font-weight:500">${r.pct||'—'}</td>
+        <td class="tr" style="color:${pnlColor};font-weight:500">${r.pct||'—'}</td>
       </tr>`;
     });
     return html;
   }
-  document.getElementById('posi-trading-tbody').innerHTML=buildRows(posiTradingBook);
-  document.getElementById('posi-prop-tbody').innerHTML=buildRows(posiPropietary);
+  document.getElementById('posi-trading-tbody').innerHTML = buildRows(posiTradingBook);
+  document.getElementById('posi-prop-tbody').innerHTML = buildRows(posiPropietary);
 }
 
-let gastosMesSeleccionado=null;
-const gastosGruposAbiertos=new Set();
-
-function renderGastosMesBtns(){
-  const btnsEl=document.getElementById('g-mes-btns');
-  if(!btnsEl)return;
-  const mesesDisponibles=Object.keys(gastosPorMes).sort((a,b)=>
-    MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
-  );
-  let html='<span class="drp-preset'+(gastosMesSeleccionado===null?' sel':'')+'" onclick="setGastosMes(null)">Todo</span>';
-  mesesDisponibles.forEach(m=>{
-    const label=m.charAt(0).toUpperCase()+m.slice(1);
-    html+=`<span class="drp-preset${gastosMesSeleccionado===m?' sel':''}" onclick="setGastosMes('${m}')">${label}</span>`;
+// ─── RENDER GASTOS ────────────────────────────────────────────────────────────
+let gastosMesSeleccionado = null;
+const gastosGruposAbiertos = new Set();
+function renderGastosMesBtns() {
+  const btnsEl = document.getElementById('g-mes-btns'); if (!btnsEl) return;
+  const mesesDisponibles = Object.keys(gastosPorMes).sort((a,b)=>MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1)));
+  let html = '<span class="drp-preset'+(gastosMesSeleccionado===null?' sel':'')+'" onclick="setGastosMes(null)">Todo</span>';
+  mesesDisponibles.forEach(m => {
+    const label = m.charAt(0).toUpperCase()+m.slice(1);
+    html += `<span class="drp-preset${gastosMesSeleccionado===m?' sel':''}" onclick="setGastosMes('${m}')">${label}</span>`;
   });
-  btnsEl.innerHTML=html;
+  btnsEl.innerHTML = html;
 }
-
-function setGastosMes(mes){
-  gastosMesSeleccionado=mes;
-  renderGastos();
-}
-
-function toggleGastoGrupo(idx){
-  const body=document.getElementById('gg-body-'+idx);
-  const arrow=document.getElementById('gg-arrow-'+idx);
-  if(!body)return;
+function setGastosMes(mes) { gastosMesSeleccionado=mes; renderGastos(); }
+function toggleGastoGrupo(idx) {
+  const body=document.getElementById('gg-body-'+idx); const arrow=document.getElementById('gg-arrow-'+idx); if(!body)return;
   const isOpen=body.classList.contains('open');
-  body.classList.toggle('open',!isOpen);
-  arrow.classList.toggle('open',!isOpen);
-  if(!isOpen) gastosGruposAbiertos.add(idx);
-  else gastosGruposAbiertos.delete(idx);
+  body.classList.toggle('open',!isOpen); arrow.classList.toggle('open',!isOpen);
+  if(!isOpen)gastosGruposAbiertos.add(idx); else gastosGruposAbiertos.delete(idx);
 }
-
-function renderGastos(){
-  if(!Object.keys(gastosPorMes).length){
+function renderGastos() {
+  if (!Object.keys(gastosPorMes).length) {
     document.getElementById('g-total').textContent='—';
-    document.getElementById('g-total-sub').textContent='sin datos';
     document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin datos de gastos</div>';
-    renderGastosMesBtns();
-    return;
+    renderGastosMesBtns(); return;
   }
-
   renderGastosMesBtns();
-
   let mesesMostrar;
-  if(gastosMesSeleccionado){
-    mesesMostrar=[gastosMesSeleccionado];
-  } else {
+  if (gastosMesSeleccionado) { mesesMostrar=[gastosMesSeleccionado]; }
+  else {
     const dates=getDatesInRange();
     const mesesEnRango=new Set(dates.map(d=>MESES[parseInt(d.split('/')[1])-1].toLowerCase()));
-    mesesMostrar=[...mesesEnRango].filter(m=>gastosPorMes[m]).sort((a,b)=>
-      MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
-    );
-    if(!mesesMostrar.length) mesesMostrar=Object.keys(gastosPorMes).sort((a,b)=>
-      MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1))
-    );
+    mesesMostrar=[...mesesEnRango].filter(m=>gastosPorMes[m]).sort((a,b)=>MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1)));
+    if(!mesesMostrar.length) mesesMostrar=Object.keys(gastosPorMes).sort((a,b)=>MESES.indexOf(a.charAt(0).toUpperCase()+a.slice(1))-MESES.indexOf(b.charAt(0).toUpperCase()+b.slice(1)));
   }
-
   const totalGastos=mesesMostrar.reduce((s,m)=>s+(gastosPorMes[m]||0),0);
   document.getElementById('g-total').innerHTML=fmtPnl(-totalGastos,true,'pnl-neg')||'—';
   document.getElementById('g-total-sub').textContent=mesesMostrar.map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ');
-
   const netoEl=document.getElementById('r-neto');
   document.getElementById('g-neto-mesa-ref').innerHTML=netoEl?netoEl.innerHTML:'—';
   const resultadoEl=document.getElementById('r-resultado');
   const gResultado=document.getElementById('g-resultado-ref');
   if(resultadoEl){gResultado.innerHTML=resultadoEl.innerHTML;gResultado.className=resultadoEl.className;}
-
-  if(!gastosGrupos.length){
-    document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin detalle disponible</div>';
-    return;
-  }
-
+  if(!gastosGrupos.length){document.getElementById('g-detalle').innerHTML='<div class="empty-state">Sin detalle disponible</div>';return;}
   const mostrarTotal=mesesMostrar.length>1;
-
   let html='';
   gastosGrupos.forEach((grupo,idx)=>{
     const totalGrupoMeses=mesesMostrar.reduce((s,m)=>s+(grupo.totalPorMes[m]||0),0);
     if(!totalGrupoMeses&&!grupo.items.some(item=>mesesMostrar.some(m=>item.porMes[m]!==0)))return;
-
     let headerMesesHtml='';
-    if(mesesMostrar.length===1){
-      const m=mesesMostrar[0];
-      headerMesesHtml=`<span class="gasto-grupo-total">-$${Math.round(grupo.totalPorMes[m]||0).toLocaleString('es-AR')}</span>`;
-    } else {
+    if(mesesMostrar.length===1){headerMesesHtml=`<span class="gasto-grupo-total">-$${Math.round(grupo.totalPorMes[mesesMostrar[0]]||0).toLocaleString('es-AR')}</span>`;}
+    else{
       headerMesesHtml='<div class="gasto-grupo-meses">';
-      mesesMostrar.forEach(m=>{
-        const val=grupo.totalPorMes[m]||0;
-        if(val){
-          const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);
-          headerMesesHtml+=`<div style="text-align:right">
-            <div class="gasto-grupo-mes-label">${label}</div>
-            <div class="gasto-grupo-mes-val">-$${Math.round(val).toLocaleString('es-AR')}</div>
-          </div>`;
-        }
-      });
+      mesesMostrar.forEach(m=>{const val=grupo.totalPorMes[m]||0;if(val){const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);headerMesesHtml+=`<div style="text-align:right"><div class="gasto-grupo-mes-label">${label}</div><div class="gasto-grupo-mes-val">-$${Math.round(val).toLocaleString('es-AR')}</div></div>`;}});
       headerMesesHtml+=`</div><span class="gasto-grupo-total">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</span>`;
     }
-
     const estabaAbierto=gastosGruposAbiertos.has(idx);
-
     let itemsHtml='';
     if(grupo.items.length){
       itemsHtml+='<table class="gasto-items-table"><thead><tr><th>Concepto</th>';
-      mesesMostrar.forEach(m=>{ itemsHtml+=`<th class="tr" style="text-transform:capitalize">${m}</th>`; });
-      if(mostrarTotal) itemsHtml+='<th class="tr">Total</th>';
+      mesesMostrar.forEach(m=>{itemsHtml+=`<th class="tr" style="text-transform:capitalize">${m}</th>`;});
+      if(mostrarTotal)itemsHtml+='<th class="tr">Total</th>';
       itemsHtml+='</tr></thead><tbody>';
-
       grupo.items.forEach(item=>{
         const totalItem=mesesMostrar.reduce((s,m)=>s+(item.porMes[m]||0),0);
         if(!totalItem&&!mesesMostrar.some(m=>item.porMes[m]!==0))return;
         itemsHtml+=`<tr><td class="gasto-concepto">${item.concepto}</td>`;
-        mesesMostrar.forEach(m=>{
-          const val=item.porMes[m]||0;
-          itemsHtml+=`<td class="tr ${val?'gasto-val-pos':'gasto-val-zero'}">${val?'-$'+Math.round(Math.abs(val)).toLocaleString('es-AR'):'—'}</td>`;
-        });
-        if(mostrarTotal) itemsHtml+=`<td class="tr gasto-val-pos" style="font-weight:500">-$${Math.round(totalItem).toLocaleString('es-AR')}</td>`;
+        mesesMostrar.forEach(m=>{const val=item.porMes[m]||0;itemsHtml+=`<td class="tr ${val?'gasto-val-pos':'gasto-val-zero'}">${val?'-$'+Math.round(Math.abs(val)).toLocaleString('es-AR'):'—'}</td>`;});
+        if(mostrarTotal)itemsHtml+=`<td class="tr gasto-val-pos" style="font-weight:500">-$${Math.round(totalItem).toLocaleString('es-AR')}</td>`;
         itemsHtml+='</tr>';
       });
-
-      itemsHtml+=`<tr style="border-top:0.5px solid #1e2330;background:#111420">
-        <td style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Subtotal</td>`;
-      mesesMostrar.forEach(m=>{
-        const val=grupo.totalPorMes[m]||0;
-        itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;
-      });
-      if(mostrarTotal) itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</td>`;
+      itemsHtml+=`<tr style="border-top:0.5px solid #1e2330;background:#111420"><td style="font-size:9px;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Subtotal</td>`;
+      mesesMostrar.forEach(m=>{const val=grupo.totalPorMes[m]||0;itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">${val?'-$'+Math.round(val).toLocaleString('es-AR'):'—'}</td>`;});
+      if(mostrarTotal)itemsHtml+=`<td class="tr" style="font-size:11px;font-weight:600;font-family:monospace;color:#f87171">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</td>`;
       itemsHtml+='</tr></tbody></table>';
-    } else {
-      itemsHtml='<div style="padding:10px 14px;font-size:11px;color:#4a5568">Sin detalle disponible para este grupo</div>';
-    }
-
-    html+=`<div class="gasto-grupo">
-      <div class="gasto-grupo-header" onclick="toggleGastoGrupo(${idx})">
-        <span class="gasto-grupo-toggle${estabaAbierto?' open':''}" id="gg-arrow-${idx}">▶</span>
-        <span class="gasto-grupo-nombre">${grupo.label}</span>
-        ${headerMesesHtml}
-      </div>
-      <div class="gasto-grupo-body${estabaAbierto?' open':''}" id="gg-body-${idx}">
-        ${itemsHtml}
-      </div>
-    </div>`;
+    }else{itemsHtml='<div style="padding:10px 14px;font-size:11px;color:#4a5568">Sin detalle disponible</div>';}
+    html+=`<div class="gasto-grupo"><div class="gasto-grupo-header" onclick="toggleGastoGrupo(${idx})"><span class="gasto-grupo-toggle${estabaAbierto?' open':''}" id="gg-arrow-${idx}">▶</span><span class="gasto-grupo-nombre">${grupo.label}</span>${headerMesesHtml}</div><div class="gasto-grupo-body${estabaAbierto?' open':''}" id="gg-body-${idx}">${itemsHtml}</div></div>`;
   });
-
-  let totalHtml='<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:6px">';
-  totalHtml+=`<span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general</span>`;
+  let totalHtml=`<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:6px"><span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general</span>`;
   if(mesesMostrar.length>1){
     totalHtml+='<div class="gasto-grupo-meses">';
-    mesesMostrar.forEach(m=>{
-      const val=gastosPorMes[m]||0;
-      if(val){
-        const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);
-        totalHtml+=`<div style="text-align:right">
-          <div class="gasto-grupo-mes-label">${label}</div>
-          <div style="font-size:12px;font-family:monospace;color:#f87171;font-weight:600">-$${Math.round(val).toLocaleString('es-AR')}</div>
-        </div>`;
-      }
-    });
+    mesesMostrar.forEach(m=>{const val=gastosPorMes[m]||0;if(val){const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);totalHtml+=`<div style="text-align:right"><div class="gasto-grupo-mes-label">${label}</div><div style="font-size:12px;font-family:monospace;color:#f87171;font-weight:600">-$${Math.round(val).toLocaleString('es-AR')}</div></div>`;}});
     totalHtml+=`</div><span style="min-width:110px;text-align:right;font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
-  } else {
-    totalHtml+=`<span style="font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
-  }
+  }else{totalHtml+=`<span style="font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;}
   totalHtml+='</div>';
-
   document.getElementById('g-detalle').innerHTML=html+totalHtml;
 }
 
-function updateClock(){
-  const now=new Date();
-  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+// ─── TABS / RELOJ ─────────────────────────────────────────────────────────────
+function renderAll() { renderRueda(); renderMes(); renderProductores(); renderCauciones(); renderGastos(); renderPosi(); }
+function showTab(t) {
+  ['rueda','mes','productores','cauciones','gastos','posi'].forEach(x => {
+    document.getElementById('view-'+x).style.display = x===t?'':'none';
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+  });
+  if(t==='mes')renderMes(); if(t==='gastos')renderGastos(); if(t==='posi')renderPosi();
+}
+function updateClock() {
+  const now=new Date(); const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
   document.getElementById('clock-el').textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
   const minLeft=17*60-(h*60+m);
   const badge=document.getElementById('rueda-badge');
@@ -1632,9 +1278,7 @@ function updateClock(){
   else if(minLeft<=30){badge.className='badge-closed';badge.textContent='Cierre en '+minLeft+' min';}
   else{badge.className='badge-open';badge.innerHTML='&#9679; Rueda abierta';}
 }
-setInterval(updateClock,1000);
-updateClock();
-checkAuth();
+setInterval(updateClock,1000); updateClock(); checkAuth();
 </script>
 </body>
 </html>
