@@ -152,10 +152,11 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .gasto-grupo-toggle{font-size:10px;color:#4a5568;min-width:14px;transition:transform .2s;flex-shrink:0}
 .gasto-grupo-toggle.open{transform:rotate(90deg)}
 .gasto-grupo-nombre{font-size:12px;font-weight:500;color:#e2e8f0;flex:1}
-.gasto-grupo-meses{display:flex;gap:10px;align-items:center}
+.gasto-grupo-meses{display:grid;gap:0;align-items:center}
 .gasto-grupo-mes-val{font-size:11px;font-family:monospace;color:#f87171}
+.gasto-grupo-mes-val.zero{color:#2d3748}
 .gasto-grupo-mes-label{font-size:9px;color:#4a5568;text-transform:capitalize}
-.gasto-grupo-total{font-size:13px;font-weight:600;font-family:monospace;color:#f87171;min-width:110px;text-align:right}
+.gasto-grupo-total{font-size:13px;font-weight:600;font-family:monospace;color:#f87171;min-width:110px;text-align:right;padding-left:14px;border-left:0.5px solid #1e2330;margin-left:4px}
 .gasto-grupo-body{display:none;background:#0d0f14;border-top:0.5px solid #1e2330}
 .gasto-grupo-body.open{display:block}
 .gasto-items-table{width:100%;border-collapse:collapse}
@@ -1296,8 +1297,8 @@ function renderGastos() {
     let headerMesesHtml='';
     if(mesesMostrar.length===1){headerMesesHtml=`<span class="gasto-grupo-total">-$${Math.round(grupo.totalPorMes[mesesMostrar[0]]||0).toLocaleString('es-AR')}</span>`;}
     else{
-      headerMesesHtml='<div class="gasto-grupo-meses">';
-      mesesMostrar.forEach(m=>{const val=grupo.totalPorMes[m]||0;if(val){const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);headerMesesHtml+=`<div style="text-align:right"><div class="gasto-grupo-mes-label">${label}</div><div class="gasto-grupo-mes-val">-$${Math.round(val).toLocaleString('es-AR')}</div></div>`;}});
+      headerMesesHtml=`<div class="gasto-grupo-meses" style="grid-template-columns:repeat(${mesesMostrar.length},48px)">`;
+      mesesMostrar.forEach(m=>{const val=grupo.totalPorMes[m]||0;const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);headerMesesHtml+=`<div style="text-align:right" title="${val?'-$'+Math.round(val).toLocaleString('es-AR'):''}"><div class="gasto-grupo-mes-label">${label}</div><div class="gasto-grupo-mes-val${val?'':' zero'}">${val?'-'+fmtK(val):'—'}</div></div>`;});
       headerMesesHtml+=`</div><span class="gasto-grupo-total">-$${Math.round(totalGrupoMeses).toLocaleString('es-AR')}</span>`;
     }
     const estabaAbierto=gastosGruposAbiertos.has(idx);
@@ -1324,9 +1325,9 @@ function renderGastos() {
   });
   let totalHtml=`<div style="border:0.5px solid #378ADD;border-radius:6px;background:#0c1628;padding:10px 14px;display:flex;align-items:center;margin-top:6px"><span style="flex:1;font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:.04em">Total general</span>`;
   if(mesesMostrar.length>1){
-    totalHtml+='<div class="gasto-grupo-meses">';
-    mesesMostrar.forEach(m=>{const val=gastosPorMes[m]||0;if(val){const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);totalHtml+=`<div style="text-align:right"><div class="gasto-grupo-mes-label">${label}</div><div style="font-size:12px;font-family:monospace;color:#f87171;font-weight:600">-$${Math.round(val).toLocaleString('es-AR')}</div></div>`;}});
-    totalHtml+=`</div><span style="min-width:110px;text-align:right;font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
+    totalHtml+=`<div class="gasto-grupo-meses" style="grid-template-columns:repeat(${mesesMostrar.length},48px)">`;
+    mesesMostrar.forEach(m=>{const val=gastosPorMes[m]||0;const label=m.charAt(0).toUpperCase()+m.slice(1).slice(0,3);totalHtml+=`<div style="text-align:right" title="${val?'-$'+Math.round(val).toLocaleString('es-AR'):''}"><div class="gasto-grupo-mes-label">${label}</div><div style="font-size:12px;font-family:monospace;font-weight:600;color:${val?'#f87171':'#2d3748'}">${val?'-'+fmtK(val):'—'}</div></div>`;});
+    totalHtml+=`</div><span style="min-width:110px;text-align:right;font-size:15px;font-weight:700;font-family:monospace;color:#f87171;padding-left:14px;border-left:0.5px solid #294066;margin-left:4px">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;
   }else{totalHtml+=`<span style="font-size:15px;font-weight:700;font-family:monospace;color:#f87171">-$${Math.round(totalGastos).toLocaleString('es-AR')}</span>`;}
   totalHtml+='</div>';
   document.getElementById('g-detalle').innerHTML=html+totalHtml;
