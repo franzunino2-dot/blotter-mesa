@@ -1091,13 +1091,13 @@ function buildBreakdownEmpleado(p, comTotal, datosProd, mesesInvolucrados, fciAr
   const totalCobra = totalFijo+totalVariable+fciArs;
   const totalMesa = comTotalConFCI-totalCobra;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px">
-    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotalConFCI).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q${fciArs?' + FCI':''}</div></div>
-    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Sueldo fijo</div><div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">por recibo · fijo mensual</div></div>
-    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Variable (${pctLabel})</div><div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div><div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div></div>
+    <div class="prod-breakdown-item"><div class="tt">Comisión de mesa+HB del período (col O) más la comisión FCI en pesos, si el productor tiene fondos asignados. No incluye FCI en USD.</div><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotalConFCI).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q${fciArs?' + FCI':''}</div></div>
+    <div class="prod-breakdown-item"><div class="tt">Sueldo fijo mensual según recibo de sueldo, sumado por cada mes del período que tiene datos cargados.</div><div class="prod-breakdown-label">Sueldo fijo</div><div class="prod-breakdown-value" style="color:#e2e8f0">${hayAlgunSueldo?'+$'+Math.round(totalFijo).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">por recibo · fijo mensual</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="tt">Se calcula mes a mes: MAX(0, (comisión del mes − sueldo fijo del mes) × ${pctLabel}), y se suman los meses del período.</div><div class="prod-breakdown-label">Variable (${pctLabel})</div><div class="prod-breakdown-value" style="color:#60a5fa">${hayAlgunSueldo?(totalVariable>0?'+$'+Math.round(totalVariable).toLocaleString('es-AR'):'$0'):'sin datos'}</div><div class="prod-breakdown-sub">MAX(0, (O − fijo) × ${pctLabel})</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total cobra el productor</div><div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo||fciArs?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">fijo + variable${fciArs?' + 100% FCI':''}</div></div>
-    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Total mesa</div><div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo||fciArs?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O'}</div><div class="prod-breakdown-sub">col O − variable${fciArs?' − FCI':''}</div></div>
+    <div class="prod-breakdown-item"><div class="tt">Lo que efectivamente cobra el productor: sueldo fijo + variable, más el 100% de la comisión FCI en pesos (ese dinero no se reparte con la mesa).</div><div class="prod-breakdown-label">Total cobra el productor</div><div class="prod-breakdown-value" style="color:#fbbf24">${hayAlgunSueldo||fciArs?'+$'+Math.round(totalCobra).toLocaleString('es-AR'):'sin datos'}</div><div class="prod-breakdown-sub">fijo + variable${fciArs?' + 100% FCI':''}</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="tt">Total generado (O) menos lo que cobra el productor. El FCI se cancela en esta cuenta porque se suma por igual en O y en lo que cobra el productor.</div><div class="prod-breakdown-label">Total mesa</div><div class="prod-breakdown-value" style="color:#4ade80">${hayAlgunSueldo||fciArs?'+$'+Math.round(totalMesa).toLocaleString('es-AR'):'col O'}</div><div class="prod-breakdown-sub">col O − variable${fciArs?' − FCI':''}</div></div>
   </div>`;
 }
 function buildBreakdownExterno(p, comTotal, fciArs) {
@@ -1106,9 +1106,9 @@ function buildBreakdownExterno(p, comTotal, fciArs) {
   const comTotalConFCI = comTotal+fciArs;
   const pylTotal = comTotalConFCI-comProdTotal;
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotalConFCI).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q${fciArs?' + FCI':''}</div></div>
-    <div class="prod-breakdown-item"><div class="prod-breakdown-label">Cobra el productor (Q)</div><div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(comProdTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col Q · cobra directo${fciArs?' + 100% FCI':''}</div></div>
-    <div class="prod-breakdown-item tt-right"><div class="prod-breakdown-label">Neto mesa (P)</div><div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col P · facturado real mesa</div></div>
+    <div class="prod-breakdown-item"><div class="tt">Comisión de mesa+HB del período (col O) más la comisión FCI en pesos, si el productor tiene fondos asignados. No incluye FCI en USD.</div><div class="prod-breakdown-label">Total generado (O)</div><div class="prod-breakdown-value" style="color:#60a5fa">+$${Math.round(comTotalConFCI).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col O = col P + col Q${fciArs?' + FCI':''}</div></div>
+    <div class="prod-breakdown-item"><div class="tt">Lo que cobra el productor directo de mesa+HB (col Q), más el 100% de la comisión FCI en pesos (ese dinero no se reparte con la mesa).</div><div class="prod-breakdown-label">Cobra el productor (Q)</div><div class="prod-breakdown-value" style="color:#a78bfa">+$${Math.round(comProdTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col Q · cobra directo${fciArs?' + 100% FCI':''}</div></div>
+    <div class="prod-breakdown-item tt-right"><div class="tt">Total generado (O) menos lo que cobra el productor (Q). El FCI se cancela en esta cuenta porque se suma por igual en O y en Q.</div><div class="prod-breakdown-label">Neto mesa (P)</div><div class="prod-breakdown-value" style="color:#4ade80">+$${Math.round(pylTotal).toLocaleString('es-AR')}</div><div class="prod-breakdown-sub">col P · facturado real mesa</div></div>
   </div>`;
 }
 function renderProductores() {
@@ -1219,7 +1219,10 @@ function renderProductores() {
         return `<div class="liq-box" style="margin-bottom:10px">
           <div class="liq-title">Comisión FCI (fondos comunes) <span class="liq-title-badge" style="background:#2a1f0a;color:#f59e0b;border-color:#f59e0b40">${moneda}</span></div>
           <div class="liq-mes-breakdown">${rowsFCI}</div>
-          <div class="liq-formula"><span>Total FCI ${esParcial?'(período seleccionado)':''}:</span> +${simbolo}${Math.round(totalFCI).toLocaleString('es-AR')}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:#1a1206;border:0.5px solid #f59e0b40;border-radius:5px">
+            <span style="font-size:11px;font-weight:600;color:#f59e0b;text-transform:uppercase;letter-spacing:.04em">Total FCI ${esParcial?'(período seleccionado)':'(histórico)'}</span>
+            <span style="font-size:16px;font-weight:700;font-family:monospace;color:#f59e0b">+${simbolo}${Math.round(totalFCI).toLocaleString('es-AR')}</span>
+          </div>
         </div>`;
       }).join('');
     }
