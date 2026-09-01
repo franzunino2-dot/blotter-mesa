@@ -1122,13 +1122,18 @@ function buildBreakdownExterno(p, comTotal, fciArs) {
 }
 function renderProductores() {
   const ops = getOpsInRange();
-  const paresTotal = getPares(ops).filter(p=>p.productor&&p.productor!=='');
+  const paresOps = getPares(ops);
+  const paresTotal = paresOps.filter(p=>p.productor&&p.productor!=='');
+  const paresSinProductorTotal = paresOps.filter(p=>!p.productor||p.productor==='');
   const hbTotal = getHBInRange();
   const prodSearchEl = document.getElementById('prod-search');
   const prodSearchTerm = prodSearchEl ? normalizar(prodSearchEl.value.trim()) : '';
   const pares = prodSearchTerm
     ? paresTotal.filter(p => normalizar(p.productor||'').includes(prodSearchTerm) || normalizar(p.cliente||'').includes(prodSearchTerm))
     : paresTotal;
+  const paresSinProductor = prodSearchTerm
+    ? paresSinProductorTotal.filter(p => normalizar('sin productor').includes(prodSearchTerm) || normalizar(p.cliente||'').includes(prodSearchTerm))
+    : paresSinProductorTotal;
   const hb = prodSearchTerm
     ? hbTotal.filter(r => normalizar(r.productor||'').includes(prodSearchTerm))
     : hbTotal;
@@ -1159,22 +1164,37 @@ function renderProductores() {
     const nombreDisplay = fciKey==='clg' ? 'CLG' : fciKey.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     combined[nombreDisplay] = {nombre:nombreDisplay,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
   });
+  if (paresSinProductor.length) {
+    const key = 'Sin productor';
+    combined[key] = {nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:true,hasHB:false,porMes:{},sinProductor:true};
+    paresSinProductor.forEach(p => {
+      const mes = MESES[parseInt(p.fecha.split('/')[1])-1];
+      if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
+      combined[key].porMes[mes].comTotal += p.pylMesa+p.comProductor;
+      combined[key].porMes[mes].comProd += p.comProductor;
+      combined[key].mesaComProd+=p.comProductor; combined[key].mesaPylMesa+=p.pylMesa;
+      combined[key].mesaPares.push(p);
+    });
+  }
   const lista = Object.values(combined).sort((a,b)=>{
+    if (a.nombre==='Sin productor') return 1;
+    if (b.nombre==='Sin productor') return -1;
     const tA=Object.values(a.porMes).reduce((s,m)=>s+m.comTotal,0);
     const tB=Object.values(b.porMes).reduce((s,m)=>s+m.comTotal,0);
     return tB-tA;
   });
-  const maxTotal = Math.max(...lista.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
-  const totalGlobal = lista.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
+  const listaProductores = lista.filter(p=>p.nombre!=='Sin productor');
+  const maxTotal = Math.max(...listaProductores.map(p=>Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0)),1);
+  const totalGlobal = listaProductores.reduce((s,p)=>s+Object.values(p.porMes).reduce((a,m)=>a+m.comTotal,0),0);
   document.getElementById('prod-total').innerHTML = fmtPnl(totalGlobal,true,'pnl-pos')||'—';
   const comPagadaProductores = calcComProductores(pares,hb);
   document.getElementById('prod-compagada').innerHTML = fmtPnl(comPagadaProductores,true,'pnl-pos')||'—';
   document.getElementById('prod-neto-mesa').innerHTML = fmtPnl(totalGlobal-comPagadaProductores,true,'pnl-pos')||'—';
-  document.getElementById('prod-unicos').textContent = lista.length||'—';
+  document.getElementById('prod-unicos').textContent = listaProductores.length||'—';
   let html = '';
   lista.forEach((p,idx) => {
     const comTotal = Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
-    const barPct = Math.round(comTotal/maxTotal*100);
+    const barPct = Math.min(100, Math.round(comTotal/maxTotal*100));
     const fciInfo = FCI_DATA[p.nombre.trim().toLowerCase()];
     const tags = (p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'')+(fciInfo?'<span class="prod-tag prod-tag-fci">FCI</span>':'');
     const mesesInvolucrados = Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
@@ -1241,13 +1261,14 @@ function renderProductores() {
     const grandTotal = grandComProd+grandPylMesa;
     function rowOp(op){return`<tr><td style="color:#4a5568;font-family:monospace">${op.fecha}</td><td><span class="especie">${op.especie}</span></td><td style="color:#a0aec0">${op.cliente}</td><td><span class="badge-sec">${op.seccion||'—'}</span></td><td class="tr">${fmtInt(op.vn)}</td><td class="tr" style="color:#a78bfa">${fmtPnl(op.comProductor,true,'pnl-pos')||'—'}</td><td class="tr">${fmtPnl(op.pylMesa,true)||'—'}</td><td class="tr" style="color:#60a5fa;font-weight:500">${fmtPnl(op.comProductor+op.pylMesa,true,'pnl-pos')||'—'}</td></tr>`;}
     const hasOps = opsMesa.length||opsSENEBI.length||hbRows.length;
-    html += `<div class="prod-card">
+    const esSinProductor = p.nombre==='Sin productor';
+    html += `<div class="prod-card"${esSinProductor?' style="border-style:dashed;opacity:.85"':''}>
       <div class="prod-card-header" onclick="toggleProdCard('pc-${idx}')">
         <span class="prod-card-toggle" id="arrow-pc-${idx}">▶</span>
-        <span class="prod-card-name">${p.nombre}</span>
-        <div class="prod-card-tags">${tags}${datosProd?'<span class="prod-tag" style="background:#1a1a00;color:#fbbf24;border:0.5px solid #fbbf2440">empleado</span>':'<span class="prod-tag" style="background:#0a1a0a;color:#4ade80;border:0.5px solid #4ade8040">externo</span>'}</div>
-        <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%"></div></div>
-        <span class="prod-card-total">+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
+        <span class="prod-card-name"${esSinProductor?' style="color:#6b7280"':''}>${p.nombre}</span>
+        <div class="prod-card-tags">${tags}${esSinProductor?'<span class="prod-tag" style="background:#1a1a1a;color:#6b7280;border:0.5px solid #6b728040">propio · directo · caución</span>':datosProd?'<span class="prod-tag" style="background:#1a1a00;color:#fbbf24;border:0.5px solid #fbbf2440">empleado</span>':'<span class="prod-tag" style="background:#0a1a0a;color:#4ade80;border:0.5px solid #4ade8040">externo</span>'}</div>
+        <div class="prod-card-bar-wrap"><div class="prod-card-bar" style="width:${barPct}%${esSinProductor?';background:#4a5568':''}"></div></div>
+        <span class="prod-card-total"${esSinProductor?' style="color:#6b7280"':''}>+$${Math.round(comTotal).toLocaleString('es-AR')}</span>
       </div>
       <div class="prod-card-body" id="pc-${idx}">
         ${datosProd?buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados,fciTotalArs):buildBreakdownExterno(p,comTotal,fciTotalArs)}
