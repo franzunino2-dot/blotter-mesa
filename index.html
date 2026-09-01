@@ -124,6 +124,7 @@ tbody td{padding:6px 8px;font-size:11px;color:#a0aec0}
 .prod-tag{font-size:9px;padding:1px 6px;border-radius:3px}
 .prod-tag-mesa{background:#1a0a2a;color:#a78bfa;border:0.5px solid #a78bfa40}
 .prod-tag-hb{background:#0c2a3a;color:#0ea5e9;border:0.5px solid #0ea5e940}
+.prod-tag-fci{background:#2a1f0a;color:#f59e0b;border:0.5px solid #f59e0b40}
 .prod-card-bar-wrap{flex:2;height:3px;background:#1e2330;border-radius:2px;min-width:60px}
 .prod-card-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,#a78bfa,#0ea5e9)}
 .prod-card-total{font-size:13px;font-weight:500;font-family:monospace;color:#4ade80;min-width:110px;text-align:right}
@@ -439,6 +440,14 @@ const FACTURACION_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtl
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const I = {sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
+
+// Comisión FCI (fondos comunes) por productor y mes — cargado a mano desde
+// "COMXMGER COMISIONES SANTI-CLG ENE-JUL 2026 pesos.xlsx" (col M, comisión diaria acumulada por mes).
+// Clave = nombre del productor tal como aparece en la mesa (Productores tab).
+const FCI_DATA = {
+  'santiago': { porMes: { Enero:32547.53, Febrero:82771.53, Marzo:123133.98, Abril:178517.33, Mayo:219273.10, Junio:243629.37, Julio:222839.48 }, total:1102712.33 },
+  'clg':      { porMes: { Junio:224.01, Julio:21340.73 }, total:21564.74 },
+};
 
 let sueldosFijos = {};
 let gastosPorMes = {}, gastosDetalle = {}, gastosGrupos = [];
@@ -1122,6 +1131,13 @@ function renderProductores() {
     if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
     combined[key].porMes[mes].comTotal+=r.comTotal; combined[key].porMes[mes].comProd+=r.comProd;
   });
+  Object.keys(FCI_DATA).forEach(fciKey => {
+    const yaExiste = Object.keys(combined).some(k=>k.toLowerCase().trim()===fciKey);
+    if (yaExiste) return;
+    if (prodSearchTerm && !normalizar(fciKey).includes(prodSearchTerm)) return;
+    const nombreDisplay = fciKey==='clg' ? 'CLG' : fciKey.charAt(0).toUpperCase()+fciKey.slice(1);
+    combined[nombreDisplay] = {nombre:nombreDisplay,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
+  });
   const lista = Object.values(combined).sort((a,b)=>{
     const tA=Object.values(a.porMes).reduce((s,m)=>s+m.comTotal,0);
     const tB=Object.values(b.porMes).reduce((s,m)=>s+m.comTotal,0);
@@ -1138,7 +1154,8 @@ function renderProductores() {
   lista.forEach((p,idx) => {
     const comTotal = Object.values(p.porMes).reduce((s,m)=>s+m.comTotal,0);
     const barPct = Math.round(comTotal/maxTotal*100);
-    const tags = (p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'');
+    const fciInfo = FCI_DATA[p.nombre.trim().toLowerCase()];
+    const tags = (p.hasMesa?'<span class="prod-tag prod-tag-mesa">Mesa</span>':'')+(p.hasHB?'<span class="prod-tag prod-tag-hb">HB</span>':'')+(fciInfo?'<span class="prod-tag prod-tag-fci">FCI</span>':'');
     const mesesInvolucrados = Object.keys(p.porMes).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
     const datosProd = getDatosProductor(p.nombre,mesesInvolucrados);
     let liqHtml = '';
@@ -1173,6 +1190,20 @@ function renderProductores() {
         <div class="liq-formula"><span>fórmula:</span> Variable = MAX(0, (O - Fijo) x ${pctLabel})</div>
       </div>`;
     }
+    let fciHtml = '';
+    if (fciInfo) {
+      const mesesEnRango = new Set(getDatesInRange().map(d=>MESES[parseInt(d.split('/')[1])-1]));
+      let mesesFCI = Object.keys(fciInfo.porMes).filter(m=>mesesEnRango.has(m));
+      if (!mesesFCI.length) mesesFCI = Object.keys(fciInfo.porMes);
+      mesesFCI.sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+      const totalFCI = mesesFCI.reduce((s,m)=>s+(fciInfo.porMes[m]||0),0);
+      const rowsFCI = mesesFCI.map(m=>`<div class="liq-mes-row"><span class="liq-mes-name">${m}</span><span style="flex:1;text-align:right;font-family:monospace;color:#f59e0b">+$${Math.round(fciInfo.porMes[m]).toLocaleString('es-AR')}</span></div>`).join('');
+      fciHtml = `<div class="liq-box" style="margin-bottom:10px">
+        <div class="liq-title">Comisión FCI (fondos comunes) <span class="liq-title-badge" style="background:#2a1f0a;color:#f59e0b;border-color:#f59e0b40">col M</span></div>
+        <div class="liq-mes-breakdown">${rowsFCI}</div>
+        <div class="liq-formula"><span>Total FCI ${mesesFCI.length===Object.keys(fciInfo.porMes).length?'':'(período seleccionado)'}:</span> +$${Math.round(totalFCI).toLocaleString('es-AR')}</div>
+      </div>`;
+    }
     const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
     const opsMesa = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
     const hbRows = p.hasHB?hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()):[];
@@ -1192,6 +1223,7 @@ function renderProductores() {
       <div class="prod-card-body" id="pc-${idx}">
         ${datosProd?buildBreakdownEmpleado(p,comTotal,datosProd,mesesInvolucrados):buildBreakdownExterno(p,comTotal)}
         ${liqHtml}
+        ${fciHtml}
         ${hasOps?`<table class="prod-detail-table"><thead><tr><th>Fecha</th><th>Especie/Canal</th><th>Cliente</th><th>Sección</th><th class="tr">VN</th><th class="tr">Com. prod.</th><th class="tr">P&L mesa</th><th class="tr">Com. total</th></tr></thead><tbody>
           ${opsMesa.length?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:#a0aec0;border-bottom:0.5px solid #a0aec030">Mesa</div></td></tr>`:''} ${opsMesa.map(rowOp).join('')}
           ${opsSENEBI.length?`<tr><td colspan="8" style="padding:0"><div class="prod-section-divider" style="color:#f59e0b;border-bottom:0.5px solid #f59e0b30"><span style="font-size:9px;padding:1px 6px;border-radius:3px;background:#f59e0b15;border:0.5px solid #f59e0b40">SENEBI</span></div></td></tr>`:''} ${opsSENEBI.map(rowOp).join('')}
