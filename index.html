@@ -441,13 +441,21 @@ const FACTURACION_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1vZtl
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const I = {sec:0,mer:1,plz:2,op:3,esp:4,mon:5,pre:6,vn:7,mto:8,com:9,cli:10,pro:11,pyl:12,cpro:13};
 
-// Comisión FCI (fondos comunes) por productor y mes — cargado a mano desde
-// "COMXMGER COMISIONES SANTI-CLG ENE-JUL 2026 pesos.xlsx" (col M, comisión diaria acumulada por mes).
-// Clave = nombre del productor tal como aparece en la mesa (Productores tab).
+// Comisión FCI (fondos comunes) por productor, moneda y mes — cargado a mano desde los excels
+// "COMXMGER..." que manda mesa (columna de comisión del productor, sumada por mes).
+// Clave = nombre del productor tal como aparece en la mesa (Productores tab), en minúsculas.
+// Cada moneda es un objeto {porMes, total} — ARS y USD nunca se suman entre sí.
 const FCI_DATA = {
-  'santiago': { porMes: { Enero:32547.53, Febrero:82771.53, Marzo:123133.98, Abril:178517.33, Mayo:219273.10, Junio:243629.37, Julio:222839.48 }, total:1102712.33 },
-  'clg':      { porMes: { Junio:224.01, Julio:21340.73 }, total:21564.74 },
+  // Fuente: COMXMGER COMISIONES SANTI-CLG ENE-JUL 2026 pesos.xlsx (col M)
+  'santiago': { ARS: { porMes: { Enero:32547.53, Febrero:82771.53, Marzo:123133.98, Abril:178517.33, Mayo:219273.10, Junio:243629.37, Julio:222839.48 }, total:1102712.33 } },
+  'clg':      { ARS: { porMes: { Junio:224.01, Julio:21340.73 }, total:21564.74 } },
+  // Fuente: COMXMGER RENATO USD Y PESOS ENERO-JULIO.xlsx (col L, TORONTO AHORRO+RENTA FIJA = ARS, MONEY MARKET DOLAR+ALLARIA LATAM USD = USD)
+  'renato galvan': {
+    ARS: { porMes: { Enero:38460.46, Febrero:35572.78, Marzo:40545.63, Abril:40523.98, Mayo:62798.28, Junio:44198.45, Julio:57299.39 }, total:319398.97 },
+    USD: { porMes: { Enero:46.44, Febrero:40.99, Marzo:44.88, Abril:43.62, Mayo:45.14, Junio:49.32, Julio:52.89 }, total:323.28 },
+  },
 };
+const FCI_MONEDA_LABEL = { ARS:'$', USD:'US$' };
 
 let sueldosFijos = {};
 let gastosPorMes = {}, gastosDetalle = {}, gastosGrupos = [];
@@ -1135,7 +1143,7 @@ function renderProductores() {
     const yaExiste = Object.keys(combined).some(k=>k.toLowerCase().trim()===fciKey);
     if (yaExiste) return;
     if (prodSearchTerm && !normalizar(fciKey).includes(prodSearchTerm)) return;
-    const nombreDisplay = fciKey==='clg' ? 'CLG' : fciKey.charAt(0).toUpperCase()+fciKey.slice(1);
+    const nombreDisplay = fciKey==='clg' ? 'CLG' : fciKey.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     combined[nombreDisplay] = {nombre:nombreDisplay,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
   });
   const lista = Object.values(combined).sort((a,b)=>{
@@ -1193,16 +1201,21 @@ function renderProductores() {
     let fciHtml = '';
     if (fciInfo) {
       const mesesEnRango = new Set(getDatesInRange().map(d=>MESES[parseInt(d.split('/')[1])-1]));
-      let mesesFCI = Object.keys(fciInfo.porMes).filter(m=>mesesEnRango.has(m));
-      if (!mesesFCI.length) mesesFCI = Object.keys(fciInfo.porMes);
-      mesesFCI.sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
-      const totalFCI = mesesFCI.reduce((s,m)=>s+(fciInfo.porMes[m]||0),0);
-      const rowsFCI = mesesFCI.map(m=>`<div class="liq-mes-row"><span class="liq-mes-name">${m}</span><span style="flex:1;text-align:right;font-family:monospace;color:#f59e0b">+$${Math.round(fciInfo.porMes[m]).toLocaleString('es-AR')}</span></div>`).join('');
-      fciHtml = `<div class="liq-box" style="margin-bottom:10px">
-        <div class="liq-title">Comisión FCI (fondos comunes) <span class="liq-title-badge" style="background:#2a1f0a;color:#f59e0b;border-color:#f59e0b40">col M</span></div>
-        <div class="liq-mes-breakdown">${rowsFCI}</div>
-        <div class="liq-formula"><span>Total FCI ${mesesFCI.length===Object.keys(fciInfo.porMes).length?'':'(período seleccionado)'}:</span> +$${Math.round(totalFCI).toLocaleString('es-AR')}</div>
-      </div>`;
+      fciHtml = Object.keys(fciInfo).map(moneda => {
+        const info = fciInfo[moneda];
+        const simbolo = FCI_MONEDA_LABEL[moneda]||'$';
+        let mesesFCI = Object.keys(info.porMes).filter(m=>mesesEnRango.has(m));
+        const esParcial = mesesFCI.length && mesesFCI.length!==Object.keys(info.porMes).length;
+        if (!mesesFCI.length) mesesFCI = Object.keys(info.porMes);
+        mesesFCI.sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+        const totalFCI = mesesFCI.reduce((s,m)=>s+(info.porMes[m]||0),0);
+        const rowsFCI = mesesFCI.map(m=>`<div class="liq-mes-row"><span class="liq-mes-name">${m}</span><span style="flex:1;text-align:right;font-family:monospace;color:#f59e0b">+${simbolo}${Math.round(info.porMes[m]).toLocaleString('es-AR')}</span></div>`).join('');
+        return `<div class="liq-box" style="margin-bottom:10px">
+          <div class="liq-title">Comisión FCI (fondos comunes) <span class="liq-title-badge" style="background:#2a1f0a;color:#f59e0b;border-color:#f59e0b40">${moneda}</span></div>
+          <div class="liq-mes-breakdown">${rowsFCI}</div>
+          <div class="liq-formula"><span>Total FCI ${esParcial?'(período seleccionado)':''}:</span> +${simbolo}${Math.round(totalFCI).toLocaleString('es-AR')}</div>
+        </div>`;
+      }).join('');
     }
     const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
     const opsMesa = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
