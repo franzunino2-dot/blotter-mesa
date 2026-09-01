@@ -875,6 +875,15 @@ function getDatesInRange() {
   return dates;
 }
 function getOpsInRange() { const ops=[]; getDatesInRange().forEach(d=>(allOps[d]||[]).forEach(o=>ops.push(o))); return ops; }
+function getMesesEnRangoCalendario() {
+  if (!rangeStart) return new Set();
+  const end = rangeEnd||rangeStart;
+  const lo = Math.min(strToTs(rangeStart),strToTs(end));
+  const hi = Math.max(strToTs(rangeStart),strToTs(end));
+  const meses = new Set(); let cur = lo;
+  while (cur <= hi) { meses.add(MESES[new Date(cur).getMonth()]); cur += 86400000; }
+  return meses;
+}
 function getHBInRange() {
   const hb = [];
   getDatesInRange().forEach(d => { (allHB[d]||[]).forEach(r => hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]})); });
@@ -1205,14 +1214,12 @@ function renderProductores() {
     let fciHtml = '';
     let fciTotalArs = 0;
     if (fciInfo) {
-      const mesesEnRango = new Set(getDatesInRange().map(d=>MESES[parseInt(d.split('/')[1])-1]));
+      const mesesEnRango = getMesesEnRangoCalendario();
       fciHtml = Object.keys(fciInfo).map(moneda => {
         const info = fciInfo[moneda];
         const simbolo = FCI_MONEDA_LABEL[moneda]||'$';
-        let mesesFCI = Object.keys(info.porMes).filter(m=>mesesEnRango.has(m));
-        const esParcial = mesesFCI.length && mesesFCI.length!==Object.keys(info.porMes).length;
-        if (!mesesFCI.length) mesesFCI = Object.keys(info.porMes);
-        mesesFCI.sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+        const mesesFCI = Object.keys(info.porMes).filter(m=>mesesEnRango.has(m)).sort((a,b)=>MESES.indexOf(a)-MESES.indexOf(b));
+        if (!mesesFCI.length) return '';
         const totalFCI = mesesFCI.reduce((s,m)=>s+(info.porMes[m]||0),0);
         if (moneda==='ARS') fciTotalArs = totalFCI;
         const rowsFCI = mesesFCI.map(m=>`<div class="liq-mes-row"><span class="liq-mes-name">${m}</span><span style="flex:1;text-align:right;font-family:monospace;color:#f59e0b">+${simbolo}${Math.round(info.porMes[m]).toLocaleString('es-AR')}</span></div>`).join('');
@@ -1220,7 +1227,7 @@ function renderProductores() {
           <div class="liq-title">Comisión FCI (fondos comunes) <span class="liq-title-badge" style="background:#2a1f0a;color:#f59e0b;border-color:#f59e0b40">${moneda}</span></div>
           <div class="liq-mes-breakdown">${rowsFCI}</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:#1a1206;border:0.5px solid #f59e0b40;border-radius:5px">
-            <span style="font-size:11px;font-weight:600;color:#f59e0b;text-transform:uppercase;letter-spacing:.04em">Total FCI ${esParcial?'(período seleccionado)':'(histórico)'}</span>
+            <span style="font-size:11px;font-weight:600;color:#f59e0b;text-transform:uppercase;letter-spacing:.04em">Total FCI (período seleccionado)</span>
             <span style="font-size:16px;font-weight:700;font-family:monospace;color:#f59e0b">+${simbolo}${Math.round(totalFCI).toLocaleString('es-AR')}</span>
           </div>
         </div>`;
