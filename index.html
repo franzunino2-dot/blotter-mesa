@@ -915,7 +915,8 @@ function getPares(ops) {
       usados.add(ai); usados.add(mi);
       const b = ops[mi];
       const compra = a.op==='C'?a:b; const venta = a.op==='V'?a:b;
-      const puntaCliente = (a.comitente!=='1000')?a:(b.comitente!=='1000'?b:a);
+      const rankLeg = x => x.comitente==='1000' ? 0 : ((x.cliente&&x.cliente.trim())||(x.productor&&x.productor.trim()) ? 2 : 1);
+      const puntaCliente = rankLeg(a)>=rankLeg(b) ? a : b;
       pares.push({
         fecha:a._fecha, especie:a.especie, seccion:a.seccion||b.seccion, plazo:a.plazo||b.plazo||'0',
         vn:parseFloat(a.vn)||0, precioC:parseFloat(compra.precio)||0, precioV:parseFloat(venta.precio)||0,
