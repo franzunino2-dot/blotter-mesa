@@ -130,7 +130,7 @@ function getBlotterData() {
         }
       }
       const op = String(row[idx.op] || '').trim().toUpperCase();
-      if (!['C', 'V'].includes(op)) continue;
+      if (!op) continue;
       const especie = String(row[idx.especie] || '').trim();
       if (!especie) continue;
       const vnRaw = row[idx.vn];
