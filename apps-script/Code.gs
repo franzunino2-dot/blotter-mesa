@@ -109,7 +109,6 @@ function getBlotterData() {
         }
         if (!enHB) continue;
         const productor = String(row[12] || '').trim();
-        if (!productor) continue;
         const comTotal = parseFloat(String(row[14] || '0').replace(/[^0-9.,-]/g, '').replace(',', '.')) || 0;
         const pylMesa  = parseFloat(String(row[15] || '0').replace(/[^0-9.,-]/g, '').replace(',', '.')) || 0;
         const comProd  = parseFloat(String(row[16] || '0').replace(/[^0-9.,-]/g, '').replace(',', '.')) || 0;

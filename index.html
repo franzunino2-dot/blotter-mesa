@@ -1135,9 +1135,11 @@ function renderProductores() {
   const paresSinProductor = prodSearchTerm
     ? paresSinProductorTotal.filter(p => normalizar('sin productor').includes(prodSearchTerm) || normalizar(p.cliente||'').includes(prodSearchTerm))
     : paresSinProductorTotal;
-  const hb = prodSearchTerm
-    ? hbTotal.filter(r => normalizar(r.productor||'').includes(prodSearchTerm))
+  const hbFiltrado = prodSearchTerm
+    ? hbTotal.filter(r => normalizar(r.productor||'').includes(prodSearchTerm) || normalizar('sin productor').includes(prodSearchTerm))
     : hbTotal;
+  const hb = hbFiltrado.filter(r=>r.productor&&r.productor.trim()!=='');
+  const hbSinProductor = hbFiltrado.filter(r=>!r.productor||r.productor.trim()==='');
   const prodCountEl = document.getElementById('prod-search-count');
   const combined = {};
   pares.forEach(p => {
@@ -1165,9 +1167,9 @@ function renderProductores() {
     const nombreDisplay = fciKey==='clg' ? 'CLG' : fciKey.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     combined[nombreDisplay] = {nombre:nombreDisplay,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:false,hasHB:false,porMes:{}};
   });
-  if (paresSinProductor.length) {
+  if (paresSinProductor.length || hbSinProductor.length) {
     const key = 'Sin productor';
-    combined[key] = {nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:true,hasHB:false,porMes:{},sinProductor:true};
+    combined[key] = {nombre:key,mesaComProd:0,mesaPylMesa:0,mesaPares:[],hbComProd:0,hbPylMesa:0,hasMesa:paresSinProductor.length>0,hasHB:hbSinProductor.length>0,porMes:{},sinProductor:true};
     paresSinProductor.forEach(p => {
       const mes = MESES[parseInt(p.fecha.split('/')[1])-1];
       if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
@@ -1175,6 +1177,12 @@ function renderProductores() {
       combined[key].porMes[mes].comProd += p.comProductor;
       combined[key].mesaComProd+=p.comProductor; combined[key].mesaPylMesa+=p.pylMesa;
       combined[key].mesaPares.push(p);
+    });
+    hbSinProductor.forEach(r => {
+      combined[key].hbComProd+=r.comProd; combined[key].hbPylMesa+=r.pylMesa;
+      const mes = MESES[parseInt(r.fecha.split('/')[1])-1];
+      if (!combined[key].porMes[mes]) combined[key].porMes[mes]={comTotal:0,comProd:0};
+      combined[key].porMes[mes].comTotal+=r.comTotal; combined[key].porMes[mes].comProd+=r.comProd;
     });
   }
   const lista = Object.values(combined).sort((a,b)=>{
@@ -1256,7 +1264,7 @@ function renderProductores() {
     }
     const opsSENEBI = p.mesaPares.filter(op=>(op.seccion||'').toUpperCase().includes('SENEBI'));
     const opsMesa = p.mesaPares.filter(op=>!(op.seccion||'').toUpperCase().includes('SENEBI'));
-    const hbRows = p.hasHB?hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()):[];
+    const hbRows = !p.hasHB?[]:(p.nombre==='Sin productor'?hbSinProductor:hb.filter(r=>r.productor.toLowerCase()===p.nombre.toLowerCase()));
     const grandComProd = p.mesaComProd+p.hbComProd;
     const grandPylMesa = p.mesaPylMesa+p.hbPylMesa;
     const grandTotal = grandComProd+grandPylMesa;
