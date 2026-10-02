@@ -884,9 +884,16 @@ function getMesesEnRangoCalendario() {
   while (cur <= hi) { meses.add(MESES[new Date(cur).getMonth()]); cur += 86400000; }
   return meses;
 }
+const HB_SPLIT_PRODUCTOR = { 'juan bautista varine': 0.5 };
 function getHBInRange() {
   const hb = [];
-  getDatesInRange().forEach(d => { (allHB[d]||[]).forEach(r => hb.push({fecha:d,productor:r[0],comTotal:r[1],pylMesa:r[2],comProd:r[3]})); });
+  getDatesInRange().forEach(d => { (allHB[d]||[]).forEach(r => {
+    const productor = r[0], comTotal = r[1];
+    let pylMesa = r[2], comProd = r[3];
+    const split = HB_SPLIT_PRODUCTOR[String(productor||'').trim().toLowerCase()];
+    if (split!==undefined && comTotal && !pylMesa && !comProd) { comProd = comTotal*split; pylMesa = comTotal-comProd; }
+    hb.push({fecha:d,productor,comTotal,pylMesa,comProd});
+  }); });
   return hb;
 }
 function getBrutoInRange() { return getDatesInRange().reduce((s,d)=>s+(allBrutos[d]||0),0); }
